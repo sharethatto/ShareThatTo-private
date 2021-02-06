@@ -23,6 +23,12 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "ShareThatToTests",
-            dependencies: ["ShareThatTo"]),
+            dependencies: ["ShareThatTo"],
+            resources: [
+              // Copy Tests/ExampleTests/Resources directories as-is.
+              // Use to retain directory structure.
+              // Will be at top level in bundle.
+              .copy("Fixtures"),
+            ]),
     ]
 )
