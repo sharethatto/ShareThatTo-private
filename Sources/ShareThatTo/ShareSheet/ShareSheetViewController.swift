@@ -13,7 +13,7 @@ import Foundation
 
 let defaultRect =  CGRect(x: 0, y: 0, width: 100, height: 100)
 
-public class ShareSheetViewController: UIViewController, UICollectionViewDelegate {
+internal class ShareSheetViewController: UIViewController, UICollectionViewDelegate {
 
     static let headerHeight:CGFloat = 60
     static let footerHeight: CGFloat = 150
@@ -28,12 +28,19 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
     internal init(videoURL: URL, title: String) throws {
         self.content = try VideoContent(videoURL: videoURL, title: title)
         self.shareOutlets = ShareOutlets.outlets(forPeformable: self.content)
+        
+        let avPlayer =  AVPlayer(url:  videoURL)
+        let controller = AVPlayerViewController()
+        controller.player = avPlayer
+        self.player = controller
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    let player: AVPlayerViewController
 
     let headerView:UIView  = {
         let headerView = UIView.init(frame: defaultRect)
@@ -57,12 +64,7 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
         return headerView
     }()
 
-    let player: AVPlayerViewController = {
-        let player = AVPlayer(url:  Bundle.main.url(forResource: "vertical", withExtension: "mp4")!)
-        let controller = AVPlayerViewController()
-        controller.player = player
-        return controller
-    }()
+
 
     let contentView: UIView = {
         let contentView = UIView.init(frame: defaultRect)

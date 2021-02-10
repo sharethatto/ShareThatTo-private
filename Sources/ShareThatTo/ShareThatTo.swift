@@ -24,14 +24,14 @@ public class ShareThatTo
     }
     
     
-    public func share(videoURL: URL, title: String) throws -> ShareSheetViewController
+    public func share(videoURL: URL, title: String) throws -> UIViewController
     {
         guard let _ = authenticationDatastore.apiKey else { throw NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"]) }
         return try ShareSheetViewController.init(videoURL: videoURL, title: title)
     }
     
     // Public setup
-    public static func share(videoURL: URL, title: String) throws -> ShareSheetViewController
+    public static func share(videoURL: URL, title: String) throws -> UIViewController
     {
         try shared.share(videoURL: videoURL, title: title)
     }
