@@ -7,21 +7,39 @@
 import UIKit
 import Foundation
 
-//struct More: ShareOutlet {
-//    var delegate: ShareOutletDelegate?
-//    
-//    func share(shareable: ShareableContentWrapper, viewController: UIViewController) {
-//        let activityViewController =  UIActivityViewController(activityItems: [shareable.textRepresentation()], applicationActivities: nil)
-//        activityViewController.completionWithItemsHandler = {(activityType, completed, returnedItems, error) in
-//            if (completed) {
-//                delegate?.success()
-//            } else {
-//                delegate?.cancelled()
-//            }
-//        }
-//        viewController.present(activityViewController, animated: true) {}
-//    }
-//    
-//    let imageName = "More"
-//    let outlateName = "More"
-//}
+struct More: ShareOutletProtocol {
+    static let imageName = "More"
+    static let outlateName = "More"
+
+    var delegate: ShareOutletDelegate?
+    var content: Content
+    
+    init(content: Content)
+    {
+        self.content = content
+    }
+    
+    func share(with viewController: UIViewController)
+    {
+        // We only support video content
+        guard let videoContent: VideoContent = self.content.videoContent() else {
+            delegate?.failure(error: "Invalid content type")
+            return
+        }
+        shareVideo(content: videoContent, viewController: viewController)
+    }
+    
+    private func shareVideo(content: VideoContent, viewController: UIViewController)
+    {
+        
+        let activityViewController =  UIActivityViewController(activityItems: [content.text(), content.videoURL], applicationActivities: nil)
+        activityViewController.completionWithItemsHandler = {(activityType, completed, returnedItems, error) in
+            if (completed) {
+                delegate?.success()
+            } else {
+                delegate?.cancelled()
+            }
+        }
+        viewController.present(activityViewController, animated: true) {}
+    }
+}

@@ -6,30 +6,64 @@
 //
 
 import UIKit
-//import Foundation
-//
-//struct InstagramStories: ShareOutlet {
-//    var delegate: ShareOutletDelegate?
-//    let imageName = "InstagramStories"
-//    let outlateName = "Stories"
-//    
-//    func share(shareable: ShareableContentWrapper, viewController: UIViewController) {
-//        guard let unwrappedRawData = shareable.rawData else {
-//            delegate?.failure(error: "Video unavailable")
-//            return
-//        }
-//        
-//        DispatchQueue.main.async {
-//            let pasteboardItems = [//"com.instagram.sharedSticker.stickerImage": image,
-//                               "com.instagram.sharedSticker.backgroundTopColor" : "#FFFFFF",
-//                               "com.instagram.sharedSticker.backgroundBottomColor" : "#FFFFFF",
-//                                "com.instagram.sharedSticker.backgroundVideo": unwrappedRawData,
-//                               "com.instagram.sharedSticker.contentURL": "https://sharethatto-demo.s3.us-east-2.amazonaws.com/index.html"] as [String : Any]
-//            let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate : NSDate().addingTimeInterval(60 * 5)]
-//            UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
-//            UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
-//                delegate?.success()
-//            })
-//        }
-//    }
-//}
+import Foundation
+
+
+struct InstagramStories: ShareOutletProtocol
+{
+    static let imageName = "InstagramStories"
+    static let outlateName = "Stories"
+    
+    var delegate: ShareOutletDelegate?
+    var content: Content
+    
+    init(content: Content)
+    {
+        self.content = content
+    }
+    
+    static func canPerform(withContent content: Content) -> Bool
+    {
+        // TODO: Refactor this to not need ios 10
+        if #available(iOS 10.0, *) {
+            return content.contentType == .video
+        }
+        return false
+    }
+
+    func share(with viewController: UIViewController)
+    {
+        // We only support video content
+        guard let videoContent: VideoContent = content.videoContent() else {
+            delegate?.failure(error: "Invalid content type")
+            return
+        }
+        shareVideo(content: videoContent, viewController: viewController)
+    }
+    
+    private func shareVideo(content: VideoContent, viewController: UIViewController)
+    {
+        let rawShareStrategy = content.rawStrategy(caller: self)
+        if #available(iOS 10.0, *) {
+            DispatchQueue.main.async {
+            var pasteboardItems = [//"com.instagram.sharedSticker.stickerImage": image,
+                               "com.instagram.sharedSticker.backgroundTopColor" : "#FFFFFF",
+                               "com.instagram.sharedSticker.backgroundBottomColor" : "#FFFFFF",
+                                "com.instagram.sharedSticker.backgroundVideo": rawShareStrategy.data] as [String: Any]
+                
+                let ctaLink = content.ctaLink()?.absoluteString ?? ""
+                if (ctaLink != "") {
+                    pasteboardItems["com.instagram.sharedSticker.contentURL"] = ctaLink
+                }
+                let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate : NSDate().addingTimeInterval(60 * 5)]
+       
+            UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
+            UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
+                delegate?.success()
+            })
+            }
+        } else {
+            delegate?.failure(error: "Needs iOS 10")
+        }
+    }
+}

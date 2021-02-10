@@ -29,6 +29,7 @@ extension AVURLAsset {
             }
         }
     }
+    
     func thumbnail(completion: @escaping (UIImage?) -> Void) {
         thumbnail(at: TimeInterval.init(0), completion: completion)
     }

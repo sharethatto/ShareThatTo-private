@@ -1,0 +1,40 @@
+{
+  "name" : "application-test",
+  "interactions" : [
+    {
+      "recorded_at" : 1612912894.6351938,
+      "request" : {
+        "url" : "http:\/\/localhost:3000\/api\/application",
+        "headers" : {
+          "Content-Type" : "application\/json",
+          "Authorization" : "Bearer share_pk_0ad3dc721ee63192fb05ab80bc9e4f72"
+        },
+        "method" : "GET"
+      },
+      "response" : {
+        "url" : "http:\/\/localhost:3000\/api\/application",
+        "body" : {
+          "cta_link" : "http://example.com"
+        },
+        "status" : 200,
+        "headers" : {
+          "Set-Cookie" : "__profilin=p%3Dt; path=\/; HttpOnly; SameSite=Lax",
+          "X-Permitted-Cross-Domain-Policies" : "none",
+          "X-XSS-Protection" : "1; mode=block",
+          "X-MiniProfiler-Original-Cache-Control" : "max-age=0, private, must-revalidate",
+          "Content-Type" : "application\/json; charset=utf-8",
+          "Cache-Control" : "no-store, must-revalidate, private, max-age=0",
+          "Referrer-Policy" : "strict-origin-when-cross-origin",
+          "X-Request-Id" : "c9489ee2-0170-4304-9348-63df36808dad",
+          "X-Frame-Options" : "SAMEORIGIN",
+          "Vary" : "Accept",
+          "X-Runtime" : "0.143304",
+          "X-Content-Type-Options" : "nosniff",
+          "Transfer-Encoding" : "Identity",
+          "X-MiniProfiler-Ids" : "jvrpezq4zbfqke4iuogq,ljdc1wy8bprf3ey5wyg8,nzesnokanolbjl6p3lob",
+          "X-Download-Options" : "noopen"
+        }
+      }
+    }
+  ]
+}

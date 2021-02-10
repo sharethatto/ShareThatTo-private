@@ -12,13 +12,24 @@ enum ContentType {
     case video
 }
 
-enum ContentPreparation {
-    case notStarted
-    case failed
-    case succeeded
+protocol Content
+{
+    var contentType: ContentType { get }
+    
+    // Content pL
+    func videoContent() -> VideoContent?
 }
 
-protocol Content {
-    var contentType: ContentType { get }
-    var contentPreparation: ContentPreparation { get }
+extension Content
+{
+    // Handle force unwrapping here so we can guard it all our
+    // outlet classes
+    func videoContent() -> VideoContent?
+    {
+        if (contentType == .video)
+        {
+            return self as? VideoContent
+        }
+        return nil
+    }
 }

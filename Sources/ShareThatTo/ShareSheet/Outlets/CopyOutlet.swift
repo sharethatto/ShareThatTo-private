@@ -8,32 +8,35 @@
 import UIKit
 import Foundation
 
-//struct Copy: ShareOutlet {
-//    var delegate: ShareOutletDelegate?
-//    
-//    func share(content: Content, viewController: UIViewController) {
-//        switch content.contentType {
-//        case .unknown:
-//            delegate?.failure(error: "Unknown content type")
-//            return
-//        case .video:
-//            shareVideo(content: content as! VideoContent, viewController: viewController)
-//            return
-//        }
-//    }
-//    
-//    private func shareVideo(content: VideoContent, viewController: UIViewController) {
-//        let text = shareable.textRepresentation()
-//        let pb = UIPasteboard.general
-//        pb.string = text
-//        guard let data = shareable.rawData else {
-//            delegate?.failure(error: "Unable to copy video")
-//            return
-//        }
-//        pb.setData(Data(referencing:  data), forPasteboardType: "public.mpeg-4")
-//        delegate?.success()
-//    }
-//    
-//    let imageName =  "Copy"
-//    let outlateName = "Copy"
-//}
+struct Copy: ShareOutletProtocol
+{
+    static let imageName = "Copy"
+    static let outlateName = "Copy"
+    var delegate: ShareOutletDelegate?
+    var content: Content
+    
+    init(content: Content)
+    {
+        self.content = content
+    }
+    
+    func share(with viewController: UIViewController)
+    {
+        // We only support video content
+        guard let videoContent: VideoContent = content.videoContent() else {
+            delegate?.failure(error: "Invalid content type")
+            return
+        }
+        shareVideo(content: videoContent, viewController: viewController)
+    }
+    
+    private func shareVideo(content: VideoContent, viewController: UIViewController)
+    {
+        let text = content.text()
+        let pb = UIPasteboard.general
+        pb.string = text
+        let rawShareStrategy = content.rawStrategy(caller: self)
+        pb.setData(rawShareStrategy.data, forPasteboardType: "public.mpeg-4")
+        delegate?.success()
+    }
+}

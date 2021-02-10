@@ -11,25 +11,7 @@ import UIKit
 import Photos
 import Foundation
 
-class GrowthShareOulets {
-    static let outlets = {
-        return [
-            IMessageShareOutlet(),
-            InstagramStories(),
-            Copy(),
-            More(),
-            IMessageShareOutlet(),
-            InstagramStories(),
-            IMessageShareOutlet(),
-            InstagramStories(),
-            IMessageShareOutlet(),
-            InstagramStories(),
-        ]
-    }()
-}
-
 let defaultRect =  CGRect(x: 0, y: 0, width: 100, height: 100)
-
 
 public class ShareSheetViewController: UIViewController, UICollectionViewDelegate {
 
@@ -39,10 +21,19 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
     static let shareBackground = UIColor(rgb: 0xF4F2FF)
     static let contentBackground = UIColor(rgb: 0xF7F6FF)
     static let contentMargin: CGFloat = 20
-
-
-    var shareable: Content?
-
+    
+    var content: Content
+    var shareOutlets: [ShareOutletProtocol]
+    
+    internal init(videoURL: URL, title: String) throws {
+        self.content = try VideoContent(videoURL: videoURL, title: title)
+        self.shareOutlets = ShareOutlets.outlets(forPeformable: self.content)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     let headerView:UIView  = {
         let headerView = UIView.init(frame: defaultRect)
@@ -67,7 +58,6 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
     }()
 
     let player: AVPlayerViewController = {
-
         let player = AVPlayer(url:  Bundle.main.url(forResource: "vertical", withExtension: "mp4")!)
         let controller = AVPlayerViewController()
         controller.player = player
@@ -78,27 +68,9 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
         let contentView = UIView.init(frame: defaultRect)
         contentView.backgroundColor = contentBackground
         contentView.translatesAutoresizingMaskIntoConstraints = false
-
-//        let player = AVPlayer(url:  Bundle.main.url(forResource: "video", withExtension: "mp4")!)
-//        let controller = AVPlayerViewController()
-//        controller.player = player
-////        controller.view.frame = self.view.frame
-//        contentView.addSubview(controller.view)
-
-
-
         return contentView
     }()
 
-
-
-//    let shareOutletView: UIView = {
-//        let shareOutletView = UIView.init(frame: defaultRect)
-//        shareOutletView.translatesAutoresizingMaskIntoConstraints = false
-//        shareOutletView.backgroundColor = GrowthShareViewController.shareBackground
-//        return shareOutletView
-//    }()
-//
     let shareOutletView: UICollectionView = {
         // Collection View
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
@@ -146,19 +118,14 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
         player.view.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(player.view)
         player.showsPlaybackControls = false
-        print(player.player?.currentItem?.presentationSize ?? "nothing")
+//        print(player.player?.currentItem?.presentationSize ?? "nothing")
 
         NSLayoutConstraint.activate([
-//            player.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             player.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-
-//            player.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//            player.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             player.view.widthAnchor.constraint(equalTo: player.view.heightAnchor, multiplier: 720.0/1280.0),
             player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
         ])
-
 
         // Setup player
         let layer = player.view.layer
@@ -235,60 +202,22 @@ public class ShareSheetViewController: UIViewController, UICollectionViewDelegat
 
 }
 
-// Mark - Button Responders
+// MARK: Button Responders
 
 extension ShareSheetViewController {
 
     @objc func didTapCancel() {
         self.dismiss(animated: true, completion:nil)
-//        let url = Bundle.main.url(forResource: "vertical", withExtension: "mp4")!
-//        do {
-//            let videoData = NSData(contentsOf: url)!
-//            let share = ShareImageInstagram()
-//            share.delegate = self;
-//            share.postToStories(data: videoData, image: UIImage(named: "FitnessBackground")!, backgroundTopColorHex: "#FFFFFF", backgroundBottomColorHex: "#FFFFFF", deepLink: "http://example.com")
-
-//        DispatchQueue.main.async {
-//
-//        let pasteboardItems = [//"com.instagram.sharedSticker.stickerImage": image,
-//                               "com.instagram.sharedSticker.backgroundTopColor" : "#FFFFFF",
-//                               "com.instagram.sharedSticker.backgroundBottomColor" : "#FFFFFF",
-//                               "com.instagram.sharedSticker.backgroundVideo": videoData,
-//                               "com.instagram.sharedSticker.contentURL": "http://example.com"] as [String : Any]
-//            let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate : NSDate().addingTimeInterval(60 * 5)]
-//            UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
-//            UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
-//
-//            })
-//        }
-//        } catch {
-//            print("Unable to load data: \(error)")
-//        }
-//        PHPhotoLibrary.shared().performChanges({
-//            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-//                 }) { saved, error in
-//                     if saved {
-//
-//
-////                        let alertController = UIAlertController(title: "Your video was successfully saved", message: nil, preferredStyle: .alert)
-////                        let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-////                         alertController.addAction(defaultAction)
-////                        self.present(alertController, animated: true, completion: nil)
-//                        ShareImageInstagram().postToStories(data: NSData, image: <#T##UIImage#>, backgroundTopColorHex: <#T##String#>, backgroundBottomColorHex: <#T##String#>, deepLink: <#T##String#>)
-//                     }
-//                 }
-
-
     }
 
 
 }
-// MARK - UICollectionView
+// MARK: UICollectionView
 
 extension ShareSheetViewController: UICollectionViewDataSource {
 
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return GrowthShareOulets.outlets.count
+        return shareOutlets.count
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -299,15 +228,15 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         }
 
         // Find the right share outletn & load the image
-        let shareOutlet: ShareOutlet = GrowthShareOulets.outlets[indexPath.row] as! ShareOutlet
-        let image = UIImage(named: shareOutlet.imageName)
+        let shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
+        let image = type(of: shareOutlet).buttonImage() //UIImage(named: shareOutlet.imageName)
 
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         myCell.contentView.addSubview(imageView)
 
         let labelView = UILabel(frame: defaultRect)
-        labelView.text = shareOutlet.outlateName
+        labelView.text = type(of: shareOutlet).outlateName
         labelView.translatesAutoresizingMaskIntoConstraints = false
         labelView.font = labelView.font.withSize(12)
         myCell.contentView.addSubview(labelView)
@@ -327,12 +256,9 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     }
 
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        var shareOutlet: ShareOutlet = GrowthShareOulets.outlets[indexPath.row] as! ShareOutlet
+        var shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
         shareOutlet.delegate = self
-        guard let unwrappedShareable = self.shareable else {
-            return
-        }
-        shareOutlet.share(content: unwrappedShareable, viewController: self)
+        shareOutlet.share(with: self)
     }
 }
 

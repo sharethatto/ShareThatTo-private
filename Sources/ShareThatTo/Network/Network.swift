@@ -8,18 +8,29 @@
 import UIKit
 import Foundation
 
-public class Network
+internal class Network
 {
-    public var apiKey:String?
-    public var userId:String?
-    public static let shared = Network()
-    private let session = URLSession(configuration: .ephemeral)
-    private let baseURL = URL(string: "https://screenshot-api.sharethatto.com/api/v1")!
+    internal var userId:String?
+    internal static let shared = Network()
     
-    private init()
+    internal let baseURL: URL
+    internal let urlSession: URLSession
+    internal let authenticationDatastore: AuthenticationDatastoreProtocol
+//    internal let baseURL = URL(string: "http://localhost:3000/api")!
+    
+    public init(
+        urlSession: URLSession = URLSession(configuration: .ephemeral),
+        authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore,
+        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/api")!
+    )
     {
+        self.baseURL = baseURL
+        self.urlSession = (urlSession)
+        self.authenticationDatastore = authenticationDatastore
     }
 }
+
+struct EmptyResponse: Decodable {}
 
 extension Network
 {
@@ -27,36 +38,69 @@ extension Network
     {
         case unknown
         case notAuthenticated
+        case decoding
         
         var errorDescription: String? {
             switch self
             {
             case .unknown: return NSLocalizedString("An unknown error occurred.", comment: "")
             case .notAuthenticated: return NSLocalizedString("Unauthorized.", comment: "")
+            case .decoding: return NSLocalizedString("Decoding error.", comment: "")
             }
         }
     }
 }
 
-//
-//func uploadImage(image: UIImage, completion: @escaping (Result<Void, Swift.Error>) -> Void)
-//{
-//    // We don't know where we're sending the image event until we hear back from the server
-//    guard let upload = screenshotResponse.upload else { return completion(.failure(Error.unknown)) }
-//    guard let uploadURL = URL(string: upload.signed_url) else { return completion(.failure(Error.unknown)) }
-//    
-//    var request = URLRequest(url: uploadURL)
-//    request.httpMethod = "PUT"
-//    request.timeoutInterval = 30.0
-//    
-//    // We have to support custom headers for image upload
-//    for(key, value) in upload.headers {
-//        request.addValue(value, forHTTPHeaderField: key)
-//    }
-//    request.httpBody = image.pngData()
-//    
-//    let task = self.session.dataTask(with: request) { (data, response, error) in
-//        completion(.success(Void()))
-//    }
-//    task.resume()
-//}
+
+
+/*
+ extension JSONDecoder.DateDecodingStrategy {
+     static let iso8601withFractionalSeconds = custom {
+         let container = try $0.singleValueContainer()
+         let string = try container.decode(String.self)
+         guard let date = Formatter.iso8601withFractionalSeconds.date(from: string) else {
+             throw DecodingError.dataCorruptedError(in: container,
+                   debugDescription: "Invalid date: " + string)
+         }
+         return date
+     }
+ }
+ */
+
+//MARK: Private extension for actually making requests
+
+extension Network
+{
+    func send<ResponseType: Decodable>(_ request: URLRequest, completion: @escaping (Result<ResponseType, Swift.Error>) -> Void)
+    {
+        var request = request
+        guard let unwrappedApiKey = authenticationDatastore.apiKey  else { return completion(.failure(Error.notAuthenticated))  }
+        request.setValue("Bearer " + unwrappedApiKey, forHTTPHeaderField:  "Authorization")
+        if let unwrappedUserId = userId {
+            request.setValue(unwrappedUserId, forHTTPHeaderField: "X-Client-UserId")
+        }
+        
+        
+        let task = self.urlSession.dataTask(with: request) { (data, response, error) in
+            do
+            {
+                guard let unWrappedData = data else { return completion(.failure(error ?? Error.unknown))}
+                
+                if let response = response as? HTTPURLResponse, response.statusCode == 401
+                {
+
+                    return completion(.failure(Error.notAuthenticated))
+                }
+                // TODO: Remove this
+                print(String(data: unWrappedData, encoding: .utf8))
+                let response = try JSONDecoder().decode(ResponseType.self, from: unWrappedData)
+                completion(.success(response))
+            }
+            catch let error
+            {
+                completion(.failure(Error.decoding))
+            }
+        }
+        task.resume()
+    }
+}
