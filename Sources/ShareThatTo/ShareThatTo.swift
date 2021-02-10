@@ -13,6 +13,7 @@ public class ShareThatTo
     }
     
     // Public configuration
+    @discardableResult
     public func configure(apiKey: String) -> ShareThatTo
     {
         authenticationDatastore.apiKey = apiKey
