@@ -7,10 +7,11 @@
 
 import Foundation
 
-enum ShareStrategy {
-    case raw
-    case rendered
-    case linkPreview
+enum ShareStrategy: Int {
+    case none = 0
+    case raw = 1
+    case rendered = 2
+    case linkPreview = 3
 }
 
 enum ShareStretegyType

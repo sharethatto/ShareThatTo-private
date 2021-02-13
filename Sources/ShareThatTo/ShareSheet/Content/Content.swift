@@ -7,9 +7,9 @@
 
 import Foundation
 
-enum ContentType {
-    case unknown
-    case video
+enum ContentType: String {
+    case unknown = "unknown"
+    case video = "video"
 }
 
 protocol Content

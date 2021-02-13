@@ -11,6 +11,8 @@ import Foundation
 
 class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDelegate
 {
+    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
+    
     static let imageName = "IMessage"
     static let outlateName = "SMS"
     

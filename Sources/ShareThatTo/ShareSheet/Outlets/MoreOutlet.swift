@@ -11,6 +11,7 @@ struct More: ShareOutletProtocol {
     static let imageName = "More"
     static let outlateName = "More"
 
+    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?
     var content: Content
     

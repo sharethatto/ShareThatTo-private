@@ -10,6 +10,8 @@ import Foundation
 
 struct Copy: ShareOutletProtocol
 {
+    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
+    
     static let imageName = "Copy"
     static let outlateName = "Copy"
     var delegate: ShareOutletDelegate?

@@ -64,8 +64,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         return headerView
     }()
 
-
-
     let contentView: UIView = {
         let contentView = UIView.init(frame: defaultRect)
         contentView.backgroundColor = contentBackground

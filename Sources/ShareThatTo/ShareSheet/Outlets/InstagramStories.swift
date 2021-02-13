@@ -11,6 +11,8 @@ import Foundation
 
 struct InstagramStories: ShareOutletProtocol
 {
+    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
+    
     static let imageName = "InstagramStories"
     static let outlateName = "Stories"
     

@@ -1,6 +1,17 @@
 import UIKit
 
-public class ShareThatTo
+//public protocol ShareThatToApplicationLifecycleProtocol
+//{
+//   
+//}
+
+// This contains the lifecycle hooks that other intergations need
+protocol ShareThatToLifecycleDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool
+}
+
+public class ShareThatTo: ShareThatToLifecycleDelegate
 {
     // Singleton
     public static let shared = ShareThatTo()
@@ -35,5 +46,23 @@ public class ShareThatTo
     {
         try shared.share(videoURL: videoURL, title: title)
     }
+    
+    @discardableResult
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+    {
+        
+        ShareOutlets.forwardLifecycleDelegate { (shareLifecycle) in
+            let _ = shareLifecycle.application(application, didFinishLaunchingWithOptions: launchOptions)
+        }
+        return true
+    }
+    
+    @discardableResult
+    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool
+    {
+        ShareOutlets.forwardLifecycleDelegate { (shareLifecycle) in
+            let _ = shareLifecycle.application(app, open: url, options: options)
+        }
+        return true
+    }
 }
-

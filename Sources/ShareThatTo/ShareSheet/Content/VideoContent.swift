@@ -35,7 +35,7 @@ class VideoContent: Content
 
     // How can we share?
     private var rawShareStrategy: RawShareStrategy
-    private var renderedShareStrategy: RenderedShareStrategy?
+    public var renderedShareStrategy: RenderedShareStrategy?
     private var linkPreviewShareStrategy: LinkPreviewShareStrategy?
     
     // How confident do we need to be before we decide to use the link preview
@@ -61,7 +61,7 @@ class VideoContent: Content
 
 //MARK: Strategies
     
-    public func rawStrategy(caller: ShareOutletProtocol) -> ShareStretegyTypeRawProtocol
+    public func rawStrategy(caller: ShareOutletProtocol?) -> ShareStretegyTypeRawProtocol
     {
         return rawShareStrategy
     }
