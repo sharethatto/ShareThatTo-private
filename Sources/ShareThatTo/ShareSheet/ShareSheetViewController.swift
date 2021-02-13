@@ -268,8 +268,8 @@ extension ShareSheetViewController: UICollectionViewDataSource {
 extension ShareSheetViewController: ShareOutletDelegate {
 
     func success() {
-        self.dismiss(animated: true) {
-            //
+        DispatchQueue.main.async {
+            self.dismiss(animated: true)
         }
     }
 
@@ -278,7 +278,9 @@ extension ShareSheetViewController: ShareOutletDelegate {
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
             NSLog("The \"OK\" alert occured.")
         }))
-        self.present(alert, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 
     func cancelled(){

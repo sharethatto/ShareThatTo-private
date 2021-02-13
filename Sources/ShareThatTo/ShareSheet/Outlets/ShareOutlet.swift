@@ -16,7 +16,8 @@ class ShareOutlets
         InstagramStories.self,
         IMessage.self,
         Facebook.self,
-        Messenger.self
+        Messenger.self,
+        Download.self
     ]
     
     internal static func forwardLifecycleDelegate(callable: (ShareThatToLifecycleDelegate) -> Void)
