@@ -84,7 +84,7 @@ extension Network: NetworkShareProtocol
                {
                case .failure(let error): completion(.failure(error))
                case .success(let response):
-                   completion(.success((response)))
+                   completion(.success(response))
                }
            }
         }

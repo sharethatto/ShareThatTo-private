@@ -16,17 +16,20 @@ internal class Network
     internal let baseURL: URL
     internal let urlSession: URLSession
     internal let authenticationDatastore: AuthenticationDatastoreProtocol
+    internal let analyticsBaseURL: URL
 //    internal let baseURL = URL(string: "http://localhost:3000/api")!
     
     public init(
         urlSession: URLSession = URLSession(configuration: .ephemeral),
         authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore,
-        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/api")!
+        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/api")!,
+        analyticsBaseURL: URL = URL(string: "https://collector.sharethatto.com/events")!
     )
     {
-        self.baseURL = baseURL
         self.urlSession = (urlSession)
         self.authenticationDatastore = authenticationDatastore
+        self.baseURL = baseURL
+        self.analyticsBaseURL = analyticsBaseURL
     }
 }
 

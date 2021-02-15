@@ -14,7 +14,8 @@ struct Download: ShareOutletProtocol
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
     static let imageName = "Download"
-    static let outlateName = "Download"
+    static let outletName = "Download"
+    static let outletAnalyticsName = "download"
     var delegate: ShareOutletDelegate?
     var content: Content
     

@@ -16,7 +16,9 @@ class Messenger: NSObject, ShareOutletProtocol
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
     static let imageName = "Messenger"
-    static let outlateName = "Messenger"
+    static let outletName = "Messenger"
+    static let outletAnalyticsName = "messenger"
+    
     var delegate: ShareOutletDelegate?
     var content: Content
     
@@ -31,7 +33,7 @@ class Messenger: NSObject, ShareOutletProtocol
 
         if (content.contentType == .video)
         {
-            if (!FacebookUtils.isMessengerAppInstalled) {
+            if (!ShareOutletUtils.isMessengerAppInstalled) {
                 // TODO: We can do this if we have the preview link.
                 // We can use the link share strategy as a fallback if we need to
                 // We can also use re-tar or even a native redirect preparation page before redirecting to fb
@@ -129,8 +131,6 @@ extension Messenger: PhotoPermissionHelperDelegate
         // We've already communicated with the user so this ins't really "failing" in the same way
         delegate?.cancelled()
     }
-    
-    
 }
 
 extension Messenger: SharingDelegate

@@ -9,7 +9,8 @@ import Foundation
 
 struct More: ShareOutletProtocol {
     static let imageName = "More"
-    static let outlateName = "More"
+    static let outletName = "More"
+    static let outletAnalyticsName = "more"
 
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?

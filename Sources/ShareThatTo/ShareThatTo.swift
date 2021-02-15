@@ -17,6 +17,7 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     public static let shared = ShareThatTo()
     private let lifecycle: LifecycleProtocol
     private var authenticationDatastore: AuthenticationDatastoreProtocol
+    internal var snapchatShare: SnapchatOutletProtocol.Type?
     internal init(lifecycle: LifecycleProtocol = Lifecycle(), authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore)
     {
         self.lifecycle = lifecycle
@@ -65,4 +66,11 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         }
         return true
     }
+    
+    // Caller, calls this with a function that I can call when I want to share to snpa
+    // TODO: [Re-enable snapchat] Change to public
+    private func setupSnapchatShare(snapchatShare: SnapchatOutletProtocol.Type){
+        self.snapchatShare = snapchatShare
+    }
 }
+

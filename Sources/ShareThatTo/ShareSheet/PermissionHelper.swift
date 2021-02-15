@@ -50,7 +50,7 @@ class PhotoPermissionHelper
     
     private func presentSettingsRedirect()
     {
-        let avc = UIAlertController(title: "Looks like you've denied permissions to save this \(content.contentType).", message: "To share to \(type(of: shareOutlet).outlateName) we need to save content to your Photos first. Would you like to change your settings? ", preferredStyle: .alert)
+        let avc = UIAlertController(title: "Looks like you've denied permissions to save this \(content.contentType).", message: "To share to \(type(of: shareOutlet).outletName) we need to save content to your Photos first. Would you like to change your settings? ", preferredStyle: .alert)
         avc.addAction(UIAlertAction(title: "No, Thanks", style: .default, handler: { (action) in
             self.delegate?.cancelled()
         }))
@@ -64,7 +64,7 @@ class PhotoPermissionHelper
     
     private func actuallyRequestPermission()
     {
-        let avc = UIAlertController(title: "Allow us to save this \(content.contentType)?", message: "To share to \(type(of: shareOutlet).outlateName) we need to save content to your Photos first", preferredStyle: .alert)
+        let avc = UIAlertController(title: "Allow us to save this \(content.contentType)?", message: "To share to \(type(of: shareOutlet).outletName) we need to save content to your Photos first", preferredStyle: .alert)
         avc.addAction(UIAlertAction(title: "No, Thanks", style: .default, handler: { (action) in
             self.delegate?.cancelled()
         }))

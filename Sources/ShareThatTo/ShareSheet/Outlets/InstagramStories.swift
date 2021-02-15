@@ -14,7 +14,8 @@ struct InstagramStories: ShareOutletProtocol
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
     static let imageName = "InstagramStories"
-    static let outlateName = "Stories"
+    static let outletName = "Stories"
+    static let outletAnalyticsName = "instagram-feed"
     
     var delegate: ShareOutletDelegate?
     var content: Content

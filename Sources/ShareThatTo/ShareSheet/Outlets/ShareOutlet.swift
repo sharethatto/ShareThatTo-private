@@ -13,7 +13,11 @@ class ShareOutlets
     internal static var availableOutlets: [ShareOutletProtocol.Type] = [
         More.self,
         Copy.self,
+        Twitter.self,
+        InstagramFeed.self,
         InstagramStories.self,
+        // TODO: [Re-enable snapchat] Add back line here
+//        Snapchat.self,
         IMessage.self,
         Facebook.self,
         Messenger.self,
@@ -42,9 +46,11 @@ class ShareOutlets
     }
 }
 
-
-
-protocol ShareOutletDelegate {
+public protocol ShareOutletDelegate {
+//    func success(shareOutlet: ShareOutletProtocol)
+//    func failure(shareOutlet: ShareOutletProtocol, error: String)
+//    func cancelled(shareOutlet: ShareOutletProtocol)
+    
     func success()
     func failure(error: String)
     func cancelled()
@@ -57,7 +63,8 @@ protocol ShareOutletProtocol {
     
     // Configuration before instantiation
     static var imageName: String { get }
-    static var outlateName: String { get }
+    static var outletName: String { get }
+    static var outletAnalyticsName: String { get }
     static func buttonImage() -> UIImage?
     static func canPerform(withContent content:Content) -> Bool;
     
@@ -75,8 +82,6 @@ protocol ShareOutletProtocol {
 
 extension ShareOutletProtocol
 {
-
-
     // Right now we can only perform with video content
     static func canPerform(withContent content: Content) -> Bool
     {

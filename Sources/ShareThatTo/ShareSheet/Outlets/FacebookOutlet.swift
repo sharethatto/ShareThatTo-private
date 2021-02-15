@@ -41,7 +41,8 @@ class Facebook: NSObject, ShareOutletProtocol
     }()
     
     static let imageName = "Facebook"
-    static let outlateName = "Facebook"
+    static let outletName = "Facebook"
+    static let outletAnalyticsName = "facebook"
     var delegate: ShareOutletDelegate?
     var content: Content
     
@@ -56,7 +57,7 @@ class Facebook: NSObject, ShareOutletProtocol
 
         if (content.contentType == .video)
         {
-            if (!FacebookUtils.isFacebookAppInstalled) {
+            if (!ShareOutletUtils.isFacebookAppInstalled) {
                 // TODO: We can do this if we have the preview link.
                 // We can use the link share strategy as a fallback if we need to
                 // We can also use re-tar or even a native redirect preparation page before redirecting to fb

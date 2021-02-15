@@ -14,8 +14,8 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
     static let imageName = "IMessage"
-    static let outlateName = "SMS"
-    
+    static let outletName = "SMS"
+    static let outletAnalyticsName = "imessage"
     var delegate: ShareOutletDelegate?
     var content: Content
     

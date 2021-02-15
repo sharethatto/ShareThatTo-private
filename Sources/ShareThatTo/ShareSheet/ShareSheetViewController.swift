@@ -39,15 +39,18 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
     
     let player: AVPlayerViewController
+
 
     let headerView:UIView  = {
         let headerView = UIView.init(frame: defaultRect)
         headerView.backgroundColor = contentBackground
 
         let headerImageView = UIImageView.init(frame: defaultRect)
-        headerImageView.image = UIImage(named: "HeaderLogo")
+        let filepath = Bundle.module.path(forResource: "Assets/HeaderLogo", ofType: ".png")
+        headerImageView.image = UIImage(contentsOfFile: filepath ?? "")
         headerImageView.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(headerImageView)
 
@@ -83,8 +86,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let shareOutletView = UICollectionView.init(frame: defaultRect, collectionViewLayout: layout)
         shareOutletView.backgroundColor = ShareSheetViewController.shareBackground
         shareOutletView.translatesAutoresizingMaskIntoConstraints = false
-
-
         shareOutletView.collectionViewLayout = layout
         shareOutletView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "MyCell")
 
@@ -110,6 +111,9 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     public override func viewDidLoad() {
         super.viewDidLoad()
+        
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.loaded"))
+        
         self.view.addSubview(headerView)
         self.view.addSubview(contentView)
         self.view.addSubview(shareOutletView)
@@ -207,7 +211,33 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 extension ShareSheetViewController {
 
     @objc func didTapCancel() {
-        self.dismiss(animated: true, completion:nil)
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"))
+//        self.dismiss(animated: true, completion:nil)
+//        
+//        let snap = SCSDKNoSnapContent()
+//        snap.sticker = SCSDKSnapSticker(stickerImage:UIImage(named: "HeaderLogo")!)
+//        snap.caption = "Snap on Snapchat!"
+//                    
+//        
+//        self.view.isUserInteractionEnabled = false
+//        
+//        let api = SCSDKSnapAPI(content: snap)
+//        api.startSnapping { error in
+//
+//            if let error = error {
+//                print(error.localizedDescription)
+//            } else {
+//                // success
+//
+//            }
+//        }
+        
+//        snapAPI.startSnapping(completionHandler: <#T##SCSDKSnapAPICompletionHandler?##SCSDKSnapAPICompletionHandler?##(Error?) -> Void#>)
+////        snapAPI.startSending(snap) { (error) in
+////            // error
+////            
+////        }
+//        
     }
 
 
@@ -236,7 +266,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         myCell.contentView.addSubview(imageView)
 
         let labelView = UILabel(frame: defaultRect)
-        labelView.text = type(of: shareOutlet).outlateName
+        labelView.text = type(of: shareOutlet).outletName
         labelView.translatesAutoresizingMaskIntoConstraints = false
         labelView.font = labelView.font.withSize(12)
         myCell.contentView.addSubview(labelView)
@@ -258,6 +288,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         var shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
         shareOutlet.delegate = self
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).outletAnalyticsName).started"))
         shareOutlet.share(with: self)
     }
 }

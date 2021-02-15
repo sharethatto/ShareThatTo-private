@@ -10,9 +10,9 @@ import Foundation
 
 
 
-class FacebookUtils
+class ShareOutletUtils
 {
-    public static let shared = FacebookUtils()
+    public static let shared = ShareOutletUtils()
     
     private static func canOpenURLScheme(scheme:String) -> Bool
     {
@@ -27,8 +27,8 @@ class FacebookUtils
     private static let fbsdkCanOpenURLFacebook = "fbauth2"
     
     // https://github.com/facebook/facebook-ios-sdk/blob/master/FBSDKCoreKit/FBSDKCoreKit/Internal/FBSDKInternalUtility.m#L376
-    static private let isFacebookAppInstalledOnce:Once<FacebookUtils.Type, Bool> = Once { myself in
-        return canOpenURLScheme(scheme: FacebookUtils.fbsdkCanOpenURLFacebook)
+    static private let isFacebookAppInstalledOnce:Once<ShareOutletUtils.Type, Bool> = Once { myself in
+        return canOpenURLScheme(scheme: ShareOutletUtils.fbsdkCanOpenURLFacebook)
     }
     static var isFacebookAppInstalled: Bool {
         get { self.isFacebookAppInstalledOnce.once(self, defaultValue: false) }
@@ -37,10 +37,28 @@ class FacebookUtils
     
     // https://github.com/facebook/facebook-ios-sdk/blob/master/FBSDKCoreKit/FBSDKCoreKit/Internal/FBSDKInternalUtility.h#L27
     private static let fbsdkCanOpenURLMessenger = "fb-messenger-share-api"
-    private static let isMessengerAppInstalledOnce:Once<FacebookUtils.Type, Bool> = Once { myself in
-        return canOpenURLScheme(scheme: FacebookUtils.fbsdkCanOpenURLMessenger)
+    private static let isMessengerAppInstalledOnce:Once<ShareOutletUtils.Type, Bool> = Once { myself in
+        return canOpenURLScheme(scheme: ShareOutletUtils.fbsdkCanOpenURLMessenger)
     }
     static var isMessengerAppInstalled: Bool {
         get { self.isMessengerAppInstalledOnce.once(self, defaultValue: false) }
+    }
+    
+    
+    private static let instagramCanOpenURL = "instagram"
+    private static let isInstagramAppInstalledOnce:Once<ShareOutletUtils.Type, Bool> = Once { myself in
+        return canOpenURLScheme(scheme: ShareOutletUtils.instagramCanOpenURL)
+    }
+    static var isInstagramAppInstalled: Bool {
+        get { self.isInstagramAppInstalledOnce.once(self, defaultValue: false) }
+    }
+    
+    
+    private static let twitterCanOpenURL = "twitter"
+    private static let isTwitterAppInstalledOnce:Once<ShareOutletUtils.Type, Bool> = Once { myself in
+        return canOpenURLScheme(scheme: ShareOutletUtils.twitterCanOpenURL)
+    }
+    static var isTwitterAppInstalled: Bool {
+        get { self.isTwitterAppInstalledOnce.once(self, defaultValue: false) }
     }
 }
