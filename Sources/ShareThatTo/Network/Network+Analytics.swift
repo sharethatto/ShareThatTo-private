@@ -16,19 +16,18 @@ extension Network: NetworkAnalyticsProtocol
 {
     func batchUploadEvents(events: [WrappedAnalyticsEvent], completion: @escaping (Result<Void, Swift.Error>) -> Void)
        {
-           let components = URLComponents(string: "/events")!
+           let components = URLComponents(string: "/v1/events")!
            let requestURL = components.url(relativeTo: analyticsBaseURL)!
            var request = URLRequest(url: requestURL)
            request.httpMethod = "POST"
            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
             // Bail if we can't encode
-        struct BatchEvents: Encodable {
+            struct BatchEvents: Encodable {
                 var events: [WrappedAnalyticsEvent]
             }
             do {
                 request.httpBody = try JSONEncoder().encode(BatchEvents(events: events))
-             
             } catch {
                 return completion(.failure(Error.unknown))
             }

@@ -7,14 +7,58 @@
 
 import UIKit
 import Foundation
-//import SCSDKCoreKit
-//import SCSDKCreativeKit
+
 
 // TODO: [Re-enable snapchat] Change to public
-internal protocol SnapchatOutletProtocol {
-    init(delegate: ShareOutletDelegate)
-    func shareVideo(videoURL: URL)
-    func shareImage(image: UIImage)
+//internal protocol SnapchatOutletProtocol {
+//    init(delegate: ShareOutletDelegate)
+//    func shareVideo(videoURL: URL)
+//    func shareImage(image: UIImage)
+//}
+#if canImport(SCSDKCreativeKit)
+import SCSDKCreativeKit
+#endif
+
+//protocol SnapchatAvailabilityProxyProtocol
+//{
+//
+//}
+
+class SnapchatAvailabilityProxy
+{
+    public init() {}
+    #if canImport(SCSDKCreativeKit)
+
+    fileprivate lazy var snapAPI = {
+        return SCSDKSnapAPI()
+    }()
+    static func available() -> Bool {
+        return true
+    }
+    func shareVideo(videoURL: URL, shareOutlet: ShareOutletProtocol)
+    {
+        let video = SCSDKSnapVideo(videoUrl: videoURL)
+        let content = SCSDKVideoSnapContent(snapVideo: video)
+        snapAPI.startSending(content) { (error) in
+            guard let error = error else {
+                shareOutlet.delegate?.success(shareOutlet: shareOutlet)
+                return
+            }
+            Analytics.shared.addObservabilityEvent(event: ObservabilityEvent(event_name: "share_outlet.snapchat.failure", message: error.localizedDescription))
+            shareOutlet.delegate?.failure(shareOutlet: shareOutlet, error: "Unable to send Snap right now.")
+            print(error)
+        }
+    }
+    
+    
+    #else
+    static func available() -> Bool {
+        return false
+    }
+    func shareVideo(videoURL: URL, shareOutlet: ShareOutletProtocol) {
+        shareOutlet.delegate?.failure(shareOutlet: shareOutlet, error: "Unable to send Snap right now.")
+    }
+    #endif
 }
 
 class Snapchat: NSObject, ShareOutletProtocol
@@ -25,18 +69,26 @@ class Snapchat: NSObject, ShareOutletProtocol
     
     static let imageName = "Snapchat"
     static let outletName = "Snapchat"
-    static let outletAnalyticsName = "snapchat"
+    static let canonicalOutletName = "snapchat"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return SnapchatRequirements(snapchatClientKey: "")
+    }()
 
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?
     var content: Content
+    
+    
+    private let availabilityProxy: SnapchatAvailabilityProxy = {
+       return SnapchatAvailabilityProxy()
+    }()
     
     // Right now we can only perform with video content
     static func canPerform(withContent content: Content) -> Bool
     {
         if (content.contentType == .video)
         {
-            return (ShareThatTo.shared.snapchatShare != nil)
+            return SnapchatAvailabilityProxy.available()
         }
         return false
     }
@@ -45,55 +97,24 @@ class Snapchat: NSObject, ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = self.content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
     }
+    
+    
+
 
     var viewController: UIViewController?
     private func shareVideo(content: VideoContent, viewController: UIViewController)
     {
-        self.viewController = viewController
-
-        guard let snapchatShareClass = ShareThatTo.shared.snapchatShare else {
-            self.delegate?.failure(error: "Unable to share to Snapchat right now.")
-            return
-        }
-        let snapchatShare = snapchatShareClass.init(delegate: self)
-        DispatchQueue.main.async {
-            viewController.view.isUserInteractionEnabled = false
-            snapchatShare.shareVideo(videoURL: content.videoURL)
-        }
+        availabilityProxy.shareVideo(videoURL: content.videoURL, shareOutlet: self)
     }
 }
 
-extension Snapchat: ShareOutletDelegate
-{
-    func success() {
-        guard let viewController = viewController else {
-            self.delegate?.success()
-            return
-        }
-        DispatchQueue.main.async { viewController.view.isUserInteractionEnabled = true }
-        self.delegate?.success()
-    }
-    
-    func failure(error: String) {
-        guard let viewController = viewController else {
-            self.delegate?.failure(error: error)
-            return
-        }
-        DispatchQueue.main.async { viewController.view.isUserInteractionEnabled = true }
-        self.delegate?.failure(error: error)
-    }
-    
-    func cancelled() {
-        guard let viewController = viewController else {
-            self.delegate?.cancelled()
-            return
-        }
-        DispatchQueue.main.async { viewController.view.isUserInteractionEnabled = true }
-        self.delegate?.cancelled()
-    }
-}
+//    fileprivate lazy var snapAPI = {
+//        return SCSDKSnapAPI()
+//    }()
+
+

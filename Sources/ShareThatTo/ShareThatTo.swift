@@ -6,7 +6,7 @@ import UIKit
 //}
 
 // This contains the lifecycle hooks that other intergations need
-protocol ShareThatToLifecycleDelegate {
+public protocol ShareThatToLifecycleDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool
 }
@@ -17,7 +17,7 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     public static let shared = ShareThatTo()
     private let lifecycle: LifecycleProtocol
     private var authenticationDatastore: AuthenticationDatastoreProtocol
-    internal var snapchatShare: SnapchatOutletProtocol.Type?
+//    internal var snapchatShare: SnapchatOutletProtocol.Type?
     internal init(lifecycle: LifecycleProtocol = Lifecycle(), authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore)
     {
         self.lifecycle = lifecycle
@@ -69,8 +69,24 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     
     // Caller, calls this with a function that I can call when I want to share to snpa
     // TODO: [Re-enable snapchat] Change to public
-    private func setupSnapchatShare(snapchatShare: SnapchatOutletProtocol.Type){
-        self.snapchatShare = snapchatShare
+//    private func setupSnapchatShare(snapchatShare: SnapchatOutletProtocol.Type){
+//        self.snapchatShare = snapchatShare
+//    }
+    
+    
+    public func debugShareOutlets(completion:  @escaping (Result<Void, Swift.Error>) -> Void)
+    {
+        
     }
+    
+    public func isDebug() -> Bool
+    {
+        #if DEBUG
+        return true
+        #else
+        return false
+        #endif
+    }
+    
 }
 

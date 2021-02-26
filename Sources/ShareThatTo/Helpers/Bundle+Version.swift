@@ -14,4 +14,8 @@ extension Bundle {
     var buildVersionNumber: String? {
         return infoDictionary?["CFBundleVersion"] as? String
     }
+    
+    var applicationQuerySchemes: [String] {
+        return infoDictionary?["LSApplicationQueriesSchemes"] as? [String] ?? []
+    }
 }

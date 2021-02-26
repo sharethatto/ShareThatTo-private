@@ -14,22 +14,31 @@ internal class Network
     internal static let shared = Network()
     
     internal let baseURL: URL
-    internal let urlSession: URLSession
-    internal let authenticationDatastore: AuthenticationDatastoreProtocol
     internal let analyticsBaseURL: URL
-//    internal let baseURL = URL(string: "http://localhost:3000/api")!
+    internal let urlSession: URLSession
+    private let authenticationDatastore: AuthenticationDatastoreProtocol
+    private let contribDatastore: ContribDatastoreProtocol
+    
     
     public init(
         urlSession: URLSession = URLSession(configuration: .ephemeral),
         authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore,
-        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/api")!,
-        analyticsBaseURL: URL = URL(string: "https://collector.sharethatto.com/events")!
+        contribDatastore: ContribDatastoreProtocol = Datastore.shared.contribDatastore,
+        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/v1/api/sdk/")!,
+//        baseURL: URL = URL(string: "http://10.0.0.92:3000/v1/api/sdk/")!,
+        analyticsBaseURL: URL = URL(string: "https://collector.sharethatto.com/v1/events")!
     )
     {
         self.urlSession = (urlSession)
         self.authenticationDatastore = authenticationDatastore
+        self.contribDatastore = contribDatastore
         self.baseURL = baseURL
         self.analyticsBaseURL = analyticsBaseURL
+    }
+    
+    internal func log(message: String)
+    {
+        print(message)
     }
 }
 
@@ -79,8 +88,8 @@ extension Network
         var request = request
         guard let unwrappedApiKey = authenticationDatastore.apiKey  else { return completion(.failure(Error.notAuthenticated))  }
         request.setValue("Bearer " + unwrappedApiKey, forHTTPHeaderField:  "Authorization")
-        if let unwrappedUserId = userId {
-            request.setValue(unwrappedUserId, forHTTPHeaderField: "X-Client-UserId")
+        if let unwrappedUserId = contribDatastore.userId {
+            request.setValue(unwrappedUserId, forHTTPHeaderField: "X-Contrib-UserId")
         }
         
         
@@ -95,7 +104,8 @@ extension Network
                     return completion(.failure(Error.notAuthenticated))
                 }
                 // TODO: Remove this
-                print(String(data: unWrappedData, encoding: .utf8))
+//                print(String(data: unWrappedData, encoding: .utf8))
+                self.log(message: String(data: unWrappedData, encoding: .utf8) ?? "")
                 let response = try JSONDecoder().decode(ResponseType.self, from: unWrappedData)
                 completion(.success(response))
             }

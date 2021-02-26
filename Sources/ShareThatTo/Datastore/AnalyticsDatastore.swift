@@ -9,18 +9,18 @@ import Foundation
 
 protocol AnalyticsDatastoreProtocol
 {
-    func addEvent(event: Codable)
-    func allEvents() -> [Codable]
+    func addEvent(event: WrappedAnalyticsEvent)
+    func allEvents() -> [WrappedAnalyticsEvent]
     func destroyAll()
 }
 
 internal class AnalyticsDatastore: AnalyticsDatastoreProtocol
 {
-    func addEvent(event: Codable) {
+    func addEvent(event: WrappedAnalyticsEvent) {
         events.append(event)
     }
     
-    func allEvents() -> [Codable] {
+    func allEvents() -> [WrappedAnalyticsEvent] {
         return events
     }
     
@@ -29,6 +29,6 @@ internal class AnalyticsDatastore: AnalyticsDatastoreProtocol
     }
     
     internal static let shared = AnalyticsDatastore()
-    private var events: [Codable] = [];
+    private var events: [WrappedAnalyticsEvent] = [];
     public init() { }
 }

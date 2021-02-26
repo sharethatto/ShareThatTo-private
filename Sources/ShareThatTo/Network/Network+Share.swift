@@ -55,17 +55,23 @@ struct ActivateRequest: Codable {
     var shareable_access_token: String
 }
 
+struct DeleteShareRequest: Codable {
+    var shareable_access_token: String
+}
+
+
 protocol NetworkShareProtocol
 {
     func shareRequest(share: ShareRequest, completion: @escaping (Result<ShareResponse, Swift.Error>) -> Void)
     func activateShare(activate: ActivateRequest, completion: @escaping (Result<EmptyResponse, Swift.Error>) -> Void)
+    func deleteShare(delete: DeleteShareRequest, completion: @escaping (Result<EmptyResponse, Swift.Error>) -> Void)
 }
 
 extension Network: NetworkShareProtocol
 {
     func shareRequest(share: ShareRequest, completion: @escaping (Result<ShareResponse, Swift.Error>) -> Void)
        {
-           let components = URLComponents(string: "/api/share")!
+           let components = URLComponents(string: "share")!
            let requestURL = components.url(relativeTo: baseURL)!
            var request = URLRequest(url: requestURL)
            request.httpMethod = "POST"
@@ -92,7 +98,7 @@ extension Network: NetworkShareProtocol
 
     func activateShare(activate: ActivateRequest, completion: @escaping (Result<EmptyResponse, Swift.Error>) -> Void)
     {
-        let components = URLComponents(string: "/api/share/activate")!
+        let components = URLComponents(string: "share/activate")!
         let requestURL = components.url(relativeTo: baseURL)!
         var request = URLRequest(url: requestURL)
         request.httpMethod = "POST"
@@ -101,6 +107,31 @@ extension Network: NetworkShareProtocol
         // Bail if we can't encode
         do {
             request.httpBody = try JSONEncoder().encode(activate)
+        } catch {
+            return completion(.failure(Error.unknown))
+        }
+        
+        self.send(request)  { (result: Result<EmptyResponse, Swift.Error>) in
+            switch result
+            {
+            case .failure(let error): completion(.failure(error))
+            case .success(let response):
+                completion(.success((response)))
+            }
+        }
+    }
+    
+    func deleteShare(delete: DeleteShareRequest, completion: @escaping (Result<EmptyResponse, Swift.Error>) -> Void)
+    {
+        let components = URLComponents(string: "share")!
+        let requestURL = components.url(relativeTo: baseURL)!
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Bail if we can't encode
+        do {
+            request.httpBody = try JSONEncoder().encode(delete)
         } catch {
             return completion(.failure(Error.unknown))
         }

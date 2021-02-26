@@ -14,7 +14,11 @@ struct Copy: ShareOutletProtocol
     
     static let imageName = "Copy"
     static let outletName = "Copy"
-    static let outletAnalyticsName = "copy"
+    static let canonicalOutletName = "copy"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return NoRequirements()
+    }()
+    
     var delegate: ShareOutletDelegate?
     var content: Content
     
@@ -27,7 +31,7 @@ struct Copy: ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(self, error: "Invalid content type")
+            delegate?.failure(shareOutlet:self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -40,6 +44,6 @@ struct Copy: ShareOutletProtocol
         pb.string = text
         let rawShareStrategy = content.rawStrategy(caller: self)
         pb.setData(rawShareStrategy.data, forPasteboardType: "public.mpeg-4")
-        delegate?.success(self)
+        delegate?.success(shareOutlet: self)
     }
 }

@@ -14,7 +14,10 @@ struct InstagramFeed: ShareOutletProtocol
     
     static let imageName = "InstagramFeed"
     static let outletName = "Insta"
-    static let outletAnalyticsName = "instagram-feed"
+    static let canonicalOutletName = "instagram-feed"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return InstagramFeedRequirements()
+    }()
     
     var delegate: ShareOutletDelegate?
     var content: Content
@@ -37,7 +40,7 @@ struct InstagramFeed: ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -54,21 +57,21 @@ struct InstagramFeed: ShareOutletProtocol
         let localIdentifier = asset.localIdentifier
         let urlFeed = "instagram://library?LocalIdentifier=" + localIdentifier
         guard let url = URL(string: urlFeed) else {
-            delegate?.failure(error: "Unable to save video to share to Instagram.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Instagram.")
            return
        }
        DispatchQueue.main.async {
            if UIApplication.shared.canOpenURL(url) {
                if #available(iOS 10.0, *) {
                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                    self.delegate?.success()
+                    self.delegate?.success(shareOutlet: self)
                    })
                } else {
                    UIApplication.shared.openURL(url)
-                   self.delegate?.success()
+                   self.delegate?.success(shareOutlet: self)
                }
            } else {
-                self.delegate?.failure(error: "Unable to open instagram")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to open instagram")
            }
        }
     }
@@ -81,7 +84,7 @@ extension InstagramFeed: PhotoPermissionHelperDelegate
     {
         // video content
         guard let videoContent = content.videoContent() else {
-            delegate?.failure(error: "Unable to save video to share to Instagram.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Instagram.")
             return
         }
         
@@ -92,25 +95,25 @@ extension InstagramFeed: PhotoPermissionHelperDelegate
             placeholder =  changeRequest?.placeholderForCreatedAsset
         } completionHandler: { (success, error) in
             if (success) {
-                guard let placeholder = placeholder else { self.delegate?.failure(error: "Unable to save video to share to Instagram."); return }
+                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Instagram."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(error: "Unable to save video to share to Instagram."); return }
+                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Instagram."); return }
                 self.shareVideoAsset(asset: asset)
             } else {
-                self.delegate?.failure(error: "Unable to save video to share to Instagram.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Instagram.")
             }
         }
     }
     
     func cancelled()
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
     
     func failed()
     {
         // We've already communicated with the user so this ins't really "failing" in the same way
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
 }

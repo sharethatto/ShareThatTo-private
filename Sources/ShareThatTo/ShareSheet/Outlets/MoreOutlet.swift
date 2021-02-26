@@ -10,7 +10,10 @@ import Foundation
 struct More: ShareOutletProtocol {
     static let imageName = "More"
     static let outletName = "More"
-    static let outletAnalyticsName = "more"
+    static let canonicalOutletName = "more"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return NoRequirements()
+    }()
 
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?
@@ -25,7 +28,7 @@ struct More: ShareOutletProtocol {
     {
         // We only support video content
         guard let videoContent: VideoContent = self.content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -37,9 +40,9 @@ struct More: ShareOutletProtocol {
         let activityViewController =  UIActivityViewController(activityItems: [content.text(), content.videoURL], applicationActivities: nil)
         activityViewController.completionWithItemsHandler = {(activityType, completed, returnedItems, error) in
             if (completed) {
-                delegate?.success()
+                delegate?.success(shareOutlet: self)
             } else {
-                delegate?.cancelled()
+                delegate?.cancelled(shareOutlet: self)
             }
         }
         viewController.present(activityViewController, animated: true) {}

@@ -22,26 +22,32 @@ class VideoContentProviders
 }
 
 
-class VideoContent: Content
+public class VideoContent: Content
 {
     // Providers
     private let datastore: ApplicationDatastoreProtocol
     
     // Content
-    let contentType: ContentType = .video
+    public let contentType: ContentType = .video
     
     internal let title: String
     internal let videoURL: URL
 
     // How can we share?
     private var rawShareStrategy: RawShareStrategy
-    public var renderedShareStrategy: RenderedShareStrategy?
+    internal var renderedShareStrategy: RenderedShareStrategy?
     private var linkPreviewShareStrategy: LinkPreviewShareStrategy?
     
     // How confident do we need to be before we decide to use the link preview
     private let linkPreviewConfidenceRequired: LinkPreviewConfidence = .succeeded
     private var linkPreviewShareStrategyConfidence: LinkPreviewConfidence  = .none
     
+    // Hack to be abel to initialize ShareManagerVideo and use self
+    private var _shareManager: ShareManagerVideo?
+    var shareManager: ShareManagerVideo? {
+        return _shareManager
+    }
+
     
     init(videoURL: URL, title: String, providers: VideoContentProviders = VideoContentProviders()) throws
     {
@@ -53,7 +59,8 @@ class VideoContent: Content
             self.rawShareStrategy = RawShareStrategy(data: video)
             
             // Start uploading
-            ShareManagerVideo.init(videoContent: self, delegate: self, providers: providers.videoManagerProviders).begin()
+            self._shareManager = ShareManagerVideo.init(videoContent: self, delegate: self, providers: providers.videoManagerProviders)
+            self.shareManager?.begin()
         } catch let error {
            throw error
         }
@@ -84,6 +91,13 @@ class VideoContent: Content
         }
         return linkPreviewShareStrategyConfidence >= linkPreviewConfidenceRequired
     }
+    
+//MARK: ShareManager
+    public func deleteShare()
+    {
+        self.shareManager?.destroy()
+    }
+    
     
 //MARK: Content
 

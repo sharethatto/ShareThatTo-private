@@ -43,6 +43,9 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     
     let player: AVPlayerViewController
 
+    let analtyicsContext: Context = {
+        return Context()
+    }()
 
     let headerView:UIView  = {
         let headerView = UIView.init(frame: defaultRect)
@@ -112,7 +115,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.loaded"))
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.loaded"), context: analtyicsContext)
         
         self.view.addSubview(headerView)
         self.view.addSubview(contentView)
@@ -211,33 +214,11 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 extension ShareSheetViewController {
 
     @objc func didTapCancel() {
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"))
-//        self.dismiss(animated: true, completion:nil)
-//        
-//        let snap = SCSDKNoSnapContent()
-//        snap.sticker = SCSDKSnapSticker(stickerImage:UIImage(named: "HeaderLogo")!)
-//        snap.caption = "Snap on Snapchat!"
-//                    
-//        
-//        self.view.isUserInteractionEnabled = false
-//        
-//        let api = SCSDKSnapAPI(content: snap)
-//        api.startSnapping { error in
-//
-//            if let error = error {
-//                print(error.localizedDescription)
-//            } else {
-//                // success
-//
-//            }
-//        }
-        
-//        snapAPI.startSnapping(completionHandler: <#T##SCSDKSnapAPICompletionHandler?##SCSDKSnapAPICompletionHandler?##(Error?) -> Void#>)
-////        snapAPI.startSending(snap) { (error) in
-////            // error
-////            
-////        }
-//        
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
+        if let videoConent = self.content.videoContent()  {
+            videoConent.deleteShare()
+        }
+        self.dismiss(animated: true, completion:nil)
     }
 
 
@@ -288,23 +269,26 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         var shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
         shareOutlet.delegate = self
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).outletAnalyticsName).started"))
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).started"))
         shareOutlet.share(with: self)
     }
 }
 
 
-// Mark - ShareOutletDelegate
+// MARK: ShareOutletDelegate
 
 extension ShareSheetViewController: ShareOutletDelegate {
 
-    func success() {
+    func success(shareOutlet: ShareOutletProtocol) {
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).succeeded"), context: analtyicsContext)
         DispatchQueue.main.async {
             self.dismiss(animated: true)
         }
     }
 
-    func failure(error: String) {
+    func failure(shareOutlet: ShareOutletProtocol, error: String)
+    {
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).failed", error_string: error), context: analtyicsContext)
         let alert = UIAlertController(title: "Error", message: error, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
             NSLog("The \"OK\" alert occured.")
@@ -314,7 +298,10 @@ extension ShareSheetViewController: ShareOutletDelegate {
         }
     }
 
-    func cancelled(){
+    func cancelled(shareOutlet: ShareOutletProtocol){
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).cancelled"), context: analtyicsContext)
+        
 
+        
     }
 }

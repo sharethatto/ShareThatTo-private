@@ -17,7 +17,10 @@ class Messenger: NSObject, ShareOutletProtocol
     
     static let imageName = "Messenger"
     static let outletName = "Messenger"
-    static let outletAnalyticsName = "messenger"
+    static let canonicalOutletName = "messenger"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return FacebookRequirements(facebookAppId: "")
+    }()
     
     var delegate: ShareOutletDelegate?
     var content: Content
@@ -51,7 +54,7 @@ class Messenger: NSObject, ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -83,7 +86,7 @@ class Messenger: NSObject, ShareOutletProtocol
                 print(error)
                 // Ideally we should never trigger this, b/c we should have caught the error
                 // at the top where we decided if we could show the outlet or not.
-                self.delegate?.failure(error: "Whoops! We can't share to Messenger right now.")
+                self.delegate?.failure(shareOutlet: self, error: "Whoops! We can't share to Messenger right now.")
                 // TODO: Capture the error here
                 return
             }
@@ -99,7 +102,7 @@ extension Messenger: PhotoPermissionHelperDelegate
     {
         // video content
         guard let videoContent = content.videoContent() else {
-            delegate?.failure(error: "Unable to save video to share to Messenger.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger.")
             return
         }
         
@@ -110,26 +113,26 @@ extension Messenger: PhotoPermissionHelperDelegate
             placeholder =  changeRequest?.placeholderForCreatedAsset
         } completionHandler: { (success, error) in
             if (success) {
-                guard let placeholder = placeholder else { self.delegate?.failure(error: "Unable to save video to share to Messenger."); return }
+                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(error: "Unable to save video to share to Messenger."); return }
+                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger."); return }
                 self.shareVideoAsset(asset: asset)
             } else {
-                self.delegate?.failure(error: "Unable to save video to share to Messenger.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger.")
             }
         }
     }
     
     func cancelled()
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
     
     func failed()
     {
         // We've already communicated with the user so this ins't really "failing" in the same way
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
 }
 
@@ -137,16 +140,16 @@ extension Messenger: SharingDelegate
 {
     func sharer(_ sharer: Sharing, didCompleteWithResults results: [String : Any])
     {
-        delegate?.success()
+        delegate?.success(shareOutlet: self)
     }
     
     func sharer(_ sharer: Sharing, didFailWithError error: Error)
     {
-        delegate?.failure(error: error.localizedDescription)
+        delegate?.failure(shareOutlet: self, error: error.localizedDescription)
     }
     
     func sharerDidCancel(_ sharer: Sharing)
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
 }

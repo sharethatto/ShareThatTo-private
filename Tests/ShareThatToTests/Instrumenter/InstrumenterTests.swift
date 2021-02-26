@@ -11,10 +11,10 @@ import XCTest
 final class InstrumenterTests: XCTestCase {
     func testInstrumentation()
     {
-        Instrumeter.shared.log(key: "error", payload: [
-            "localization":"abc"
-        ])
-        Instrumeter.shared.track("hi")
+//        Instrumeter.shared.log(key: "error", payload: [
+//            "localization":"abc"
+//        ])
+//        Instrumeter.shared.track("hi")
     }
     
  

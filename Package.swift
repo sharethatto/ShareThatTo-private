@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-//        .package(name: "SCSDKCreativeKit", url: "https://github.com/sharethatto/Snapchat-SPM", from: "1.0.0"),
+        .package(name: "SCSDKCreativeKit", url: "https://github.com/sharethatto/Snapchat-SPM", from: "1.0.0"),
         
 //        .package(name: "SCSDKCreativeKit", url: "https://github.com/sharethatto/Snapchat-SPM", from: "master"),
         .package(url: "https://github.com/venmo/DVR", from: "2.0.0"),
@@ -33,9 +33,16 @@ let package = Package(
                 .product(name: "FacebookShare", package: "Facebook"),
 //                .product(name: "SCSDKCreativeKit", package: "SCSDKCreativeKit")
             ],
-            resources: [
+            path: "Sources/ShareThatTo", resources: [
                 .copy("Assets")
             ]),
+//        .target(
+//            name: "ShareThatToSnapchat",
+//            dependencies: [
+////                .product(name: "FacebookShare", package: "Facebook"),
+////                .product(name: "SCSDKCreativeKit", package: "SCSDKCreativeKit")
+//            ],
+//            path: "Sources/ShareThatToSnapchat"),
         .testTarget(
             name: "ShareThatToTests",
             dependencies: ["ShareThatTo", "DVR"],

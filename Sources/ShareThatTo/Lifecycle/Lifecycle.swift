@@ -57,6 +57,7 @@ internal class Lifecycle: LifecycleProtocol
     
     @objc private func willEnterForeground()
     {
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "lifecycle.app_opened", error_string: nil))
         refreshSessionData()
     }
     

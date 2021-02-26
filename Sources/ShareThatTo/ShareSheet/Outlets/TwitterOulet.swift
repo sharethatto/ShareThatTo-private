@@ -10,7 +10,10 @@ import Foundation
 struct Twitter: ShareOutletProtocol {
     static let imageName = "Twitter"
     static let outletName = "Twitter"
-    static let outletAnalyticsName = "twitter"
+    static let canonicalOutletName = "twitter"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return InstgramStoriesRequirements()
+    }()
 
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?
@@ -25,7 +28,7 @@ struct Twitter: ShareOutletProtocol {
     {
         // We only support video content
         guard let videoContent: VideoContent = self.content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -38,7 +41,7 @@ struct Twitter: ShareOutletProtocol {
         {
             // text will have the link preview in it
             guard let message = content.text().addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-                self.delegate?.failure(error: "Unable to share to Twitter right now.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to share to Twitter right now.")
                 return
             }
             
@@ -54,28 +57,28 @@ struct Twitter: ShareOutletProtocol {
             }
         } else {
             // TODO: Handle waiting before we redirect you
-            self.delegate?.failure(error: "Unable to share to Twitter right now.")
+            self.delegate?.failure(shareOutlet: self, error: "Unable to share to Twitter right now.")
         }
     }
     
     private func openURL(twitterURL: String)
     {
         guard let url = URL(string: twitterURL) else {
-            delegate?.failure(error: "Unable to share to Twitter right now.")
+            delegate?.failure(shareOutlet: self, error: "Unable to share to Twitter right now.")
            return
        }
        DispatchQueue.main.async {
            if UIApplication.shared.canOpenURL(url) {
                if #available(iOS 10.0, *) {
                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                    self.delegate?.success()
+                    self.delegate?.success(shareOutlet: self)
                    })
                } else {
                    UIApplication.shared.openURL(url)
-                   self.delegate?.success()
+                   self.delegate?.success(shareOutlet: self)
                }
            } else {
-                self.delegate?.failure(error: "Unable to open twitter")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to open twitter")
            }
        }
     }

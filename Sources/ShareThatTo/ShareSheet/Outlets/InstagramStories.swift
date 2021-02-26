@@ -15,7 +15,10 @@ struct InstagramStories: ShareOutletProtocol
     
     static let imageName = "InstagramStories"
     static let outletName = "Stories"
-    static let outletAnalyticsName = "instagram-feed"
+    static let canonicalOutletName = "instagram-stories"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return InstgramStoriesRequirements()
+    }()
     
     var delegate: ShareOutletDelegate?
     var content: Content
@@ -38,7 +41,7 @@ struct InstagramStories: ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -62,11 +65,11 @@ struct InstagramStories: ShareOutletProtocol
        
             UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
             UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
-                delegate?.success()
+                delegate?.success(shareOutlet: self)
             })
             }
         } else {
-            delegate?.failure(error: "Needs iOS 10")
+            delegate?.failure(shareOutlet: self, error: "Needs iOS 10")
         }
     }
 }

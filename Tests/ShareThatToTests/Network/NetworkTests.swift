@@ -12,7 +12,7 @@ import XCTest
 final class NetworkTests: XCTestCase {
     func testRequestShare()
     {
-        ShareThatTo.configure(apiKey: "share_pk_5d167039aee692d93a1821b38ac58c6b")
+//        ShareThatTo.configure(apiKey: "share_pk_5d167039aee692d93a1821b38ac58c6b")
         let expectation = self.expectation(description: "Network Request")
         let bundle = Bundle(for: AVURLAssetTest.self)
         let fixturesPath = bundle.resourcePath! + "/ShareThatTo_ShareThatToTests.bundle/Fixtures/"
@@ -32,8 +32,8 @@ final class NetworkTests: XCTestCase {
             Network.shared.shareRequest(share: shareRequest) { (result) in
                 switch(result) {
                 case .success(let response):
-                    XCTAssertNotNil(response.preview_image.configurable?.direct_upload?.url)
-                    XCTAssertNotNil(response.video_content.configurable?.direct_upload?.url)
+//                    XCTAssertNotNil(response.preview_image.configurable?.direct_upload?.url)
+//                    XCTAssertNotNil(response.video_content.configurable?.direct_upload?.url)
                     XCTAssertNotNil(response.shareable.title)
                     XCTAssertNotNil(response.shareable.link)
                     XCTAssertNotNil(response.shareable.shareable_access_token)
@@ -43,7 +43,7 @@ final class NetworkTests: XCTestCase {
                         (result) in
                         switch(result) {
                         case .success(_):
-                            Network.shared.activateShare(activate: ActivateRequest(video_content: nil, preview_image: true, shareable_access_token: response.shareable.shareable_access_token)) {
+                            Network.shared.activateShare(activate: ActivateRequest(video_content: false, preview_image: true, shareable_access_token: response.shareable.shareable_access_token)) {
                                 (result) in
                                 switch(result) {
                                 case .success(_):

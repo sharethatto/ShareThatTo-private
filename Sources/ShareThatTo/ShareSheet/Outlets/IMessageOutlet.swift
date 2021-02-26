@@ -15,7 +15,11 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     
     static let imageName = "IMessage"
     static let outletName = "SMS"
-    static let outletAnalyticsName = "imessage"
+    static let canonicalOutletName = "imessage"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return NoRequirements()
+    }()
+    
     var delegate: ShareOutletDelegate?
     var content: Content
     
@@ -38,7 +42,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -59,11 +63,11 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         if result == .failed {
-            delegate?.failure(error: "Could not send message")
+            delegate?.failure(shareOutlet: self, error: "Could not send message")
         }
         else
         {
-            delegate?.success()
+            delegate?.success(shareOutlet: self)
         }
     }
 }

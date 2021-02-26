@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Context
+class Context: Codable
 {
-    let uuid: UUID = UUID()
+    var uuid: UUID = UUID()
 }

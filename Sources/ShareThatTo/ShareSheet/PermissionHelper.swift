@@ -35,12 +35,7 @@ class PhotoPermissionHelper
     func requestPermission()
     {
         // Do we have the permission we need?
-        let result: PHAuthorizationStatus
-//        if #available(iOS 14, *) {
-//            result = PHPhotoLibrary.authorizationStatus(for: .addOnly)
-//        } else {
-            result = PHPhotoLibrary.authorizationStatus()
-//        }
+        let result = PHPhotoLibrary.authorizationStatus()
         switch (result) {
         case .authorized, .limited: delegate?.succeeded(); return
         case .notDetermined: actuallyRequestPermission()
@@ -70,21 +65,12 @@ class PhotoPermissionHelper
         }))
         avc.addAction(UIAlertAction(title: "Yes, Please!", style: .default, handler: { (action) in
             // Actually prompt the permission
-//            if #available(iOS 14, *) {
-//                PHPhotoLibrary.requestAuthorization(for: .addOnly) { (result)
-//                    switch (result) {
-//                    case .authorized, .limited: delegate?.succeeded()
-//                    default: delegate?.failed()
-//                    }
-//                }
-//            } else {
-                PHPhotoLibrary.requestAuthorization { (result) in
-                    switch (result) {
-                    case .authorized, .limited: self.delegate?.succeeded()
-                    default: self.delegate?.failed()
-                    }
+            PHPhotoLibrary.requestAuthorization { (result) in
+                switch (result) {
+                case .authorized, .limited: self.delegate?.succeeded()
+                default: self.delegate?.failed()
                 }
-//            }
+            }
         }))
         self.viewController.present(avc, animated: true, completion: nil)
     }

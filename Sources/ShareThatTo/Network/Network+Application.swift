@@ -10,6 +10,7 @@ import Foundation
 struct ApplicationResponse: Decodable
 {
     var cta_link: String?
+    var slug: String?
 }
 
 protocol NetworkApplicationProtocol
@@ -21,7 +22,7 @@ extension Network: NetworkApplicationProtocol
 {
     func application(completion: @escaping (Result<ApplicationResponse, Swift.Error>) -> Void)
        {
-           let components = URLComponents(string: "/api/application")!
+           let components = URLComponents(string: "application")!
            let requestURL = components.url(relativeTo: baseURL)!
            var request = URLRequest(url: requestURL)
            request.httpMethod = "GET"

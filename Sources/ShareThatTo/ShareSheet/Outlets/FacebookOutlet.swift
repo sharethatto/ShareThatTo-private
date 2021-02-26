@@ -42,7 +42,11 @@ class Facebook: NSObject, ShareOutletProtocol
     
     static let imageName = "Facebook"
     static let outletName = "Facebook"
-    static let outletAnalyticsName = "facebook"
+    static let canonicalOutletName = "facebook"
+    static let requirements: ShareOutletRequirementProtocol = {
+        return FacebookRequirements(facebookAppId: "")
+    }()
+    
     var delegate: ShareOutletDelegate?
     var content: Content
     
@@ -75,7 +79,7 @@ class Facebook: NSObject, ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -99,7 +103,7 @@ class Facebook: NSObject, ShareOutletProtocol
         let shareVdieoContent = ShareVideoContent()
         shareVdieoContent.video = shareVideo
         
-        guard let viewController = self.viewController else {  delegate?.failure(error: "Unable to save video to share to Facebook."); return }
+        guard let viewController = self.viewController else {  delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
         let shareDialog = ShareDialog.init(fromViewController: viewController, content: shareVdieoContent, delegate: self)
         
         // I think validate needs to be on the main thread--definitely one of the two does
@@ -110,7 +114,7 @@ class Facebook: NSObject, ShareOutletProtocol
                 print(error)
                 // Ideally we should never trigger this, b/c we should have caught the error
                 // at the top where we decided if we could show the outlet or not.
-                self.delegate?.failure(error: "Whoops! We can't share to Facebook right now.")
+                self.delegate?.failure(shareOutlet: self, error: "Whoops! We can't share to Facebook right now.")
                 // TODO: Capture the error here
                 return
             }
@@ -126,7 +130,7 @@ extension Facebook: PhotoPermissionHelperDelegate
     {
         // video content
         guard let videoContent = content.videoContent() else {
-            delegate?.failure(error: "Unable to save video to share to Facebook.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook.")
             return
         }
         
@@ -137,26 +141,26 @@ extension Facebook: PhotoPermissionHelperDelegate
             placeholder =  changeRequest?.placeholderForCreatedAsset
         } completionHandler: { (success, error) in
             if (success) {
-                guard let placeholder = placeholder else { self.delegate?.failure(error: "Unable to save video to share to Facebook."); return }
+                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(error: "Unable to save video to share to Facebook."); return }
+                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
                 self.shareVideoAsset(asset: asset)
             } else {
-                self.delegate?.failure(error: "Unable to save video to share to Facebook.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook.")
             }
         }
     }
     
     func cancelled()
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
     
     func failed()
     {
         // We've already communicated with the user so this ins't really "failing" in the same way
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
     
     
@@ -166,16 +170,16 @@ extension Facebook: SharingDelegate
 {
     func sharer(_ sharer: Sharing, didCompleteWithResults results: [String : Any])
     {
-        delegate?.success()
+        delegate?.success(shareOutlet: self)
     }
     
     func sharer(_ sharer: Sharing, didFailWithError error: Error)
     {
-        delegate?.failure(error: error.localizedDescription)
+        delegate?.failure(shareOutlet: self, error: error.localizedDescription)
     }
     
     func sharerDidCancel(_ sharer: Sharing)
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
 }

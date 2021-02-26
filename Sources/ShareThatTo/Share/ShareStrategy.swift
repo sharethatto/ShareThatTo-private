@@ -7,40 +7,40 @@
 
 import Foundation
 
-enum ShareStrategy: Int {
+public enum ShareStrategy: Int {
     case none = 0
     case raw = 1
     case rendered = 2
     case linkPreview = 3
 }
 
-enum ShareStretegyType
+public enum ShareStretegyType
 {
     case raw
     case linkPreview
 }
 
-protocol ShareStretegyTypeRawProtocol
+public protocol ShareStretegyTypeRawProtocol
 {
     var data: Data { get }
 }
 
-protocol ShareStretegyTypeLinkPreviewProtocol
+public protocol ShareStretegyTypeLinkPreviewProtocol
 {
     var link: String { get }
 }
 
-protocol ShareStrategyProtocol
+public protocol ShareStrategyProtocol
 {
     var shareStrategy: ShareStrategy { get }
     var shareStrategyType: ShareStretegyType { get  }
 }
 
-class RawShareStrategy: ShareStrategyProtocol, ShareStretegyTypeRawProtocol
+public class RawShareStrategy: ShareStrategyProtocol, ShareStretegyTypeRawProtocol
 {
-    let shareStrategy:ShareStrategy = .raw
-    var shareStrategyType:ShareStretegyType = .raw
-    var data: Data
+    public let shareStrategy:ShareStrategy = .raw
+    public var shareStrategyType:ShareStretegyType = .raw
+    public var data: Data
     
     init(data: Data)
     {
@@ -48,31 +48,31 @@ class RawShareStrategy: ShareStrategyProtocol, ShareStretegyTypeRawProtocol
     }
 }
 
-class RenderedShareStrategy: ShareStrategyProtocol,  ShareStretegyTypeRawProtocol
+public class RenderedShareStrategy: ShareStrategyProtocol,  ShareStretegyTypeRawProtocol
 {
-    let shareStrategy:ShareStrategy = .rendered
-    var shareStrategyType:ShareStretegyType = .raw
-    var data: Data
+    public let shareStrategy:ShareStrategy = .rendered
+    public var shareStrategyType:ShareStretegyType = .raw
+    public var data: Data
     init(data: Data)
     {
         self.data = data
     }
 }
 
-class LinkPreviewShareStrategy: ShareStrategyProtocol, ShareStretegyTypeLinkPreviewProtocol
+public class LinkPreviewShareStrategy: ShareStrategyProtocol, ShareStretegyTypeLinkPreviewProtocol
 {
-    let shareStrategy:ShareStrategy = .linkPreview
-    var shareStrategyType:ShareStretegyType = .linkPreview
-    var link: String
+    public let shareStrategy:ShareStrategy = .linkPreview
+    public var shareStrategyType:ShareStretegyType = .linkPreview
+    public var link: String
     init(link: String)
     {
         self.link = link
     }
 }
 
-enum LinkPreviewConfidence: Int, Comparable
+public enum LinkPreviewConfidence: Int, Comparable
 {
-    static func < (lhs: LinkPreviewConfidence, rhs: LinkPreviewConfidence) -> Bool {
+    public static func < (lhs: LinkPreviewConfidence, rhs: LinkPreviewConfidence) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
     

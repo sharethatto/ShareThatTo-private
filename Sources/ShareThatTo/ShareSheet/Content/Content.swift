@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum ContentType: String {
+public enum ContentType: String {
     case unknown = "unknown"
     case video = "video"
 }
 
-protocol Content
+public protocol Content
 {
     var contentType: ContentType { get }
     
@@ -24,7 +24,7 @@ extension Content
 {
     // Handle force unwrapping here so we can guard it all our
     // outlet classes
-    func videoContent() -> VideoContent?
+    public func videoContent() -> VideoContent?
     {
         if (contentType == .video)
         {

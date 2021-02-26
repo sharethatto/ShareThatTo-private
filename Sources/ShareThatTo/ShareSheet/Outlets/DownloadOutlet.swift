@@ -15,9 +15,12 @@ struct Download: ShareOutletProtocol
     
     static let imageName = "Download"
     static let outletName = "Download"
-    static let outletAnalyticsName = "download"
+    static let canonicalOutletName = "download"
     var delegate: ShareOutletDelegate?
     var content: Content
+    static let requirements: ShareOutletRequirementProtocol = {
+        return PhotoRequirement()
+    }()
     
     init(content: Content)
     {
@@ -28,7 +31,7 @@ struct Download: ShareOutletProtocol
     {
         // We only support video content
         guard let videoContent: VideoContent = content.videoContent() else {
-            delegate?.failure(error: "Invalid content type")
+            delegate?.failure(shareOutlet: self, error: "Invalid content type")
             return
         }
         shareVideo(content: videoContent, viewController: viewController)
@@ -49,7 +52,7 @@ extension Download: PhotoPermissionHelperDelegate
     {
         // video content
         guard let videoContent = content.videoContent() else {
-            delegate?.failure(error: "Unable to save video.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video.")
             return
         }
         
@@ -60,25 +63,25 @@ extension Download: PhotoPermissionHelperDelegate
             placeholder =  changeRequest?.placeholderForCreatedAsset
         } completionHandler: { (success, error) in
             if (success) {
-                guard let placeholder = placeholder else { self.delegate?.failure(error: "Unable to save video."); return }
+                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(error: "Unable to save video."); return }
-                self.delegate?.success()
+                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video."); return }
+                self.delegate?.success(shareOutlet: self)
             } else {
-                self.delegate?.failure(error: "Unable to save video.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to save video.")
             }
         }
     }
     
     func cancelled()
     {
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
     
     func failed()
     {
         // We've already communicated with the user so this ins't really "failing" in the same way
-        delegate?.cancelled()
+        delegate?.cancelled(shareOutlet: self)
     }
 }
