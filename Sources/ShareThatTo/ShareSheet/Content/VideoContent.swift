@@ -30,8 +30,8 @@ public class VideoContent: Content
     // Content
     public let contentType: ContentType = .video
     
-    internal let title: String
-    internal let videoURL: URL
+    public let title: String
+    public let videoURL: URL
 
     // How can we share?
     private var rawShareStrategy: RawShareStrategy
