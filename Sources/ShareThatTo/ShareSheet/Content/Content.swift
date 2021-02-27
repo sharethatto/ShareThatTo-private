@@ -18,6 +18,8 @@ public protocol Content
     
     // Content pL
     func videoContent() -> VideoContent?
+    
+    func cleanupContent(with usedStrategies:[ShareStretegyType])
 }
 
 extension Content
@@ -31,5 +33,10 @@ extension Content
             return self as? VideoContent
         }
         return nil
+    }
+    
+    func cleanupContent(with usedStrategies:[ShareStretegyType])
+    {
+        //
     }
 }

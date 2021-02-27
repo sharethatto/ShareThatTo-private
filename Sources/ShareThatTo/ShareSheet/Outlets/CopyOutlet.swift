@@ -44,6 +44,6 @@ struct Copy: ShareOutletProtocol
         pb.string = text
         let rawShareStrategy = content.rawStrategy(caller: self)
         pb.setData(rawShareStrategy.data, forPasteboardType: "public.mpeg-4")
-        delegate?.success(shareOutlet: self)
+        delegate?.success(shareOutlet: self, strategiesUsed:[.linkPreview, .raw])
     }
 }

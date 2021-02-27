@@ -48,6 +48,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
         shareVideo(content: videoContent, viewController: viewController)
     }
 
+    var linkUsed = true
     func shareVideo(content: VideoContent, viewController: UIViewController)
     {
         let composeViewController = MFMessageComposeViewController()
@@ -55,6 +56,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
         composeViewController.body = content.text()
         if (!content.linkPreviewAvailable())
         {
+            linkUsed = false
             let rawShareStrategy = content.rawStrategy(caller: self)
             composeViewController.addAttachmentData(rawShareStrategy.data, typeIdentifier: "public.movie", filename: "movie.mp4")
         }
@@ -67,7 +69,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
         }
         else
         {
-            delegate?.success(shareOutlet: self)
+            delegate?.success(shareOutlet: self, strategiesUsed: (linkUsed ? [.linkPreview] : [.raw]))
         }
     }
 }

@@ -65,7 +65,7 @@ struct InstagramStories: ShareOutletProtocol
        
             UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
             UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
-                delegate?.success(shareOutlet: self)
+                delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
             })
             }
         } else {

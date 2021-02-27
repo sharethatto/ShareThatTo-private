@@ -88,7 +88,9 @@ extension Network: NetworkShareProtocol
            self.send(request)  { (result: Result<ShareResponse, Swift.Error>) in
                switch result
                {
-               case .failure(let error): completion(.failure(error))
+               case .failure(let error):
+                shareThatToDebug(string: "[network POST /share] - failure <doc-link> - ", error: error)
+                completion(.failure(error))
                case .success(let response):
                    completion(.success(response))
                }
@@ -114,7 +116,9 @@ extension Network: NetworkShareProtocol
         self.send(request)  { (result: Result<EmptyResponse, Swift.Error>) in
             switch result
             {
-            case .failure(let error): completion(.failure(error))
+            case .failure(let error):
+                shareThatToDebug(string: "[network POST /share/activate] - failure <doc-link> - ",  error:error)
+                completion(.failure(error))
             case .success(let response):
                 completion(.success((response)))
             }
@@ -139,7 +143,9 @@ extension Network: NetworkShareProtocol
         self.send(request)  { (result: Result<EmptyResponse, Swift.Error>) in
             switch result
             {
-            case .failure(let error): completion(.failure(error))
+            case .failure(let error):
+                shareThatToDebug(string: "[network DELETE /share/activate] - failure <doc-link> - ", error:error)
+                completion(.failure(error))
             case .success(let response):
                 completion(.success((response)))
             }

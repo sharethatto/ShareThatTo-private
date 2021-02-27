@@ -215,9 +215,8 @@ extension ShareSheetViewController {
 
     @objc func didTapCancel() {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
-        if let videoConent = self.content.videoContent()  {
-            videoConent.deleteShare()
-        }
+        // We didn't use any strategies 
+        content.cleanupContent(with: [])
         self.dismiss(animated: true, completion:nil)
     }
 
@@ -279,8 +278,11 @@ extension ShareSheetViewController: UICollectionViewDataSource {
 
 extension ShareSheetViewController: ShareOutletDelegate {
 
-    func success(shareOutlet: ShareOutletProtocol) {
+    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType]) {
+        // TODO: Add strategy type to event
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).succeeded"), context: analtyicsContext)
+        // If we didn't use the link preview, I think we can delete it
+        content.cleanupContent(with: strategiesUsed)
         DispatchQueue.main.async {
             self.dismiss(animated: true)
         }

@@ -35,7 +35,9 @@ extension Network: NetworkAnalyticsProtocol
            self.send(request)  { (result: Result<EmptyResponse, Swift.Error>) in
                switch result
                {
-               case .failure(let error): completion(.failure(error))
+               case .failure(let error):
+                shareThatToDebug(string: "[network POST /events] - failure <doc-link>", error: error)
+                completion(.failure(error))
                case .success:
                    completion(.success(Void()))
                }
