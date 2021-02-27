@@ -18,7 +18,6 @@ class ShareOutlets
         Twitter.self,
         Facebook.self,
         InstagramFeed.self,
-        Snapchat.self,
         More.self,
         Copy.self,
     ]

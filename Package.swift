@@ -18,9 +18,6 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(name: "SCSDKCreativeKit", url: "https://github.com/sharethatto/Snapchat-SPM", from: "1.0.0"),
-        
-//        .package(name: "SCSDKCreativeKit", url: "https://github.com/sharethatto/Snapchat-SPM", from: "master"),
         .package(url: "https://github.com/venmo/DVR", from: "2.0.0"),
         .package(name: "Facebook", url: "https://github.com/facebook/facebook-ios-sdk", from: "9.0.1")
     ],
@@ -31,18 +28,10 @@ let package = Package(
             name: "ShareThatTo",
             dependencies: [
                 .product(name: "FacebookShare", package: "Facebook"),
-//                .product(name: "SCSDKCreativeKit", package: "SCSDKCreativeKit")
             ],
             path: "Sources/ShareThatTo", resources: [
                 .copy("Assets")
             ]),
-//        .target(
-//            name: "ShareThatToSnapchat",
-//            dependencies: [
-////                .product(name: "FacebookShare", package: "Facebook"),
-////                .product(name: "SCSDKCreativeKit", package: "SCSDKCreativeKit")
-//            ],
-//            path: "Sources/ShareThatToSnapchat"),
         .testTarget(
             name: "ShareThatToTests",
             dependencies: ["ShareThatTo", "DVR"],
@@ -51,7 +40,6 @@ let package = Package(
               // Use to retain directory structure.
               // Will be at top level in bundle.
               .copy("Fixtures"),
-//              .copy("Assets"),
             ]),
     ]
 )

@@ -300,8 +300,5 @@ extension ShareSheetViewController: ShareOutletDelegate {
 
     func cancelled(shareOutlet: ShareOutletProtocol){
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).cancelled"), context: analtyicsContext)
-        
-
-        
     }
 }

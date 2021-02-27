@@ -11,6 +11,8 @@ struct ApplicationResponse: Decodable
 {
     var cta_link: String?
     var slug: String?
+    var brand_color: String?
+    var background_color: String?
 }
 
 protocol NetworkApplicationProtocol
