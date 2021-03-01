@@ -43,7 +43,7 @@ class Facebook: NSObject, ShareOutletProtocol
     static let outletName = "Facebook"
     static let canonicalOutletName = "facebook"
     static let requirements: ShareOutletRequirementProtocol = {
-        return FacebookRequirements(facebookAppId: "")
+        return FacebookRequirements()
     }()
     
     var delegate: ShareOutletDelegate?

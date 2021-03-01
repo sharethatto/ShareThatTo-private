@@ -19,7 +19,7 @@ class Messenger: NSObject, ShareOutletProtocol
     static let outletName = "Messenger"
     static let canonicalOutletName = "messenger"
     static let requirements: ShareOutletRequirementProtocol = {
-        return FacebookRequirements(facebookAppId: "")
+        return FacebookRequirements()
     }()
     
     var delegate: ShareOutletDelegate?
