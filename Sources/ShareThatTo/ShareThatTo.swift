@@ -66,6 +66,9 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         return true
     }
     
+    // TODO: Maybe automatically go find all the available share outlets?
+    // Would make installing Facebook and Snapchat easier 
+    // https://stackoverflow.com/questions/42824541/swift-3-1-deprecates-initialize-how-can-i-achieve-the-same-thing/42824542#42824542
     public func register(outlet: ShareOutletProtocol.Type)
     {
         ShareOutlets.availableOutlets.append(outlet)
