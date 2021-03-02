@@ -30,28 +30,39 @@ public class UGC: VideoConent {
     var duration : CMTime = CMTime(value: 0, timescale: 1, flags: CMTimeFlags(rawValue: 1), epoch: 0)
     var durationTillNow : CMTime = CMTime(value: 0, timescale: 1, flags: CMTimeFlags(rawValue: 1), epoch: 0)
     
-    let mainComposition = AVMutableComposition()
-    let outputComposition = AVMutableVideoComposition()
-    let instruction = AVMutableVideoCompositionInstruction()
-    var ugcExporter: AVAssetExportSession?
+    var mainComposition : AVMutableComposition?
+    var outputComposition : AVMutableVideoComposition?
+    var instruction : AVMutableVideoCompositionInstruction?
+    var ugcExporter : AVAssetExportSession?
+    var mainTrack: AVMutableCompositionTrack?
     
-    var displayUrl: URL
+    
+    public var displayUrl: URL?
     
     let defaultVideoUrl: URL
     
-    let ugcDispatchGroup = DispatchGroup()
-    let sceneRenderDispatchQueue : DispatchQueue
+    var ugcDispatchGroup = DispatchGroup()
+    let ugcRenderDispatchQueue : DispatchQueue
+    
+    static var createdUGCs: [UGC] = []
     
     
     public init(defaultVideoUrl: URL, renderSettings: UGCRenderSettings){
-        
         self.defaultVideoUrl = defaultVideoUrl
         self.renderSettings = renderSettings
-        self.sceneRenderDispatchQueue = DispatchQueue.init(label: "com.Sharethat.to.sceneRenderDispatchQueue." + id.uuidString,
+        self.ugcRenderDispatchQueue = DispatchQueue.init(label: "com.Sharethat.to.ugcRenderDispatchQueue-" + id.uuidString,
                                                                qos: .userInteractive,
                                                                attributes: [.concurrent],
                                                                autoreleaseFrequency: .workItem,
                                                                target: nil)
+        UGC.createdUGCs.append(self)
+    }
+    
+    func makeFoundationComponents(){
+        mainComposition = AVMutableComposition()
+        outputComposition = AVMutableVideoComposition()
+        instruction = AVMutableVideoCompositionInstruction()
+        
         guard let outputURL = ContentHelper.createFileURL(filename: id.uuidString,
                                                           filenameExt: self.renderSettings.filenameExt) else {
             self.status = .usingDefaultVideo
@@ -60,14 +71,21 @@ public class UGC: VideoConent {
             return
         }
         self.displayUrl = outputURL
-        UGCQueueManager.createdUGCs.append(self)
+
+        guard let mainTrack: AVMutableCompositionTrack = self.mainComposition!.addMutableTrack(
+                withMediaType: .video,
+                preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
+        ) else {
+            self.useDefaultVideoUrl(loggerMessage: "Unable to create UGC mainTrack")
+            return
+        }
+        self.mainTrack = mainTrack
     }
     
     public func createScene() -> UGCSecne {
         let scene = UGCSecne(ugc: self, orderInUgc: (scenes.count+1) )
         switch status {
         case .creating:
-//            ugcDispatchGroup.enter()
             scenes.append(scene)
         default:
             Logger.log(message: "Scene Not Added to UGC.  self.status != .creating")
@@ -75,21 +93,39 @@ public class UGC: VideoConent {
         return scene
     }
     
-    func ugcReady() {
+    public func ugcReady() {
         switch status {
         case .creating, .partial:
-            ugcDispatchGroup.notify(queue: sceneRenderDispatchQueue ) {
-                
-                guard let mainTrack: AVMutableCompositionTrack = self.mainComposition.addMutableTrack(
-                        withMediaType: .video,
-                        preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
-                ) else {
-                    self.useDefaultVideoUrl(loggerMessage: "Unable to create UGC mainTrack")
-                    return
+            self.startExport()
+            status = .locked
+        default:
+            Logger.log(message: "UGC already rendering. Cannot render again. Did you call this function twice on a single UGC? ")
+        }
+    }
+    
+    func cancelExport(seconds: Int){
+        if(seconds == 0){
+            Logger.log(message: "UGC Export Canceled")
+            self.ugcExporter?.cancelExport()
+            self.status = .canceled
+        } else {
+            let dispatchTime = DispatchTime.now() + .seconds(seconds)
+            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: dispatchTime) {
+                if(self.ugcExporter?.status != .completed){
+                    self.ugcExporter?.cancelExport()
                 }
-                
-                for scene in self.scenes {
-                    
+                self.status = .canceled
+            }
+        }
+    }
+    
+    func startExport(){
+        self.status = .exporting
+        ugcDispatchGroup.notify(queue: ugcRenderDispatchQueue ) {
+            self.makeFoundationComponents()
+            
+            for scene in self.scenes {
+                if scene.status == .completed {
                     guard let assetURL = scene.videoURL else {
                         Logger.log(message: "Unable to add scene \(scene.id). URL not valid.")
                         continue
@@ -104,7 +140,7 @@ public class UGC: VideoConent {
                     }
                     
                     do{
-                        try mainTrack.insertTimeRange(
+                        try self.mainTrack!.insertTimeRange(
                             CMTimeRangeMake(start: .zero, duration: sceneVideoAsset.duration),
                             of: sceneVideoTrack,
                             at: .zero)
@@ -120,68 +156,61 @@ public class UGC: VideoConent {
                     if scene.id != self.scenes.last?.id {
                         sceneInstruction.setOpacity(0.0, at: self.durationTillNow)
                     }
-                    self.instruction.layerInstructions.append(sceneInstruction)
-                }
-                
-                self.instruction.timeRange = CMTimeRangeMake(
-                    start: .zero,
-                    duration: self.durationTillNow
-                )
-                
-                self.outputComposition.instructions = [self.instruction]
-                self.outputComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-                self.outputComposition.renderSize = self.renderSettings.size
-                
-                guard let exporter = AVAssetExportSession(
-                        asset: self.mainComposition,
-                        presetName: AVAssetExportPresetHighestQuality )
-                else {
-                    self.useDefaultVideoUrl(loggerMessage: "UGC Exporter Not Created")
-                    return
-                }
-                self.ugcExporter = exporter
-                exporter.outputURL = self.displayUrl
-                exporter.outputFileType = self.renderSettings.outputFileType
-                exporter.shouldOptimizeForNetworkUse = true
-                exporter.videoComposition = self.outputComposition
-                
-                let dispatchTime = DispatchTime.now() + 60
-                DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: dispatchTime) {
-                    if(self.ugcExporter?.status != .completed){
-                        self.ugcExporter?.cancelExport()
-                        self.useDefaultVideoUrl(loggerMessage: "UGC Exporter timedout with status of \(exporter.status.rawValue). See AVAssetExportSession.Status Docs to debug")
-                    }
-                }
-                
-                self.status = .exporting
-                Logger.log(message: "UGC Generated")
-                exporter.exportAsynchronously {
-                    Logger.log(message: "UGC Rendered ")
-                    switch exporter.status {
-                        case .completed:
-                            self.status = .completed
-                            guard let delegate = self.delegate else {
-                                Logger.log(message: "UGC Delegate not set.")
-                                return
-                            }
-                            DispatchQueue.main.async {
-                                delegate.videoDidComplete(url: self.displayUrl)
-                            }
-                        default:
-                            // TODO: UGC render fails, but scenes succeed
-                            Logger.log(message: "UGC Exporter failed with status of \(exporter.status.rawValue). See AVAssetExportSession.Status Docs to debug")
-                            guard let delegate = self.delegate else {
-                                Logger.log(message: "UGC Delegate not set.")
-                                return
-                            }
-                            self.status = .usingDefaultVideo
-                            delegate.videoDidComplete(url: self.defaultVideoUrl)
-                    }
+                    self.instruction!.layerInstructions.append(sceneInstruction)
+                } else {
+                    Logger.log(message: "Scene not completed")
                 }
             }
-            status = .locked
-        default:
-            Logger.log(message: "UGC already rendering. Cannot render again. Did you call this function twice on a single UGC? ")
+            
+            self.instruction!.timeRange = CMTimeRangeMake(
+                start: .zero,
+                duration: self.durationTillNow
+            )
+            
+            self.outputComposition!.instructions = [self.instruction!]
+            self.outputComposition!.frameDuration = CMTimeMake(value: 1, timescale: 30)
+            self.outputComposition!.renderSize = self.renderSettings.size
+            
+            guard let exporter = AVAssetExportSession(
+                    asset: self.mainComposition!,
+                    presetName: AVAssetExportPresetHighestQuality )
+            else {
+                self.useDefaultVideoUrl(loggerMessage: "UGC Exporter Not Created")
+                return
+            }
+            self.ugcExporter = exporter
+            exporter.outputURL = self.displayUrl
+            exporter.outputFileType = self.renderSettings.outputFileType
+            exporter.shouldOptimizeForNetworkUse = true
+            exporter.videoComposition = self.outputComposition
+            
+            self.cancelExport(seconds: 120)
+            
+            Logger.log(message: "UGC Generated")
+            exporter.exportAsynchronously {
+                Logger.log(message: "UGC Rendered ")
+                switch exporter.status {
+                    case .completed:
+                        self.status = .completed
+                        guard let delegate = self.delegate else {
+                            Logger.log(message: "UGC Delegate not set.")
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            delegate.videoDidComplete(url: self.displayUrl!)
+                        }
+                    default:
+                        // TODO: UGC render fails, but scenes succeed
+//                        self.status = .canceled
+                        Logger.log(message: "UGC Exporter failed with status of \(exporter.status.rawValue). See AVAssetExportSession.Status Docs to debug")
+                        guard let delegate = self.delegate else {
+                            Logger.log(message: "UGC Delegate not set.")
+                            return
+                        }
+                        self.status = .usingDefaultVideo
+                        delegate.videoDidComplete(url: self.defaultVideoUrl)
+                }
+            }
         }
     }
     
@@ -191,13 +220,15 @@ public class UGC: VideoConent {
         Logger.log(message: loggerMessage)
     }
     
-    enum Status {
-        case locked
-        case partial
-        case usingDefaultVideo
-        case completed
-        case creating
-        case exporting
+    enum Status : Int {
+        case failed = 1
+        case completed = 2
+        case creating = 3
+        case exporting = 4
+        case canceled = 5
+        case locked = 6
+        case partial = 7
+        case usingDefaultVideo = 8
     }
     
     public var videoSegments: [VideoSegment] {

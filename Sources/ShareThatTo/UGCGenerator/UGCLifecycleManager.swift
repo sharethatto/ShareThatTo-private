@@ -7,46 +7,42 @@
 
 import Foundation
 
-struct UGCQueueManager {
+struct UGCLifecycleManager {
     
     static var activeWorkItems: [DispatchWorkItem] = []
-    static var createdUGCs: [UGC] = []
-    static let setAttributesDispatchQueue = DispatchQueue.init(label: "com.Sharethat.to.setAttributesDispatchQueue",
-                                                               qos: .userInteractive,
-                                                               attributes: [],
-                                                               autoreleaseFrequency: .workItem,
-                                                               target: nil)
     
     static var status: AppStatus = .appInForeground
     
-    static func appendSceneCreationComponentToQueue(workerItem: DispatchWorkItem) -> Bool {
-        UGCQueueManager.setAttributesDispatchQueue.sync(execute: workerItem)
-        UGCQueueManager.activeWorkItems.append(workerItem)
-        return true
-    }
-    
+//    static func appendSceneCreationComponentToQueue(workerItem: DispatchWorkItem) -> Bool {
+//        UGCQueueManager.setAttributesDispatchQueue.sync(execute: workerItem)
+//        UGCQueueManager.activeWorkItems.append(workerItem)
+//        return true
+//    }
+//
     static func appDidMoveToBackground(){
-        for ugc in createdUGCs {
+        for ugc in UGC.createdUGCs {
             for scene in ugc.scenes{
                 if scene.status == .exporting {
                     scene.cancelExport(seconds: 0)
                 }
             }
+            if ugc.status == .exporting {
+                ugc.cancelExport(seconds: 0)
+            }
         }
     }
-    
+//
     static func appDidMoveToForeground(){
-        if(createdUGCs.count > 0 ) {
-            for ugc in createdUGCs {
+        if(UGC.createdUGCs.count > 0 ) {
+            for ugc in UGC.createdUGCs {
                 for scene in ugc.scenes{
+                    print(scene.status)
                     if scene.status == .canceled {
-                        scene.remakeScene()
-                        for workerItem in UGCQueueManager.activeWorkItems {
-                            scene.sceneDispatchGroup.enter()
-                            UGCQueueManager.setAttributesDispatchQueue.sync(execute: workerItem)
-                        }
                         scene.startExport()
                     }
+                }
+                if ugc.status == .canceled {
+                    ugc.startExport()
                 }
             }
         }
