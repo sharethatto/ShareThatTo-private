@@ -13,10 +13,9 @@ import Foundation
 
 let defaultRect =  CGRect(x: 0, y: 0, width: 100, height: 100)
 
-internal class ShareSheetViewController: UIViewController, UICollectionViewDelegate {
+internal class ShareSheetViewController: UIViewController, UICollectionViewDelegate, UIAdaptivePresentationControllerDelegate {
 
-    static let headerHeight:CGFloat = 60
-    static let footerHeight: CGFloat = 150
+    static let footerHeight: CGFloat = 100
 
     static let shareBackground = UIColor(rgb: 0xF4F2FF)
     static let contentBackground = UIColor(rgb: 0xF7F6FF)
@@ -25,7 +24,13 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     var content: Content
     var shareOutlets: [ShareOutletProtocol]
     
+
+    
     internal init(videoURL: URL, title: String) throws {
+        // TODO: Fix this with a delegate proxy so we don't break other callers
+        // https://stackoverflow.com/questions/26953559/in-swift-how-do-i-have-a-uiscrollview-subclass-that-has-an-internal-and-externa
+        
+        
         self.content = try VideoContent(videoURL: videoURL, title: title)
         self.shareOutlets = ShareOutlets.outlets(forPeformable: self.content)
         
@@ -34,6 +39,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         controller.player = avPlayer
         self.player = controller
         super.init(nibName: nil, bundle: nil)
+        self.presentationController?.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -47,34 +53,32 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         return Context()
     }()
 
-    let headerView:UIView  = {
-        let headerView = UIView.init(frame: defaultRect)
-        headerView.backgroundColor = contentBackground
-
-        let headerImageView = UIImageView.init(frame: defaultRect)
-        let filepath = Bundle.module.path(forResource: "Assets/HeaderLogo", ofType: ".png")
-        headerImageView.image = UIImage(contentsOfFile: filepath ?? "")
-        headerImageView.translatesAutoresizingMaskIntoConstraints = false
-        headerView.addSubview(headerImageView)
-
-        let constraints = [
-            headerImageView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-            headerImageView.centerYAnchor.constraint(equalTo: headerView.centerYAnchor, constant: 4 ),
-            headerImageView.heightAnchor.constraint(equalToConstant: headerHeight * 0.8),
-            headerImageView.widthAnchor.constraint(equalToConstant: headerHeight * 0.8),
-
-        ]
-        NSLayoutConstraint.activate(constraints)
-
-        headerView.translatesAutoresizingMaskIntoConstraints = false
-        return headerView
-    }()
-
     let contentView: UIView = {
         let contentView = UIView.init(frame: defaultRect)
         contentView.backgroundColor = contentBackground
         contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
+    }()
+    
+    let shareToLabelView: UIView = {
+        let shareToLabelView = UIView.init(frame: defaultRect)
+        shareToLabelView.translatesAutoresizingMaskIntoConstraints = false
+        shareToLabelView.backgroundColor = contentBackground
+        
+        let shareToLabel = UILabel.init(frame: defaultRect)
+        shareToLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let labelText = NSAttributedString(string: "Share To", attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 18.0)])
+        
+        shareToLabel.attributedText = labelText
+        
+        
+        shareToLabelView.addSubview(shareToLabel)
+        NSLayoutConstraint.activate([
+            shareToLabel.topAnchor.constraint(equalTo: shareToLabelView.topAnchor, constant: 0),
+            shareToLabel.centerXAnchor.constraint(equalTo: shareToLabelView.centerXAnchor),
+        ])
+        return shareToLabelView
     }()
 
     let shareOutletView: UICollectionView = {
@@ -82,26 +86,56 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        layout.itemSize = CGSize(width: 50, height: 70)
+        layout.itemSize = CGSize(width: 60, height: 60)
         layout.minimumLineSpacing = 15
 
-
         let shareOutletView = UICollectionView.init(frame: defaultRect, collectionViewLayout: layout)
-        shareOutletView.backgroundColor = ShareSheetViewController.shareBackground
+        shareOutletView.backgroundColor = ShareSheetViewController.contentBackground
         shareOutletView.translatesAutoresizingMaskIntoConstraints = false
         shareOutletView.collectionViewLayout = layout
-        shareOutletView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "MyCell")
-
+        shareOutletView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ShareThatToOutletCell")
+        shareOutletView.showsHorizontalScrollIndicator = false
+            
         return shareOutletView
     }()
 
-    let cancelButton: UIButton = {
+    let shareThatToBrandingButton: UIButton = {
         let cancelButton = UIButton.init(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.backgroundColor = UIColor(rgb: 0xECECEE)
-
+        cancelButton.backgroundColor = contentBackground
+        
         let cancelLabel = UILabel(frame: defaultRect)
-        cancelLabel.text = "Cancel"
+        
+        // create an NSMutableAttributedString that we'll append everything to
+        let font = UIFont(name: "Avenir-Black", size: 18.0)
+        var stringAttributes: [NSAttributedString.Key:Any] = [:]
+        if let unwrappedFont = font {
+            stringAttributes[NSAttributedString.Key.font] = unwrappedFont
+        }
+
+        let fullString = NSMutableAttributedString(string: "Powered by", attributes:stringAttributes)
+        
+        
+        // create our NSTextAttachment
+        
+        let image1Attachment = NSTextAttachment()
+        let filepath = Bundle.module.path(forResource: "Assets/ShareThatTo", ofType: ".png")
+        image1Attachment.image = UIImage(contentsOfFile: filepath ?? "")
+
+        image1Attachment.bounds = CGRect(x: 6, y:-5, width: 25, height: 25)
+        
+        // wrap the attachment in its own attributed string so we can append it
+        let image1String = NSAttributedString(attachment: image1Attachment)
+
+        // add the NSTextAttachment wrapper to our full string, then add some more text.
+        fullString.append(image1String)
+        
+        
+        fullString.append(NSAttributedString(string: " Share That To", attributes: stringAttributes ))
+
+        // draw the result in a label
+        cancelLabel.attributedText = fullString
+
 
         cancelLabel.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addSubview(cancelLabel)
@@ -117,33 +151,23 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.loaded"), context: analtyicsContext)
         
-        self.view.addSubview(headerView)
         self.view.addSubview(contentView)
+        self.view.addSubview(shareToLabelView)
         self.view.addSubview(shareOutletView)
-        self.view.addSubview(cancelButton)
+        self.view.addSubview(shareThatToBrandingButton)
 
         player.view.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(player.view)
         player.showsPlaybackControls = false
-//        print(player.player?.currentItem?.presentationSize ?? "nothing")
 
         NSLayoutConstraint.activate([
             player.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             player.view.widthAnchor.constraint(equalTo: player.view.heightAnchor, multiplier: 720.0/1280.0),
-            player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
-            player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
+            player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
         ])
 
         // Setup player
-        let layer = player.view.layer
-
-        layer.masksToBounds = false
-        layer.shadowRadius = 4
-        layer.shadowOpacity = 1
-        layer.shadowColor = UIColor.gray.cgColor
-        layer.shadowOffset = CGSize(width: 0 , height: 4)
-
-
         self.addChild(player)
         player.player?.play()
 
@@ -156,53 +180,52 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         shareOutletView.dataSource = self
         shareOutletView.delegate = self
 
-        addHeader()
         addShareOutletView()
         addContentView()
-        addCancelButtonView()
+        addShareToLabelView()
+        addShareThatToLogoButtonView()
     }
 
+    func addShareToLabelView() {
+        let constraints = [
+            shareToLabelView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            shareToLabelView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            shareToLabelView.heightAnchor.constraint(equalToConstant: 40),
+            shareToLabelView.bottomAnchor.constraint(equalTo: shareOutletView.topAnchor)
+        ]
+        NSLayoutConstraint.activate(constraints)
+    }
+    
     func addShareOutletView() {
         let constraints = [
             shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareOutletView.heightAnchor.constraint(equalToConstant: 110),
-            shareOutletView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor)
+            shareOutletView.heightAnchor.constraint(equalToConstant: 60),
+            shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingButton.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
 
     }
 
-    func addCancelButtonView() {
+    func addShareThatToLogoButtonView() {
         let constraints = [
-            cancelButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            cancelButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            cancelButton.heightAnchor.constraint(equalToConstant: ShareSheetViewController.footerHeight * 0.6),
-            cancelButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            shareThatToBrandingButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            shareThatToBrandingButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            shareThatToBrandingButton.heightAnchor.constraint(equalToConstant: ShareSheetViewController.footerHeight * 0.6),
+            shareThatToBrandingButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
 
-        cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
+        shareThatToBrandingButton.addTarget(self, action: #selector(didTapShareThatToLogo), for: .touchUpInside)
     }
 
 
     func addContentView() {
         let constraints = [
-            contentView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
-            contentView.bottomAnchor.constraint(equalTo: shareOutletView.topAnchor),
+            contentView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: shareToLabelView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-        ]
-        NSLayoutConstraint.activate(constraints)
-    }
-
-    func addHeader() {
-
-        let constraints = [
-            headerView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            headerView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            headerView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.headerHeight)
         ]
         NSLayoutConstraint.activate(constraints)
     }
@@ -213,12 +236,11 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
 extension ShareSheetViewController {
 
-    @objc func didTapCancel() {
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
-        if let videoConent = self.content.videoContent()  {
-            videoConent.deleteShare()
-        }
-        self.dismiss(animated: true, completion:nil)
+    @objc func didTapShareThatToLogo() {
+        
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.logo_tapped"), context: analtyicsContext)
+        
+
     }
 
 
@@ -232,7 +254,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyCell", for: indexPath)
+        let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShareThatToOutletCell", for: indexPath)
 
         for view in myCell.contentView.subviews {
             view.removeFromSuperview()
@@ -246,21 +268,12 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         myCell.contentView.addSubview(imageView)
 
-        let labelView = UILabel(frame: defaultRect)
-        labelView.text = type(of: shareOutlet).outletName
-        labelView.translatesAutoresizingMaskIntoConstraints = false
-        labelView.font = labelView.font.withSize(12)
-        myCell.contentView.addSubview(labelView)
 
         let constraints = [
             imageView.topAnchor.constraint(equalTo: myCell.contentView.topAnchor),
             imageView.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor),
             imageView.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor), // Make it a square
             imageView.centerXAnchor.constraint(equalTo: myCell.contentView.centerXAnchor),
-
-            labelView.topAnchor.constraint(equalTo: imageView.bottomAnchor),
-            labelView.bottomAnchor.constraint(equalTo: myCell.contentView.bottomAnchor),
-            labelView.centerXAnchor.constraint(equalTo: myCell.centerXAnchor),
         ]
         NSLayoutConstraint.activate(constraints)
         return myCell
@@ -272,17 +285,39 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).started"))
         shareOutlet.share(with: self)
     }
+    
+    
+    public func presentationControllerDidDismiss(
+       _ presentationController: UIPresentationController)
+     {
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
+        // We didn't use any strategies
+        content.cleanupContent(with: [])
+//        self.dismiss(animated: true, completion:nil)
+       // Only called when the sheet is dismissed by DRAGGING.
+       // You'll need something extra if you call .dismiss() on the child.
+       // (I found that overriding dismiss in the child and calling
+       // presentationController.delegate?.presentationControllerDidDismiss
+       // works well).
+        print("[ShareThatTo] Dismissed by dragging")
+     }
+    
+    
 }
+
 
 
 // MARK: ShareOutletDelegate
 
 extension ShareSheetViewController: ShareOutletDelegate {
 
-    func success(shareOutlet: ShareOutletProtocol) {
+    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType]) {
+        // TODO: Add strategy type to event
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).succeeded"), context: analtyicsContext)
+        // If we didn't use the link preview, I think we can delete it
+        content.cleanupContent(with: strategiesUsed)
         DispatchQueue.main.async {
-            self.dismiss(animated: true)
+            self.presentingViewController?.dismiss(animated: true)
         }
     }
 
@@ -302,3 +337,5 @@ extension ShareSheetViewController: ShareOutletDelegate {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).cancelled"), context: analtyicsContext)
     }
 }
+
+

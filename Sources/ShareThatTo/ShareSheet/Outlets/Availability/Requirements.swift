@@ -14,7 +14,6 @@ protocol ShareOutletConfigurationRequirements {
 protocol ShareOutletRequirementProtocol
 {
     func met(plist: [String:Any?]) -> Bool
-//    func instructions(plist: [String:Any?]) -> String?
 }
 
 struct PlistBuddyInstructionHelper
@@ -66,11 +65,6 @@ struct RequiredApplicationQuerySchemes: ShareOutletRequirementProtocol
 
 struct RequiredCFBundleURLSchemes: ShareOutletRequirementProtocol
 {
-    func instructions(plist: [String : Any?]) -> String? {
-        return ""
-    }
-    
-
     let requiredSchemes:[String]
     public init(requiredSchemes: [String])
     {
@@ -99,9 +93,6 @@ struct RequiredCFBundleURLSchemes: ShareOutletRequirementProtocol
 
 struct RequiredPlistValue: ShareOutletRequirementProtocol
 {
-    func instructions(plist: [String : Any?]) -> String? {
-        ""
-    }
     
     let requiredKey: String
     let requiredValue: String
@@ -209,17 +200,11 @@ class NoRequirements: Requirements
 
 class FacebookRequirements: Requirements
 {
-    public init(facebookAppId: String?)
+    public init()
     {
-        guard let facebookAppId = facebookAppId else {
-            super.init(requirements: [
-                RequiredConfigurationValue(requiredConfigurationValue: "facebookAppId")
-            ])
-            return
-        }
         super.init(requirements: [
             RequiredPlistNonNil(requiredKey: "FacebookDisplayName"),
-            RequiredPlistValue(requiredKey: "FacebookAppID", requiredValue: facebookAppId),
+            RequiredPlistNonNil(requiredKey: "FacebookAppID"),
             RequiredApplicationQuerySchemes(requiredSchemes: [
                 "fbapi",
                 "fbapi20130214",
@@ -237,7 +222,7 @@ class FacebookRequirements: Requirements
                 "fbauth2",
                 "fbshareextension",
             ]),
-            RequiredCFBundleURLSchemes(requiredSchemes: ["fb" + facebookAppId]),
+//            RequiredCFBundleURLSchemes(requiredSchemes: ["fb" + facebookAppId]),
             PhotoRequirement(),
         ])
     }

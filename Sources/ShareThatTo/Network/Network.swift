@@ -24,8 +24,8 @@ internal class Network
         urlSession: URLSession = URLSession(configuration: .ephemeral),
         authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore,
         contribDatastore: ContribDatastoreProtocol = Datastore.shared.contribDatastore,
-        baseURL: URL = URL(string: "https://sharethatto-sdk.herokuapp.com/v1/api/sdk/")!,
-//        baseURL: URL = URL(string: "http://10.0.0.92:3000/v1/api/sdk/")!,
+        baseURL: URL = URL(string: "https://api.sharethatto.com/v1/api/sdk/")!,
+//        baseURL: URL = URL(string: "http://192.168.0.9:3000/v1/api/sdk/")!,
         analyticsBaseURL: URL = URL(string: "https://collector.sharethatto.com/v1/events")!
     )
     {
@@ -100,7 +100,7 @@ extension Network
                 
                 if let response = response as? HTTPURLResponse, response.statusCode == 401
                 {
-
+                    shareThatToDebug(string: "Unable to authenticate, please make sure your ShareThatToClientId is correct. <doc-link>")
                     return completion(.failure(Error.notAuthenticated))
                 }
                 // TODO: Remove this

@@ -93,9 +93,9 @@ public class VideoContent: Content
     }
     
 //MARK: ShareManager
-    public func deleteShare()
+    public func cleanupContent(with usedStrategies:[ShareStretegyType])
     {
-        self.shareManager?.destroy()
+        shareManager?.cleanupContent(with:usedStrategies)
     }
     
     
@@ -116,6 +116,8 @@ public class VideoContent: Content
         guard let application = datastore.application else { return nil }
         return URL(string: application.cta_link ?? "")
     }
+    
+
 }
     
 // MARK: ShareManagerVideoDelegate

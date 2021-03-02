@@ -44,10 +44,19 @@ class ShareOutlets
 }
 
 public protocol ShareOutletDelegate {
-    func success(shareOutlet: ShareOutletProtocol)
+    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType])
+//    func success(shareOutlet: ShareOutletProtocol)
     func failure(shareOutlet: ShareOutletProtocol, error: String)
     func cancelled(shareOutlet: ShareOutletProtocol)
 }
+
+//extension ShareOutletDelegate
+//{
+//    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType])
+//    {
+//        self.success(shareOutlet: shareOutlet)
+//    }
+//}
 
 public protocol ShareOutletProtocol {
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate? { get }

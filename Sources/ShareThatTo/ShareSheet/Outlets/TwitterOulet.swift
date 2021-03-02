@@ -71,11 +71,11 @@ struct Twitter: ShareOutletProtocol {
            if UIApplication.shared.canOpenURL(url) {
                if #available(iOS 10.0, *) {
                    UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
-                    self.delegate?.success(shareOutlet: self)
+                    self.delegate?.success(shareOutlet: self, strategiesUsed: [.linkPreview])
                    })
                } else {
-                   UIApplication.shared.openURL(url)
-                   self.delegate?.success(shareOutlet: self)
+                    UIApplication.shared.openURL(url)
+                    self.delegate?.success(shareOutlet: self, strategiesUsed: [.linkPreview])
                }
            } else {
                 self.delegate?.failure(shareOutlet: self, error: "Unable to open twitter")

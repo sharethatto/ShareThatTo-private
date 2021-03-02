@@ -21,31 +21,23 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     {
         self.lifecycle = lifecycle
         self.authenticationDatastore = authenticationDatastore
-    }
-    
-    // Public configuration
-    @discardableResult
-    public func configure(apiKey: String) -> ShareThatTo
-    {
-        authenticationDatastore.apiKey = apiKey
-        
-        // Whenever we've set the api key, start refreshing data again
-        lifecycle.start()
-        return self
+        self.lifecycle.start()
     }
     
     
-    public func share(videoURL: URL, title: String) throws -> UIViewController
+    public func share(videoURL: URL, title: String) throws -> (UIViewController & UIAdaptivePresentationControllerDelegate)
     {
         guard let _ = authenticationDatastore.apiKey else { throw NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"]) }
         return try ShareSheetViewController.init(videoURL: videoURL, title: title)
     }
     
     // Public setup
-    public static func share(videoURL: URL, title: String) throws -> UIViewController
+    public static func share(videoURL: URL, title: String) throws -> (UIViewController & UIAdaptivePresentationControllerDelegate)
     {
         try shared.share(videoURL: videoURL, title: title)
     }
+    
+    
     
     @discardableResult
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
@@ -66,24 +58,12 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         return true
     }
     
+    // TODO: Maybe automatically go find all the available share outlets?
+    // Would make installing Facebook and Snapchat easier 
+    // https://stackoverflow.com/questions/42824541/swift-3-1-deprecates-initialize-how-can-i-achieve-the-same-thing/42824542#42824542
     public func register(outlet: ShareOutletProtocol.Type)
     {
         ShareOutlets.availableOutlets.append(outlet)
     }
-    
-    public func debugShareOutlets(completion:  @escaping (Result<Void, Swift.Error>) -> Void)
-    {
-        
-    }
-    
-    public func isDebug() -> Bool
-    {
-        #if DEBUG
-        return true
-        #else
-        return false
-        #endif
-    }
-    
 }
 

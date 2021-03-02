@@ -35,7 +35,6 @@ class FacebookOutletLifecycle: ShareThatToLifecycleDelegate
 class Facebook: NSObject, ShareOutletProtocol
 {
 
-    
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?  = {
         return FacebookOutletLifecycle()
     }()
@@ -44,7 +43,7 @@ class Facebook: NSObject, ShareOutletProtocol
     static let outletName = "Facebook"
     static let canonicalOutletName = "facebook"
     static let requirements: ShareOutletRequirementProtocol = {
-        return FacebookRequirements(facebookAppId: "")
+        return FacebookRequirements()
     }()
     
     var delegate: ShareOutletDelegate?
@@ -170,7 +169,7 @@ extension Facebook: SharingDelegate
 {
     func sharer(_ sharer: Sharing, didCompleteWithResults results: [String : Any])
     {
-        delegate?.success(shareOutlet: self)
+        delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
     }
     
     func sharer(_ sharer: Sharing, didFailWithError error: Error)

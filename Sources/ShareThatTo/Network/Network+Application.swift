@@ -33,7 +33,9 @@ extension Network: NetworkApplicationProtocol
            self.send(request)  { (result: Result<ApplicationResponse, Swift.Error>) in
                switch result
                {
-               case .failure(let error): completion(.failure(error))
+               case .failure(let error):
+                shareThatToDebug(string: "[network GET /application] - failure <doc-link> - ", error:error)
+                completion(.failure(error))
                case .success(let response):
                    completion(.success((response)))
                }

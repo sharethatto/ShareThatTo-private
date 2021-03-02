@@ -37,10 +37,12 @@ struct More: ShareOutletProtocol {
     private func shareVideo(content: VideoContent, viewController: UIViewController)
     {
         
+        let linkPreviewUsed = content.linkPreviewAvailable()
         let activityViewController =  UIActivityViewController(activityItems: [content.text(), content.videoURL], applicationActivities: nil)
         activityViewController.completionWithItemsHandler = {(activityType, completed, returnedItems, error) in
             if (completed) {
-                delegate?.success(shareOutlet: self)
+                //
+                delegate?.success(shareOutlet: self, strategiesUsed: (linkPreviewUsed ? [.raw, .linkPreview] : [.raw]))
             } else {
                 delegate?.cancelled(shareOutlet: self)
             }

@@ -19,7 +19,7 @@ class Messenger: NSObject, ShareOutletProtocol
     static let outletName = "Messenger"
     static let canonicalOutletName = "messenger"
     static let requirements: ShareOutletRequirementProtocol = {
-        return FacebookRequirements(facebookAppId: "")
+        return FacebookRequirements()
     }()
     
     var delegate: ShareOutletDelegate?
@@ -42,6 +42,7 @@ class Messenger: NSObject, ShareOutletProtocol
                 // We can also use re-tar or even a native redirect preparation page before redirecting to fb
                 // let url = URL(string: "https://www.Messenger.com/dialog/share?app_id=1926440290830565&href=https://sharethatto-sdk.herokuapp.com/s/4cff8157b895b53737de241c5d8ff13c&redirect_uri=https://example.com")!
                 // UIApplication.shared.openURL(url)
+                // If we do this, we MUST change the strategiesUsed: in the success delegate
                 return false
             }
             return true
@@ -140,7 +141,7 @@ extension Messenger: SharingDelegate
 {
     func sharer(_ sharer: Sharing, didCompleteWithResults results: [String : Any])
     {
-        delegate?.success(shareOutlet: self)
+        delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
     }
     
     func sharer(_ sharer: Sharing, didFailWithError error: Error)
