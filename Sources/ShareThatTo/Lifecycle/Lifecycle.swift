@@ -43,6 +43,7 @@ internal class Lifecycle: LifecycleProtocol
     {
         stop() // Ensure we don't do this twice
         notificationCenter.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         refreshSessionData()
         analytics.start()
     }
@@ -51,6 +52,7 @@ internal class Lifecycle: LifecycleProtocol
     {
         analytics.stop()
         notificationCenter.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+        notificationCenter.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
     // MARK: - Private
@@ -59,6 +61,12 @@ internal class Lifecycle: LifecycleProtocol
     {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "lifecycle.app_opened", error_string: nil))
         refreshSessionData()
+        UGCQueueManager.appDidMoveToForeground()
+    }
+    
+    @objc private func didEnterBackground()
+    {
+        UGCQueueManager.appDidMoveToBackground()
     }
     
     /**
