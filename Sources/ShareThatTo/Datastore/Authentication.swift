@@ -16,4 +16,12 @@ class AuthenticationDatastore: AuthenticationDatastoreProtocol
 {
     internal static let shared = AuthenticationDatastore()
     var apiKey: String?
+    
+    private init() {
+        apiKey = Bundle.main.shareThatToClientId
+        if (apiKey == nil)
+        {
+            shareThatToDebug(string: "[AuthenticationDatastore ShareThatToClientId] ShareThatToClientId is not set, please update your Info.plist")
+        }
+    }
 }

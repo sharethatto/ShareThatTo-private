@@ -8,6 +8,10 @@
 import Foundation
 
 extension Bundle {
+    var shareThatToClientId: String? {
+        return infoDictionary?["ShareThatToClientId"] as? String
+    }
+    
     var releaseVersionNumber: String? {
         return infoDictionary?["CFBundleShortVersionString"] as? String
     }
@@ -19,3 +23,4 @@ extension Bundle {
         return infoDictionary?["LSApplicationQueriesSchemes"] as? [String] ?? []
     }
 }
+

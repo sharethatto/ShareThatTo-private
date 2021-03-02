@@ -21,17 +21,7 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     {
         self.lifecycle = lifecycle
         self.authenticationDatastore = authenticationDatastore
-    }
-    
-    // Public configuration
-    @discardableResult
-    public func configure(apiKey: String) -> ShareThatTo
-    {
-        authenticationDatastore.apiKey = apiKey
-        
-        // Whenever we've set the api key, start refreshing data again
-        lifecycle.start()
-        return self
+        self.lifecycle.start()
     }
     
     
@@ -46,6 +36,8 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     {
         try shared.share(videoURL: videoURL, title: title)
     }
+    
+    
     
     @discardableResult
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
@@ -73,20 +65,5 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     {
         ShareOutlets.availableOutlets.append(outlet)
     }
-    
-    public func debugShareOutlets(completion:  @escaping (Result<Void, Swift.Error>) -> Void)
-    {
-        
-    }
-    
-    public func isDebug() -> Bool
-    {
-        #if DEBUG
-        return true
-        #else
-        return false
-        #endif
-    }
-    
 }
 
