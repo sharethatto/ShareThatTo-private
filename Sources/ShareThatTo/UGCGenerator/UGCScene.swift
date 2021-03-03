@@ -10,106 +10,120 @@ import AVFoundation
 import UIKit
 import Photos
 
-public protocol VideoSegmentDelegate {
-    func videSegmentDidComplete(url: URL)
+private protocol UGCSceneDelegate: class
+{
+    func sceneDidRender(configuration: UGCScene, result: UGCResult)
+    func sceneReady(configuration: UGCScene)
 }
 
-public protocol VideoSegment {
-    func videoComplete() -> Bool
-    var delegate: VideoSegmentDelegate? { get set }
-    var videoURL: URL? { get }
-}
-
-public class UCGSceneConfiguration
+public class UGCScene
 {
     private var configurations: [UGCLayerConfiguration] = []
     private let renderSettings: UGCRenderSettings
-    public init(renderSettings: UGCRenderSettings) //ugc: UGC, orderInUgc: Int)
+    private weak var delegate: UGCSceneDelegate?
+    internal init(delegate: UGCSceneDelegate, renderSettings: UGCRenderSettings) //ugc: UGC, orderInUgc: Int)
     {
+        self.delegate = delegate
         self.renderSettings = renderSettings
     }
     
-    public func withImageLayer(format: UGCImageFormat, url: URL) -> UCGSceneConfiguration {
+    //MARK: Public Interface
+    
+    public func withImageLayer(format: UGCImageFormat, url: URL) -> UGCScene {
         configurations.append(UGCImageLayerConfiguration(format: format, url: url))
         return self
     }
 
-    public func withVideoLayer(format: UGCVideoFormat, url: URL) -> UCGSceneConfiguration {
+    public func withVideoLayer(format: UGCVideoFormat, url: URL) -> UGCScene {
         configurations.append(UGCVideoLayerConfiguration(format: format, url: url))
         return self
     }
     
-    public func withTextLayer(format: UGCTextFormat, parameters: [String:String]) -> UCGSceneConfiguration {
+    public func withTextLayer(format: UGCTextFormat, parameters: [String:String]) -> UGCScene {
         configurations.append(UGCTextLayerConfiguration(format: format, parameters: parameters))
         return self
     }
     
-    
-    
-    public func createScene() -> UGCSecne?
+    public func ready()
     {
-        let optionalScene = try? UGCSecne(configurations:configurations, renderSettings: renderSettings)
-        guard let scene = optionalScene else {
-            return nil
-        }
-        scene.sceneReady()
-        return scene
+        delegate?.sceneReady(configuration: self)
+        renderScene()
     }
     
+    //MARK: Private Rendering
+    
+    private func renderScene(retries: Int = 3)
+    {
+        let scene: UGCSecneRenderer
+        do {
+            scene = try UGCSecneRenderer(configurations:configurations, renderSettings: renderSettings)
+        } catch let error as UGCError {
+            // Propogate configuration errors
+            delegate?.sceneDidRender(configuration: self, result: .failure(error))
+            return
+        } catch {
+            delegate?.sceneDidRender(configuration:self, result: .failure(.unknown))
+            return
+        }
+
+        scene.sceneReady() {
+            (result) in
+            switch(result)
+            {
+            case .success(let result):
+                self.delegate?.sceneDidRender(configuration: self, result: .success(result))
+            case .failure(let error):
+                if(error.retryable && retries > 0)
+                {
+                    self.renderScene(retries: retries - 1)
+                }
+                else
+                {
+                    self.delegate?.sceneDidRender(configuration: self, result: .failure(error))
+                }
+            }
+        }
+    }
 }
 
-enum UGCSceneConfigurationError: Error {
-    case unknown
+
+extension UGCScene: Equatable
+{
+    public static func == (lhs: UGCScene, rhs: UGCScene) -> Bool
+    {
+        return lhs === rhs
+    }
 }
 
-public class UGCSecne : VideoSegment {
-    
-    public var delegate:VideoSegmentDelegate?
-    
-    let id :UUID = UUID()
-//    let orderInUgc : Int
+internal class UGCSecneRenderer
+{
     var sceneDuration : CMTime?
-    
     var sceneExporter : AVAssetExportSession?
     
-    var sceneTrack: AVMutableCompositionTrack
-    var sceneComposition : AVMutableComposition
-    var sceneOutputComposition : AVMutableVideoComposition
-    var sceneOutputInstruction : AVMutableVideoCompositionInstruction
-    var layerInstruction : AVVideoCompositionLayerInstruction
-    var outputLayer : CALayer
+    // Video compositions elementes
+    private var sceneComposition : AVMutableComposition
     
-    var status: Status = .creating
-    
-//    let ugc: UGC
-    
-    let sceneDispatchGroup = DispatchGroup()
-    var sceneCreationBlocks: [DispatchWorkItem] = []
-    var setAttributesDispatchQueue : DispatchQueue?
-    var queueLabel : String?
-    static let sceneExporterDispatchQueue = DispatchQueue.init(label: "com.ShareThat.To.SceneExporterDispatchQueue",
-                                                                  qos: .userInteractive,
-                                                                  attributes: [.concurrent],
-                                                                  autoreleaseFrequency: .workItem,
-                                                                  target: nil)
-    
-    
-    public let displayUrl: URL
-    public let renderSettings: UGCRenderSettings
+    internal var sceneTrack: AVMutableCompositionTrack
+    internal var sceneOutputComposition : AVMutableVideoComposition
+    internal var sceneOutputInstruction : AVMutableVideoCompositionInstruction
+    internal var layerInstruction : AVVideoCompositionLayerInstruction
+    internal var outputLayer : CALayer
+
+    // Passed Variables
+    internal let displayURL: URL
+    internal let renderSettings: UGCRenderSettings
     private let configurations: [UGCLayerConfiguration]
     internal init(configurations: [UGCLayerConfiguration], renderSettings: UGCRenderSettings) throws {
         self.configurations = configurations
         self.renderSettings = renderSettings
 
         
-        guard let outputURL = ContentHelper.createFileURL(filename: self.id.uuidString,
+        guard let outputURL = ContentHelper.createFileURL(filename: UUID().uuidString,
                                                           filenameExt: renderSettings.filenameExt) else {
-            status = .failed
-            Logger.log(message: "Cannot create output URL")
-            throw UGCSceneConfigurationError.unknown
+            throw UGCError.unknown
         }
         
-        self.displayUrl = outputURL
+        self.displayURL = outputURL
 
         self.sceneComposition = AVMutableComposition()
         self.sceneOutputComposition = AVMutableVideoComposition()
@@ -124,178 +138,60 @@ public class UGCSecne : VideoSegment {
             preferredTrackID: Int32(kCMPersistentTrackID_Invalid)
         )
         guard let sceneTrack = optionalSceneTrack else {
-            throw UGCSceneConfigurationError.unknown
-        
+            throw UGCError.unknown
         }
         self.sceneTrack = sceneTrack
         
-//        else {
-//            Logger.log(message: "Failed to create main scene track.")
-//            status = .failed
-////            self.sceneTrack = nil
-//            return
-//        }
-//        self.sceneTrack = sceneTrack
-        
-        queueLabel = "com.Sharethat.to.setAttributesDispatchQueue-" + self.id.uuidString
-        
-        setAttributesDispatchQueue = DispatchQueue.init(label: queueLabel!,
-                                                          qos: .userInteractive,
-                                                          attributes: [],
-                                                          autoreleaseFrequency: .workItem,
-                                                          target: nil)
-    }
-    
-    public func sceneReady() {
-//        makeFoundationComponents()
         for configuration in configurations {
-            configuration.build(scene: self)
-        }
-    
-                let durationLogger = DurationLogger.begin(prefix: "[UGCScene] sceneReady")
-                
-                guard let sceneDuration = self.sceneDuration else {
-                    self.status = .failed
-                    Logger.log(message: "Duration Never Set. Is there a Video in this scene?")
-                    return
-                }
-                self.sceneOutputInstruction.timeRange = CMTimeRangeMake(
-                    start: .zero,
-                    duration: sceneDuration
-                )
-                
-                self.sceneOutputComposition.instructions = [self.sceneOutputInstruction]
-                self.sceneOutputComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-                self.sceneOutputComposition.renderSize = self.renderSettings.size
-                
-                // TODO: Implement Crop
-//                exporter.timeRange = CMTimeRange(
-//                    start: CMTime(seconds: Double(60 ), preferredTimescale: 1000),
-//                    duration: CMTime(seconds: Double(5 ), preferredTimescale: 1000))
-//                self.sceneDispatchGroup.leave()
-//                durationLogger.finish()
-//            }
-//            sceneCreationBlocks.append(workerItem)
-            
-        self.startExport()
-    }
-    
-    func cancelExport(seconds: Int){
-        
-        // TODO: [Brian 3/2] Figure out cancels
-//        if(seconds == 0){
-//            Logger.log(message: "Scene Export Canceled")
-//            self.sceneExporter?.cancelExport()
-//            self.status = .canceled
-//        } else {
-//            let dispatchTime = DispatchTime.now() + .seconds(seconds)
-//            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: dispatchTime) {
-//                if(self.sceneExporter?.status != .completed){
-//                    self.sceneExporter?.cancelExport()
-//                }
-//                self.status = .canceled
-//            }
-//        }
-    }
-    
-    func startExport() {
-//        if(sceneCreationBlocks.count > 0 ) {
-            status = .exporting
-            
-            sceneDispatchGroup.notify(queue: UGCSecne.sceneExporterDispatchQueue) {
-                guard let exporter = AVAssetExportSession(
-                    asset: self.sceneComposition,
-                  presetName: AVAssetExportPresetHighestQuality
-                ) else {
-                    self.status = .failed
-                    Logger.log(message: "Exporter unable to be created")
-                    return
-                }
-                self.sceneExporter = exporter
-                
-                print(self.sceneExporter)
-                print(self.sceneOutputComposition)
-                
-                guard self.displayUrl != nil else {
-                    self.status = .failed
-                    Logger.log(message: "No Cache file URL set.")
-                    return
-                }
-                
-                self.sceneExporter?.outputURL = ContentHelper.createFileURL(filename: self.id.uuidString,
-                                                                            filenameExt: self.renderSettings.filenameExt)!
-                self.sceneExporter?.outputFileType = self.renderSettings.outputFileType
-                self.sceneExporter?.shouldOptimizeForNetworkUse = true
-                self.sceneExporter?.videoComposition = self.sceneOutputComposition
-                
-                Logger.log(message: "Scene Generated")
-                self.cancelExport(seconds: 120)
-                
-                // TODO: [BRIAN 3/2] Figure out how to handle async
-//                self.ugc.ugcDispatchGroup.enter()
-                self.sceneExporter?.exportAsynchronously {
-                    Logger.log(message: "Scene Rendered")
-                    
-                    // TODO: [BRIAN 3/2] Figure out how to handle async
-//                    self.ugc.ugcDispatchGroup.leave()
-                    switch self.sceneExporter?.status {
-                        case .completed:
-                            self.status = .completed
-                            guard let delegate = self.delegate else {
-                                return
-                            }
-                            DispatchQueue.main.async {
-                                delegate.videSegmentDidComplete( url: self.videoURL! )
-                            }
-                        default:
-                            Logger.log(message: "Exporter failed with status of \( self.sceneExporter?.status.rawValue). See AVAssetExportSession.Status Docs to debug")
-                            self.status = .failed
-                            return
-                    }
-                }
-            }
-
-            
-//        }
-        
-    }
-    
-    public func useDefaultVideoUrl(loggerMessage: String) {
-        self.status = .failed
-        Logger.log(message: loggerMessage)
-    }
-    
-    public var videoURL: URL? {
-        get {
-            switch status{
-            case .completed:
-                return self.displayUrl
-            default:
-                Logger.log(message: "Scene failed with status of \(self.status). See UGCSecne.Status Docs to debug")
-                return nil
-            }
+            try configuration.build(scene: self)
         }
     }
     
-    public func videoComplete() -> Bool
+    public func sceneReady(completion: @escaping UGCResultCompletion)
     {
+        let durationLogger = DurationLogger.begin(prefix: "[UGCScene] sceneReady")
         
-        // TODO: [Brian 3/2] Renable this?
-//        guard let progress = self.sceneExporter.progress else {
-//            return false
-//        }
-//        return progress == 1
-        return false
+        guard let sceneDuration = self.sceneDuration else {
+            completion(.failure(.noDuration))
+            return
+        }
+        self.sceneOutputInstruction.timeRange = CMTimeRangeMake(
+            start: .zero,
+            duration: sceneDuration
+        )
+        
+        self.sceneOutputComposition.instructions = [self.sceneOutputInstruction]
+        self.sceneOutputComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
+        self.sceneOutputComposition.renderSize = self.renderSettings.size
+                
+        guard let exporter = AVAssetExportSession(
+            asset: self.sceneComposition,
+          presetName: AVAssetExportPresetHighestQuality
+        ) else {
+            completion(.failure(.exportFailedFatally))
+            return
+        }
+        self.sceneExporter = exporter
+        
+        self.sceneExporter?.outputURL = displayURL
+        self.sceneExporter?.outputFileType = self.renderSettings.outputFileType
+        self.sceneExporter?.shouldOptimizeForNetworkUse = true
+        self.sceneExporter?.videoComposition = self.sceneOutputComposition
+        
+        self.sceneExporter?.exportAsynchronously {
+            switch self.sceneExporter?.status {
+                case .completed:
+                    completion(.success(
+                        UGCSuccessResult(
+                            displayURL: self.displayURL
+                        )
+                    ))
+                case .cancelled, .failed: completion(.failure(.exportFailedOrCancelled))
+                default: completion(.failure(.unknown))
+            }
+            durationLogger.finish()
+        }
     }
-    
-    enum Status : Int {
-        case failed = 1
-        case completed = 2
-        case creating = 3
-        case exporting = 4
-        case canceled = 5
-    }
-    
 }
 
 

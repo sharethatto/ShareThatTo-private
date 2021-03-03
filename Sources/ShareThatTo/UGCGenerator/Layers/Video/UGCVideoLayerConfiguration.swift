@@ -19,9 +19,9 @@ class UGCVideoLayerConfiguration: UGCLayerConfiguration
         self.url = url
     }
     
-    override public func build(scene: UGCSecne)
+    override public func build(scene: UGCSecneRenderer) throws
     {
-        UGCVideoLayerBuilder.build(configuration: self, scene: scene)
+        try UGCVideoLayerBuilder.build(configuration: self, scene: scene)
     }
 }
 

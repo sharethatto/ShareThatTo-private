@@ -13,22 +13,15 @@ import Foundation
 
 class UGCVideoLayerBuilder: UGCLayerBuilder
 {
-    public static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecne)
+    public static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecneRenderer) throws
     {
         let durationLogger = DurationLogger.begin(prefix: "[UGCScene] withVideoLayer")
         
         let videoLayer = UGCVideoLayer()
         let videoAsset = AVAsset(url: configuration.url)
-//        guard let sceneTrack = scene.sceneTrack else {
-//            scene.status = .failed
-//            Logger.log(message: "Unable to get video track from AVAsset.")
-//            return
-//        }
-        
+
         guard let videoTrack = videoAsset.tracks(withMediaType: .video).first else {
-            scene.status = .failed
-            Logger.log(message: "Unable to get video track from AVAsset.")
-            return
+            throw UGCError.videoError(message: "Unable to load video asset")
         }
         
         let videoInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: scene.sceneTrack)
@@ -56,9 +49,7 @@ class UGCVideoLayerBuilder: UGCLayerBuilder
                 of: videoTrack,
                 at: .zero)
         } catch {
-            scene.status = .failed
-            Logger.log(message: "Cannot insertTimeRange into scene Track.")
-            return
+            throw UGCError.videoError(message: "Unable to insert video track")
         }
 
         

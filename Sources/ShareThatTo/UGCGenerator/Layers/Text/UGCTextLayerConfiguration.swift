@@ -19,7 +19,7 @@ class UGCTextLayerConfiguration: UGCLayerConfiguration
         self.parameters = parameters
     }
     
-    override public func build(scene: UGCSecne)
+    override public func build(scene: UGCSecneRenderer)
     {
         UGCTextLayerBuilder.build(configuration: self, scene: scene)
     }

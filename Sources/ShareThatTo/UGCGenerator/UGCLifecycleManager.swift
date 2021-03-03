@@ -9,9 +9,9 @@ import Foundation
 
 struct UGCLifecycleManager {
     
-    static var activeWorkItems: [DispatchWorkItem] = []
+//    static var activeWorkItems: [DispatchWorkItem] = []
     
-    static var status: AppStatus = .appInForeground
+//    static var status: AppStatus = .appInForeground
     
 //    static func appendSceneCreationComponentToQueue(workerItem: DispatchWorkItem) -> Bool {
 //        UGCQueueManager.setAttributesDispatchQueue.sync(execute: workerItem)
@@ -20,38 +20,38 @@ struct UGCLifecycleManager {
 //    }
 //
     static func appDidMoveToBackground(){
-        for ugc in UGC.createdUGCs {
-            for scene in ugc.scenes{
-                if scene.status == .exporting {
-                    scene.cancelExport(seconds: 0)
-                }
-            }
-            if ugc.status == .exporting {
-                ugc.cancelExport(seconds: 0)
-            }
-        }
+//        for ugc in UGC.createdUGCs {
+//            for scene in ugc.scenes{
+//                if scene.status == .exporting {
+//                    scene.cancelExport(seconds: 0)
+//                }
+//            }
+//            if ugc.status == .exporting {
+//                ugc.cancelExport(seconds: 0)
+//            }
+//        }
+    }
+////
+    static func appDidMoveToForeground(){
+//        if(UGC.createdUGCs.count > 0 ) {
+//            for ugc in UGC.createdUGCs {
+//                for scene in ugc.scenes{
+//                    print(scene.status)
+//                    if scene.status == .canceled {
+//                        scene.startExport()
+//                    }
+//                }
+//                if ugc.status == .canceled {
+//                    ugc.startExport()
+//                }
+//            }
+//        }
     }
 //
-    static func appDidMoveToForeground(){
-        if(UGC.createdUGCs.count > 0 ) {
-            for ugc in UGC.createdUGCs {
-                for scene in ugc.scenes{
-                    print(scene.status)
-                    if scene.status == .canceled {
-                        scene.startExport()
-                    }
-                }
-                if ugc.status == .canceled {
-                    ugc.startExport()
-                }
-            }
-        }
-    }
-    
-    enum AppStatus {
-        case appInForeground
-        case appDidEnterBackground
-    }
+//    enum AppStatus {
+//        case appInForeground
+//        case appDidEnterBackground
+//    }
     
     
 //    static func pauseRender(){
@@ -68,7 +68,7 @@ struct UGCLifecycleManager {
 //        }
 //    }
     
-//    static func resumeRender(scene: UGCSecne){
+//    static func resumeRender(scene: UGCSecneRenderer){
 //        queuedScenes.append(scene)
 //    }
     

@@ -9,7 +9,7 @@ import Foundation
 
 class UGCLayerConfiguration {
     
-    public func build(scene: UGCSecne)
+    public func build(scene: UGCSecneRenderer) throws
     {
         //
     }
