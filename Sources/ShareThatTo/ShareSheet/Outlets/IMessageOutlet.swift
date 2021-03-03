@@ -66,8 +66,6 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     }
     
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
-        print("[ShareThatTo] RESULT \(result)")
-        
         switch(result) {
             case .failed:
                 delegate?.failure(shareOutlet: self, error: "Could not send message")

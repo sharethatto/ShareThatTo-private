@@ -36,7 +36,7 @@ class VideoExporter
     // TODO: Check if the video is an mp4 going in
     internal static func exportVideo(videoURL: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void)
     {
-        let attribute: [FileAttributeKey : Any]
+//        let attribute: [FileAttributeKey : Any]
         let exporter: VideoExportProtocol.Type
         
       // TODO: Re-evaluate if we really need this at all

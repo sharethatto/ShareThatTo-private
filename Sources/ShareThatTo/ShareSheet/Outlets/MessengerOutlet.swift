@@ -84,7 +84,7 @@ class Messenger: NSObject, ShareOutletProtocol
             do {
                 try shareDialog.validate()
             } catch let error {
-                print(error)
+                shareThatToDebug(string: "[MessengerOutlet] Unable to share to facebook", error: error)
                 // Ideally we should never trigger this, b/c we should have caught the error
                 // at the top where we decided if we could show the outlet or not.
                 self.delegate?.failure(shareOutlet: self, error: "Whoops! We can't share to Messenger right now.")

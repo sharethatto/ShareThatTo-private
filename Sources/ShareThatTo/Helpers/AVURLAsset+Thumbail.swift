@@ -20,7 +20,7 @@ extension AVURLAsset {
             do {
                 thumbnailImageRef = try assetIG.copyCGImage(at: cmTime, actualTime: nil)
             } catch let error {
-                print("Error: \(error)")
+                shareThatToDebug(string: "[AVURLAsset+Thumbnail] Unable to create thumbnail", error: error)
                 return completion(nil)
             }
 

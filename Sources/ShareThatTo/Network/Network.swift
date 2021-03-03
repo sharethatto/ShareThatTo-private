@@ -35,11 +35,6 @@ internal class Network
         self.baseURL = baseURL
         self.analyticsBaseURL = analyticsBaseURL
     }
-    
-    internal func log(message: String)
-    {
-        print(message)
-    }
 }
 
 struct EmptyResponse: Decodable {}
@@ -103,14 +98,12 @@ extension Network
                     shareThatToDebug(string: "Unable to authenticate, please make sure your ShareThatToClientId is correct. <doc-link>")
                     return completion(.failure(Error.notAuthenticated))
                 }
-                // TODO: Remove this
-//                print(String(data: unWrappedData, encoding: .utf8))
-                self.log(message: String(data: unWrappedData, encoding: .utf8) ?? "")
                 let response = try JSONDecoder().decode(ResponseType.self, from: unWrappedData)
                 completion(.success(response))
             }
             catch let error
             {
+                shareThatToDebug(string: "Unable to decode response to type \(ResponseType.self)", error: error)
                 completion(.failure(Error.decoding))
             }
         }

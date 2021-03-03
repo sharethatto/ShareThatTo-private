@@ -66,7 +66,7 @@ extension Download: PhotoPermissionHelperDelegate
                 guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video."); return }
+                guard let _ = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video."); return }
                 delegate?.success(shareOutlet: self, strategiesUsed:[.raw])
             } else {
                 self.delegate?.failure(shareOutlet: self, error: "Unable to save video.")

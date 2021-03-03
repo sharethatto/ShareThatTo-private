@@ -151,7 +151,7 @@ class ShareManagerVideo
                 // We've just created it but we're going to delete it here if destroyed has been set
                 if (self.destroyed) {
                     guard let token = self.shareable?.shareable_access_token else { return }
-                    self.providers.shareNetwork.deleteShare(delete: DeleteShareRequest(shareable_access_token: token )){ _ in (result)
+                    self.providers.shareNetwork.deleteShare(delete: DeleteShareRequest(shareable_access_token: token )){ _ in 
                         if (1 == 2) {}
                     }
                     return

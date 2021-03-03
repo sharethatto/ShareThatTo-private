@@ -55,11 +55,9 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
 
         
         scene.sceneDuration = videoAsset.duration
-        print("[VideoLayerBuilder] before composition")
         scene.sceneOutputComposition.animationTool = AVVideoCompositionCoreAnimationTool(
             postProcessingAsVideoLayer: videoLayer,
             in: scene.outputLayer)
-        print("[VideoLayerBuilder] after composition \(scene.sceneOutputComposition.animationTool)")
         scene.sceneOutputInstruction.layerInstructions.append(videoInstruction)
         scene.outputLayer.addSublayer(videoLayer)
         

@@ -74,7 +74,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         let labelText = NSAttributedString(string: "Share to",
                                            attributes: [
-                                            NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 16.0)
+                                            NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 16.0) as Any
                                            ])
         shareToLabel.attributedText = labelText
         
@@ -160,7 +160,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             try ShareSheetViewController.session?.setCategory(.ambient, options: [])
             try ShareSheetViewController.session?.setActive(true) //Set to false to deactivate session
         } catch let error as NSError {
-            print("Unable to activate audio session:  \(error.localizedDescription)")
+            shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
         }
 
         // Setup player
@@ -188,7 +188,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
             } catch let error as NSError {
-                print("Unable to activate audio session:  \(error.localizedDescription)")
+                shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
             }
         }
     }
@@ -317,7 +317,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         let label = UILabel()
         let labelText = NSAttributedString(string: type(of: shareOutlet).outletName,
                                            attributes: [
-                                            NSAttributedString.Key.font: UIFont(name: "Avenir", size: 12.0)
+                                            NSAttributedString.Key.font: UIFont(name: "Avenir", size: 12.0) as Any
                                            ])
         label.attributedText = labelText
         label.textAlignment = .center
@@ -375,7 +375,6 @@ extension ShareSheetViewController: UICollectionViewDataSource {
        // (I found that overriding dismiss in the child and calling
        // presentationController.delegate?.presentationControllerDidDismiss
        // works well).
-        print("[ShareThatTo] Dismissed by dragging")
      }
     
     
@@ -402,7 +401,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).failed", error_string: error), context: analtyicsContext)
         let alert = UIAlertController(title: "Error", message: error, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-            NSLog("The \"OK\" alert occured.")
+            NSLog("The \"OK\" alert occured.")        
         }))
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)

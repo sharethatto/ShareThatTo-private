@@ -47,7 +47,7 @@ class Render: RenderProtocol
             switch result
             {
             case .failure(let error):
-                print(error)
+                shareThatToDebug(string: "[ThumbnailCreator] failed to create thumbnail", error: error)
             case .success(let data):
                 renderedThumbnail = data
             }
@@ -57,7 +57,7 @@ class Render: RenderProtocol
             switch result
             {
             case .failure(let error):
-                print(error)
+                shareThatToDebug(string: "[VideoExporter] failed to create video export", error: error)
             case .success(let data):
                 renderedVideo = data
             }
