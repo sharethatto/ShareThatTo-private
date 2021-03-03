@@ -11,13 +11,13 @@ import AVFoundation
 
 public struct UGCRenderSettings {
     
-    var size: CGSize
-    var fps: Int32
-    var avCodecKey: AVVideoCodecType
-    var filenameExt: String
-    var assetHeight: Double
-    var assetWidth: Double
-    var outputFileType: AVFileType
+    internal var size: CGSize
+    internal var fps: Int32
+    internal var avCodecKey: AVVideoCodecType
+    internal var filenameExt: String
+    internal var assetHeight: Double
+    internal var assetWidth: Double
+    internal var outputFileType: AVFileType
     
     public init(renderPreset: UGCRenderPreset){
         switch renderPreset {

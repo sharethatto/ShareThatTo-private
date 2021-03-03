@@ -8,7 +8,7 @@
 import AVKit
 import Foundation
 
-public class ThumbnailCreator
+internal class ThumbnailCreator
 {
     public static func thumbnail(videoURL: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void)
     {

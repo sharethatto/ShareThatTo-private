@@ -7,7 +7,7 @@
 
 import UIKit
 
-public enum HapticType : Int {
+internal enum HapticType : Int {
     case selection
     case light
     case medium
@@ -17,7 +17,7 @@ public enum HapticType : Int {
     case error
 }
 
-class Haptics: NSObject
+internal class Haptics: NSObject
 {
     public static let shared = Haptics()
     

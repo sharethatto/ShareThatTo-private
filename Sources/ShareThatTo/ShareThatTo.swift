@@ -6,7 +6,8 @@ import UIKit
 //}
 
 // This contains the lifecycle hooks that other intergations need
-public protocol ShareThatToLifecycleDelegate {
+public protocol ShareThatToLifecycleDelegate
+{
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool
 }
@@ -17,10 +18,16 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     public static let shared = ShareThatTo()
     private let lifecycle: LifecycleProtocol
     private var authenticationDatastore: AuthenticationDatastoreProtocol
-    internal init(lifecycle: LifecycleProtocol = Lifecycle(), authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore)
+    private var contribDatastore: ContribDatastoreProtocol
+    internal init(
+        lifecycle: LifecycleProtocol = Lifecycle(),
+        authenticationDatastore: AuthenticationDatastoreProtocol = Datastore.shared.authenticationDatastore,
+        contribDatastore: ContribDatastoreProtocol = ContribDatastore.shared
+    )
     {
         self.lifecycle = lifecycle
         self.authenticationDatastore = authenticationDatastore
+        self.contribDatastore = contribDatastore
         self.lifecycle.start()
     }
     
@@ -63,6 +70,12 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
             let _ = shareLifecycle.application(app, open: url, options: options)
         }
         return true
+    }
+    
+    
+    public func configure(userId: String?)
+    {
+        self.contribDatastore.userId = userId
     }
     
     // TODO: Maybe automatically go find all the available share outlets?

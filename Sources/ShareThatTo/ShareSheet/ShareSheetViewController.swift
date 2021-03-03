@@ -367,12 +367,6 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
         // We didn't use any strategies
         content.cleanupContent(with: [])
-//        self.dismiss(animated: true, completion:nil)
-       // Only called when the sheet is dismissed by DRAGGING.
-       // You'll need something extra if you call .dismiss() on the child.
-       // (I found that overriding dismiss in the child and calling
-       // presentationController.delegate?.presentationControllerDidDismiss
-       // works well).
      }
     
     

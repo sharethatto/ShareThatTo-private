@@ -53,7 +53,7 @@ internal class UGCRenderer
         
     func startExport(completion: @escaping UGCResultCompletion)
     {
-        let durationLogger = UGCDurationLogger.begin(prefix: "[UGC] startExport")
+        let durationLogger = UGCDurationLogger.begin(prefix: "[UGC startExport]")
         for scene in self.scenes.reversed() {
             let sceneVideoAsset = AVAsset(url: scene.displayURL)
                     

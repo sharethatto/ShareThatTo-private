@@ -36,7 +36,9 @@ public protocol ShareStrategyProtocol
     var shareStrategyType: ShareStretegyType { get  }
 }
 
-public class RawShareStrategy: ShareStrategyProtocol, ShareStretegyTypeRawProtocol
+public typealias RawShareStrategyProtocol = (ShareStrategyProtocol & ShareStretegyTypeRawProtocol)
+
+internal class RawShareStrategy: RawShareStrategyProtocol
 {
     public let shareStrategy:ShareStrategy = .raw
     public var shareStrategyType:ShareStretegyType = .raw
@@ -48,7 +50,7 @@ public class RawShareStrategy: ShareStrategyProtocol, ShareStretegyTypeRawProtoc
     }
 }
 
-public class RenderedShareStrategy: ShareStrategyProtocol,  ShareStretegyTypeRawProtocol
+internal class RenderedShareStrategy: RawShareStrategyProtocol
 {
     public let shareStrategy:ShareStrategy = .rendered
     public var shareStrategyType:ShareStretegyType = .raw
@@ -59,7 +61,9 @@ public class RenderedShareStrategy: ShareStrategyProtocol,  ShareStretegyTypeRaw
     }
 }
 
-public class LinkPreviewShareStrategy: ShareStrategyProtocol, ShareStretegyTypeLinkPreviewProtocol
+public typealias LinkPreviewShareStrategyProtocol = (ShareStrategyProtocol & ShareStretegyTypeLinkPreviewProtocol)
+
+internal class LinkPreviewShareStrategy: LinkPreviewShareStrategyProtocol
 {
     public let shareStrategy:ShareStrategy = .linkPreview
     public var shareStrategyType:ShareStretegyType = .linkPreview
@@ -70,7 +74,7 @@ public class LinkPreviewShareStrategy: ShareStrategyProtocol, ShareStretegyTypeL
     }
 }
 
-public enum LinkPreviewConfidence: Int, Comparable
+internal enum LinkPreviewConfidence: Int, Comparable
 {
     public static func < (lhs: LinkPreviewConfidence, rhs: LinkPreviewConfidence) -> Bool {
         return lhs.rawValue < rhs.rawValue

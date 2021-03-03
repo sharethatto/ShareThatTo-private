@@ -34,9 +34,9 @@ public class VideoContent: Content
     public let videoURL: URL
 
     // How can we share?
-    private var rawShareStrategy: RawShareStrategy
+    private var rawShareStrategy: RawShareStrategyProtocol
     internal var renderedShareStrategy: RenderedShareStrategy?
-    private var linkPreviewShareStrategy: LinkPreviewShareStrategy?
+    private var linkPreviewShareStrategy: LinkPreviewShareStrategyProtocol?
     
     // How confident do we need to be before we decide to use the link preview
     private let linkPreviewConfidenceRequired: LinkPreviewConfidence = .succeeded
@@ -68,12 +68,12 @@ public class VideoContent: Content
 
 //MARK: Strategies
     
-    public func rawStrategy(caller: ShareOutletProtocol?) -> ShareStretegyTypeRawProtocol
+    public func rawStrategy(caller: ShareOutletProtocol?) -> RawShareStrategyProtocol
     {
         return rawShareStrategy
     }
     
-    public func linkPreviewStrategy(caller: ShareOutletProtocol) -> ShareStretegyTypeLinkPreviewProtocol?
+    public func linkPreviewStrategy(caller: ShareOutletProtocol) -> LinkPreviewShareStrategyProtocol?
     {
         if (!linkPreviewAvailable())
         {

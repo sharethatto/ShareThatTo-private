@@ -32,6 +32,7 @@ struct UGCDurationLogger
     
     public func finish()
     {
+        
         print("[ShareThatTo] \(prefix) Finished: \(Date().timeIntervalSince(self.startTime) * 1000))")
     }
 }
