@@ -183,16 +183,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         addShareThatToLogoButtonView()
     }
     
-    public override func viewDidDisappear(_ animated: Bool) {
-        if ShareSheetViewController.session != nil {
-            do {
-                try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
-            } catch let error as NSError {
-                print("Unable to activate audio session:  \(error.localizedDescription)")
-            }
-        }
-    }
-    
     func makeShareThatToLogoLabel(_ userInterfaceModeString: String) -> UILabel {
         let shareThatToBrandingLabel = UILabel(frame: defaultRect)
         
@@ -366,6 +356,14 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     public func presentationControllerDidDismiss(
        _ presentationController: UIPresentationController)
      {
+        // turn off audio session
+        if ShareSheetViewController.session != nil {
+            do {
+                try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
+            } catch let error as NSError {
+                print("Unable to activate audio session:  \(error.localizedDescription)")
+            }
+        }
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
         // We didn't use any strategies
         content.cleanupContent(with: [])
@@ -392,6 +390,14 @@ extension ShareSheetViewController: ShareOutletDelegate {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).succeeded"), context: analtyicsContext)
         // If we didn't use the link preview, I think we can delete it
         content.cleanupContent(with: strategiesUsed)
+        // turn off audio session
+        if ShareSheetViewController.session != nil {
+            do {
+                try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
+            } catch let error as NSError {
+                print("Unable to activate audio session:  \(error.localizedDescription)")
+            }
+        }
         DispatchQueue.main.async {
             self.presentingViewController?.dismiss(animated: true)
         }
