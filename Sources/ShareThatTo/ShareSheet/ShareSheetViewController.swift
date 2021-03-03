@@ -17,21 +17,20 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     static let footerHeight: CGFloat = 100
 
-    static let shareBackground = UIColor(rgb: 0xF4F2FF)
-    static let contentBackground = UIColor(rgb: 0xF7F6FF)
+    static let shareBackground : UIColor = UIColor(rgb: 0xF4F2FF)
+    static let lightModeBackground : UIColor = UIColor(rgb: 0xF7F6FF)
+    static let darkModeBackground : UIColor = UIColor(rgb: 0x0F0F0F)
     static let contentMargin: CGFloat = 20
-    static let shareoutViewDimension: CGFloat = 75
+    static let shareoutViewDimension: CGFloat = 80
     static let shareOutletItemSize: CGFloat = 75
     
     var content: Content
     var shareOutlets: [ShareOutletProtocol]
-    
 
     
     internal init(videoURL: URL, title: String) throws {
         // TODO: Fix this with a delegate proxy so we don't break other callers
         // https://stackoverflow.com/questions/26953559/in-swift-how-do-i-have-a-uiscrollview-subclass-that-has-an-internal-and-externa
-        
         
         self.content = try VideoContent(videoURL: videoURL, title: title)
         self.shareOutlets = ShareOutlets.outlets(forPeformable: self.content)
@@ -57,7 +56,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     let contentView: UIView = {
         let contentView = UIView.init(frame: defaultRect)
-        contentView.backgroundColor = contentBackground
+        contentView.backgroundColor = lightModeBackground
         contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
     }()
@@ -65,13 +64,16 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     let shareToLabelView: UIView = {
         let shareToLabelView = UIView.init(frame: defaultRect)
         shareToLabelView.translatesAutoresizingMaskIntoConstraints = false
-        shareToLabelView.backgroundColor = contentBackground
+        shareToLabelView.backgroundColor = lightModeBackground
         
         let shareToLabel = UILabel.init(frame: defaultRect)
         shareToLabel.translatesAutoresizingMaskIntoConstraints = false
         shareToLabel.textAlignment = .center
         
-        let labelText = NSAttributedString(string: "Share to", attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 16.0)])
+        let labelText = NSAttributedString(string: "Share to",
+                                           attributes: [
+                                            NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 16.0)
+                                           ])
         shareToLabel.attributedText = labelText
         
         
@@ -88,19 +90,15 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         // Collection View
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-//        layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         layout.itemSize = CGSize(width: shareOutletItemSize, height: shareOutletItemSize)
-//        let paddingPercent =  0.05
         let maxFullShareOutletsOnScreen = floor(UIScreen.main.bounds.width / shareOutletItemSize)
         let fullShareOutletsOnScreen = maxFullShareOutletsOnScreen - 1
         let percentLastShareOutletOnScreen  = CGFloat(0.5)
         let spaceOccupiedByShareOutlets = (fullShareOutletsOnScreen + percentLastShareOutletOnScreen) * shareOutletItemSize
         layout.minimumLineSpacing = (UIScreen.main.bounds.width - spaceOccupiedByShareOutlets) / fullShareOutletsOnScreen
-//        layout.minimumLineSpacing = (375-(4.5*68))/4
-//        layout.minimumLineSpacing = 50
 
         let shareOutletView = UICollectionView.init(frame: defaultRect, collectionViewLayout: layout)
-        shareOutletView.backgroundColor = ShareSheetViewController.contentBackground
+        shareOutletView.backgroundColor = lightModeBackground
         shareOutletView.translatesAutoresizingMaskIntoConstraints = false
         shareOutletView.collectionViewLayout = layout
         shareOutletView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ShareThatToOutletCell")
@@ -109,51 +107,12 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         return shareOutletView
     }()
 
-    let shareThatToBrandingButton: UIButton = {
-        let cancelButton = UIButton.init(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.backgroundColor = contentBackground
+    let shareThatToBrandingView: UIView = {
+        let shareThatToBrandingView = UIView.init(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
+        shareThatToBrandingView.translatesAutoresizingMaskIntoConstraints = false
+        shareThatToBrandingView.backgroundColor = lightModeBackground
         
-        let cancelLabel = UILabel(frame: defaultRect)
-        
-        // create an NSMutableAttributedString that we'll append everything to
-        let font = UIFont(name: "Avenir-Black", size: 18.0)
-        var stringAttributes: [NSAttributedString.Key:Any] = [:]
-        if let unwrappedFont = font {
-            stringAttributes[NSAttributedString.Key.font] = unwrappedFont
-        }
-
-        let fullString = NSMutableAttributedString(string: "Powered by", attributes:stringAttributes)
-        
-        
-        // create our NSTextAttachment
-        
-        let image1Attachment = NSTextAttachment()
-        let filepath = Bundle.module.path(forResource: "Assets/ShareThatTo", ofType: ".png")
-        image1Attachment.image = UIImage(contentsOfFile: filepath ?? "")
-
-        image1Attachment.bounds = CGRect(x: 6, y:-5, width: 25, height: 25)
-        
-        // wrap the attachment in its own attributed string so we can append it
-        let image1String = NSAttributedString(attachment: image1Attachment)
-
-        // add the NSTextAttachment wrapper to our full string, then add some more text.
-        fullString.append(image1String)
-        
-        
-        fullString.append(NSAttributedString(string: " Share That To", attributes: stringAttributes ))
-
-        // draw the result in a label
-        cancelLabel.attributedText = fullString
-
-
-        cancelLabel.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.addSubview(cancelLabel)
-        NSLayoutConstraint.activate([
-            cancelLabel.topAnchor.constraint(equalTo: cancelButton.topAnchor, constant: 10),
-            cancelLabel.centerXAnchor.constraint(equalTo: cancelButton.centerXAnchor),
-        ])
-        return cancelButton
+        return shareThatToBrandingView
     }()
 
     public override func viewDidLoad() {
@@ -161,10 +120,27 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.loaded"), context: analtyicsContext)
         
+        var userInterfaceModeString = "lightMode"
+        if #available(iOS 12.0, *) {
+            contentView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+            shareToLabelView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+            shareOutletView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+            shareThatToBrandingView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+            userInterfaceModeString = self.traitCollection.userInterfaceStyle == .dark ? "darkMode" : "lightMode"
+        }
+        
+        let shareThatToBrandingLabel = makeShareThatToLogoLabel(userInterfaceModeString)
+        
+        shareThatToBrandingView.addSubview(shareThatToBrandingLabel)
+        NSLayoutConstraint.activate([
+            shareThatToBrandingLabel.topAnchor.constraint(equalTo: shareThatToBrandingView.topAnchor, constant: 10),
+            shareThatToBrandingLabel.centerXAnchor.constraint(equalTo: shareThatToBrandingView.centerXAnchor),
+        ])
+        
         self.view.addSubview(contentView)
         self.view.addSubview(shareToLabelView)
         self.view.addSubview(shareOutletView)
-        self.view.addSubview(shareThatToBrandingButton)
+        self.view.addSubview(shareThatToBrandingView)
 
         player.view.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(player.view)
@@ -195,6 +171,46 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         addShareToLabelView()
         addShareThatToLogoButtonView()
     }
+    
+    func makeShareThatToLogoLabel(_ userInterfaceModeString: String) -> UILabel {
+        let shareThatToBrandingLabel = UILabel(frame: defaultRect)
+        
+        // create an NSMutableAttributedString that we'll append everything to
+        let font = UIFont(name: "Avenir-Black", size: 14.0)
+        var stringAttributes: [NSAttributedString.Key:Any] = [:]
+        if let unwrappedFont = font {
+            stringAttributes[NSAttributedString.Key.font] = unwrappedFont
+        }
+
+        let shareThatToBrandingString = NSMutableAttributedString(string: "Powered by ", attributes:stringAttributes)
+        
+        
+        // create our NSTextAttachment
+        
+        let shareThatToLogo = NSTextAttachment()
+        let logoFilepath = Bundle.module.path(forResource: "Assets/ShareThatTo-" + userInterfaceModeString, ofType: ".png")
+        shareThatToLogo.image = UIImage(contentsOfFile: logoFilepath ?? "")
+
+        shareThatToLogo.bounds = CGRect(x: 0, y:-2, width: 14, height: 14)
+        
+        
+        // wrap the attachment in its own attributed string so we can append it
+        let shareThatToLogoString = NSAttributedString(attachment: shareThatToLogo)
+
+        // add the NSTextAttachment wrapper to our full string, then add some more text.
+        shareThatToBrandingString.append(shareThatToLogoString)
+        
+        
+        shareThatToBrandingString.append(NSAttributedString(string: " Share That To", attributes: stringAttributes ))
+
+        // draw the result in a label
+        shareThatToBrandingLabel.attributedText = shareThatToBrandingString
+
+
+        shareThatToBrandingLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        return shareThatToBrandingLabel
+    }
 
     func addShareToLabelView() {
         let constraints = [
@@ -212,22 +228,22 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             shareOutletView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.shareoutViewDimension),
-            shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingButton.topAnchor)
+            shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingView.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
 
     }
-
+    
     func addShareThatToLogoButtonView() {
         let constraints = [
-            shareThatToBrandingButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            shareThatToBrandingButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareThatToBrandingButton.heightAnchor.constraint(equalToConstant: ShareSheetViewController.footerHeight * 0.6),
-            shareThatToBrandingButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            shareThatToBrandingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            shareThatToBrandingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            shareThatToBrandingView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.footerHeight * 0.6),
+            shareThatToBrandingView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
 
-        shareThatToBrandingButton.addTarget(self, action: #selector(didTapShareThatToLogo), for: .touchUpInside)
+//        shareThatToBrandingView.addTarget(self, action: #selector(didTapShareThatToLogo), for: .touchUpInside)
     }
 
 
@@ -265,8 +281,9 @@ extension ShareSheetViewController: UICollectionViewDataSource {
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShareThatToOutletCell", for: indexPath)
-        myCell.backgroundColor = ShareSheetViewController.contentBackground
-//        myCell.backgroundColor = UIColor.red
+        if #available(iOS 12.0, *) {
+            myCell.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+        }
 
         for view in myCell.contentView.subviews {
             view.removeFromSuperview()
