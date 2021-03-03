@@ -24,6 +24,8 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     static let shareoutViewDimension: CGFloat = 80
     static let shareOutletItemSize: CGFloat = 75
     
+    static var session : AVAudioSession?
+    
     var content: Content
     var shareOutlets: [ShareOutletProtocol]
 
@@ -152,9 +154,18 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
+        
+        ShareSheetViewController.session = AVAudioSession.sharedInstance()
+        do {
+            try ShareSheetViewController.session?.setCategory(.ambient, options: [])
+            try ShareSheetViewController.session?.setActive(true) //Set to false to deactivate session
+        } catch let error as NSError {
+            print("Unable to activate audio session:  \(error.localizedDescription)")
+        }
 
         // Setup player
         self.addChild(player)
+        player.player?.isMuted = true
         player.player?.play()
 
         // Loop the video!
@@ -170,6 +181,16 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         addContentView()
         addShareToLabelView()
         addShareThatToLogoButtonView()
+    }
+    
+    public override func viewDidDisappear(_ animated: Bool) {
+        if ShareSheetViewController.session != nil {
+            do {
+                try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
+            } catch let error as NSError {
+                print("Unable to activate audio session:  \(error.localizedDescription)")
+            }
+        }
     }
     
     func makeShareThatToLogoLabel(_ userInterfaceModeString: String) -> UILabel {
