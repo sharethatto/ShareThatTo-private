@@ -7,7 +7,7 @@
 
 import Foundation
 
-class PhotoRequirement: RequiredPlistNonNil
+public class PhotoRequirement: RequiredPlistNonNil
 {
     required public init()
     {

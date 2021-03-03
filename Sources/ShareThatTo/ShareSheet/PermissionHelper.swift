@@ -17,7 +17,7 @@ public protocol PhotoPermissionHelperDelegate
 }
 
 
-class PhotoPermissionHelper
+public class PhotoPermissionHelper
 {
     let viewController: UIViewController
     let content: Content
@@ -32,7 +32,7 @@ class PhotoPermissionHelper
         self.delegate = delegate
     }
     
-    func requestPermission()
+    public func requestPermission()
     {
         // Do we have the permission we need?
         let result = PHPhotoLibrary.authorizationStatus()

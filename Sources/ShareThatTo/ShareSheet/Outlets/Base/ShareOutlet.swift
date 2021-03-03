@@ -13,10 +13,8 @@ class ShareOutlets
     internal static var availableOutlets: [ShareOutletProtocol.Type] = [
         IMessage.self,
         InstagramStories.self,
-        Messenger.self,
         Download.self,
         Twitter.self,
-        Facebook.self,
         InstagramFeed.self,
         More.self,
         Copy.self,
