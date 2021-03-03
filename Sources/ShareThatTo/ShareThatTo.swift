@@ -24,20 +24,27 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         self.lifecycle.start()
     }
     
-    
-    public func share(videoURL: URL, title: String) throws -> (UIViewController & UIAdaptivePresentationControllerDelegate)
+    public func presentShareSheet(on viewController: UIViewController, videoURL: URL, title: String, completion: ((Swift.Error?) -> Void)?)
     {
-        guard let _ = authenticationDatastore.apiKey else { throw NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"]) }
-        return try ShareSheetViewController.init(videoURL: videoURL, title: title)
+        guard let _ = authenticationDatastore.apiKey else {
+            let error = NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"])
+            shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist", error: error)
+            completion?(error)
+            return
+        }
+        DispatchQueue.main.async {
+            do {
+                let vc = try ShareSheetViewController.init(videoURL: videoURL, title: title)
+                viewController.present(vc, animated: true) {
+                    completion?(nil)
+                }
+            } catch let error {
+                shareThatToDebug(string: "Unable to present Share Sheet", error: error)
+                completion?(error)
+            }
+        }
     }
-    
-    // Public setup
-    public static func share(videoURL: URL, title: String) throws -> (UIViewController & UIAdaptivePresentationControllerDelegate)
-    {
-        try shared.share(videoURL: videoURL, title: title)
-    }
-    
-    
+
     
     @discardableResult
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool

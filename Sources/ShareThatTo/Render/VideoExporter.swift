@@ -38,24 +38,29 @@ class VideoExporter
     {
         let attribute: [FileAttributeKey : Any]
         let exporter: VideoExportProtocol.Type
-        do {
-            attribute = try FileManager.default.attributesOfItem(atPath: videoURL.path)
-        } catch {
-            completion(.failure(Error.readFile))
-            return
-        }
         
-        let size = attribute[FileAttributeKey.size] as? NSNumber ?? -1
+      // TODO: Re-evaluate if we really need this at all
+//        do {
+//            attribute = try FileManager.default.attributesOfItem(atPath: videoURL.path)
+//        } catch {
+//            completion(.failure(Error.readFile))
+//            return
+//        }
+//
+//        let size = attribute[FileAttributeKey.size] as? NSNumber ?? -1
+//
+//        // If we can't find the size, assume we need to re-render
+//        if (size.intValue < 1_000_000 && size != -1)
+//        {
+//            exporter = PassThrough.self
+//        }
+//        else
+//        {
+//            exporter = AVExport.self
+//        }
         
-        // If we can't find the size, assume we need to re-render
-        if (size.intValue < 1_000_000 && size != -1)
-        {
-            exporter = PassThrough.self
-        }
-        else
-        {
-            exporter = AVExport.self
-        }
+        exporter = PassThrough.self
+        
         exporter.exportVideo(videoURL: videoURL, completion: completion)
     }
 
