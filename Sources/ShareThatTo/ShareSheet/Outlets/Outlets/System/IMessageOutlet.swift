@@ -9,7 +9,7 @@ import MessageUI
 import UIKit
 import Foundation
 
-class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDelegate
+class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDelegate, UINavigationControllerDelegate
 {
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
@@ -21,9 +21,13 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     var delegate: ShareOutletDelegate?
     var content: Content
     
+    
+    var composeViewController = MFMessageComposeViewController()
+    
     required init(content: Content)
     {
         self.content = content
+        super.init()
     }
 
     // Make sure we have the ability to send messages before we show this option
@@ -48,10 +52,10 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
 
     var linkUsed = true
     var viewController: UIViewController?
+    
     func shareVideo(content: VideoContent, viewController: UIViewController)
     {
         self.viewController = viewController
-        let composeViewController = MFMessageComposeViewController()
         composeViewController.messageComposeDelegate = self
         composeViewController.body = content.text()
         if (!content.linkPreviewAvailable())
@@ -78,5 +82,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
         @unknown default:
             delegate?.failure(shareOutlet: self, error: "Could not send message")
         }
+        // Reset this after we've created it
+        composeViewController = MFMessageComposeViewController()
     }
 }

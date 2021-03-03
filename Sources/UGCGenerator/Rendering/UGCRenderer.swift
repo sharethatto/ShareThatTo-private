@@ -120,6 +120,7 @@ internal class UGCRenderer
                 case .cancelled, .failed: completion(.failure(.exportFailedOrCancelled))
                 default: completion(.failure(.unknown))
             }
+
             durationLogger.finish()
         }
     }

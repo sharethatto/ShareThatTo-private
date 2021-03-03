@@ -13,7 +13,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "ShareThatTo",
-            targets: ["ShareThatTo"]),
+            targets: ["ShareThatTo", "UGCGenerator"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -27,11 +27,15 @@ let package = Package(
         .target(
             name: "ShareThatTo",
             dependencies: [
-                .product(name: "FacebookShare", package: "Facebook"),
+                .product(name: "FacebookShare", package: "Facebook")
             ],
             path: "Sources/ShareThatTo", resources: [
                 .copy("Assets")
             ]),
+        .target(
+            name: "UGCGenerator",
+            path: "Sources/UGCGenerator"
+        ),
         .testTarget(
             name: "ShareThatToTests",
             dependencies: ["ShareThatTo", "DVR"],

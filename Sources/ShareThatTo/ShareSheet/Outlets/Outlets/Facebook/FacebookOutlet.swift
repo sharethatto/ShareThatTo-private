@@ -55,7 +55,8 @@ class Facebook: NSObject, ShareOutletProtocol
     // Right now we can only perform with video content
     static func canPerform(withContent content: Content) -> Bool
     {
-
+        
+        
         if (content.contentType == .video)
         {
             if (!ShareOutletUtils.isFacebookAppInstalled) {

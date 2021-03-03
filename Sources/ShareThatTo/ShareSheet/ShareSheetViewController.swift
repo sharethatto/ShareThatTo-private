@@ -335,10 +335,12 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     }
 
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let dl = DurationLogger.begin(prefix: "Cell tapped")
         var shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
         shareOutlet.delegate = self
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).started"))
         shareOutlet.share(with: self)
+        dl.finish()
     }
     
     func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath){
@@ -368,8 +370,6 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         // We didn't use any strategies
         content.cleanupContent(with: [])
      }
-    
-    
 }
 
 

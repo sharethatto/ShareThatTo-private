@@ -107,7 +107,7 @@ public class RequiredPlistNonNil: ShareOutletRequirementProtocol
     
 }
 
-public class Requirements: ShareOutletRequirementProtocol
+open class Requirements: ShareOutletRequirementProtocol
 {
 
     let requirements:[ShareOutletRequirementProtocol]

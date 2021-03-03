@@ -87,11 +87,10 @@ internal class UGCSecneRenderer
         }
         self.sceneExporter = exporter
         
-        self.sceneExporter?.outputURL = displayURL
+        self.sceneExporter?.outputURL = self.displayURL
         self.sceneExporter?.outputFileType = self.renderSettings.outputFileType
         self.sceneExporter?.shouldOptimizeForNetworkUse = true
         self.sceneExporter?.videoComposition = self.sceneOutputComposition
-        
         self.sceneExporter?.exportAsynchronously {
             switch self.sceneExporter?.status {
                 case .completed:

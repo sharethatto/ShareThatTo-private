@@ -9,7 +9,7 @@ import UIKit
 import Photos
 import Foundation
 
-protocol PhotoPermissionHelperDelegate
+public protocol PhotoPermissionHelperDelegate
 {
     func succeeded()
     func cancelled()

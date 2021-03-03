@@ -54,32 +54,35 @@ public class UGCScene
     
     private func renderScene(retries: Int = 3)
     {
-        let scene: UGCSecneRenderer
-        do {
-            scene = try UGCSecneRenderer(configurations:configurations, renderSettings: renderSettings)
-        } catch let error as UGCError {
-            // Propogate configuration errors
-            delegate?.sceneDidRender(configuration: self, result: .failure(error))
-            return
-        } catch {
-            delegate?.sceneDidRender(configuration:self, result: .failure(.unknown))
-            return
-        }
+        DispatchQueue.main.async {
+        
+            let scene: UGCSecneRenderer
+            do {
+                scene = try UGCSecneRenderer(configurations:self.configurations, renderSettings: self.renderSettings)
+            } catch let error as UGCError {
+                // Propogate configuration errors
+                self.delegate?.sceneDidRender(configuration: self, result: .failure(error))
+                return
+            } catch {
+                self.delegate?.sceneDidRender(configuration:self, result: .failure(.unknown))
+                return
+            }
 
-        scene.sceneReady() {
-            (result) in
-            switch(result)
-            {
-            case .success(let result):
-                self.delegate?.sceneDidRender(configuration: self, result: .success(result))
-            case .failure(let error):
-                if(error.retryable && retries > 0)
+            scene.sceneReady() {
+                (result) in
+                switch(result)
                 {
-                    self.renderScene(retries: retries - 1)
-                }
-                else
-                {
-                    self.delegate?.sceneDidRender(configuration: self, result: .failure(error))
+                case .success(let result):
+                    self.delegate?.sceneDidRender(configuration: self, result: .success(result))
+                case .failure(let error):
+                    if(error.retryable && retries > 0)
+                    {
+                        self.renderScene(retries: retries - 1)
+                    }
+                    else
+                    {
+                        self.delegate?.sceneDidRender(configuration: self, result: .failure(error))
+                    }
                 }
             }
         }
