@@ -26,6 +26,7 @@ public class UGC: VideoConent {
     let renderSettings : UGCRenderSettings
     let id: UUID = UUID()
     var scenes: [UGCSecne] = []
+    var sceneConfigurations: [UCGSceneConfiguration] = []
     
     var duration : CMTime = CMTime(value: 0, timescale: 1, flags: CMTimeFlags(rawValue: 1), epoch: 0)
     var durationTillNow : CMTime = CMTime(value: 0, timescale: 1, flags: CMTimeFlags(rawValue: 1), epoch: 0)
@@ -82,15 +83,27 @@ public class UGC: VideoConent {
         self.mainTrack = mainTrack
     }
     
-    public func createScene() -> UGCSecne {
-        let scene = UGCSecne(ugc: self, orderInUgc: (scenes.count+1) )
-        switch status {
-        case .creating:
-            scenes.append(scene)
-        default:
-            Logger.log(message: "Scene Not Added to UGC.  self.status != .creating")
-        }
-        return scene
+//    public func createScene() -> UGCSecne {
+//        let scene = UGCSecne(ugc: self, orderInUgc: (scenes.count+1) )
+//        switch status {
+//        case .creating:
+//            scenes.append(scene)
+//        default:
+//            Logger.log(message: "Scene Not Added to UGC.  self.status != .creating")
+//        }
+//        return scene
+//    }
+    
+    public func createSceneConfiguration() -> UCGSceneConfiguration {
+        let sceneConfiguration = UCGSceneConfiguration(renderSettings: self.renderSettings)
+        sceneConfigurations.append(sceneConfiguration)
+//        switch status {
+//        case .creating:
+//            scenes.append(scene)
+//        default:
+//            Logger.log(message: "Scene Not Added to UGC.  self.status != .creating")
+//        }
+        return sceneConfiguration
     }
     
     public func ugcReady() {
@@ -124,8 +137,13 @@ public class UGC: VideoConent {
         ugcDispatchGroup.notify(queue: ugcRenderDispatchQueue ) {
             self.makeFoundationComponents()
             
+            
+            
             for scene in self.scenes {
                 if scene.status == .completed {
+                    
+                    
+                    
                     guard let assetURL = scene.videoURL else {
                         Logger.log(message: "Unable to add scene \(scene.id). URL not valid.")
                         continue
@@ -138,6 +156,8 @@ public class UGC: VideoConent {
                         Logger.log(message: "Unable to add scene \(scene.id) to the UGC. Scene has no video Track.")
                         continue
                     }
+                    
+                    self.duration = CMTimeAdd(self.duration, sceneVideoAsset.duration)
                     
                     do{
                         try self.mainTrack!.insertTimeRange(
@@ -202,6 +222,7 @@ public class UGC: VideoConent {
                     default:
                         // TODO: UGC render fails, but scenes succeed
 //                        self.status = .canceled
+                        self.startExport()
                         Logger.log(message: "UGC Exporter failed with status of \(exporter.status.rawValue). See AVAssetExportSession.Status Docs to debug")
                         guard let delegate = self.delegate else {
                             Logger.log(message: "UGC Delegate not set.")
