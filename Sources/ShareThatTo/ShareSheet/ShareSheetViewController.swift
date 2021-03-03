@@ -361,7 +361,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
             } catch let error as NSError {
-                print("Unable to activate audio session:  \(error.localizedDescription)")
+                shareThatToDebug(string: "Unable to activate audio session", error: error)
             }
         }
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
@@ -394,7 +394,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
             } catch let error as NSError {
-                print("Unable to activate audio session:  \(error.localizedDescription)")
+                shareThatToDebug(string: "Unable to activate audio session", error: error)
             }
         }
         DispatchQueue.main.async {

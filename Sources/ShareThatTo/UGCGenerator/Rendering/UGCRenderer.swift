@@ -54,7 +54,7 @@ internal class UGCRenderer
     func startExport(completion: @escaping UGCResultCompletion)
     {
         let durationLogger = UGCDurationLogger.begin(prefix: "[UGC] startExport")
-        for scene in self.scenes {
+        for scene in self.scenes.reversed() {
             let sceneVideoAsset = AVAsset(url: scene.displayURL)
                     
             guard let sceneVideoTrack = sceneVideoAsset.tracks(withMediaType: .video).first
@@ -63,8 +63,7 @@ internal class UGCRenderer
                 continue
             }
 
-                    
-            do{
+            do {
                 try self.mainTrack.insertTimeRange(
                     CMTimeRangeMake(start: .zero, duration: sceneVideoAsset.duration),
                     of: sceneVideoTrack,
