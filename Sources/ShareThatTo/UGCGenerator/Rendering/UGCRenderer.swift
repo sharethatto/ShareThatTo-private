@@ -8,7 +8,7 @@ import Foundation
 import AVFoundation
 import UIKit
 
-private class UGCRenderer
+internal class UGCRenderer
 {
     
     var durationTillNow : CMTime = CMTime(value: 0, timescale: 1, flags: CMTimeFlags(rawValue: 1), epoch: 0)

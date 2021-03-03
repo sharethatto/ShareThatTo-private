@@ -11,9 +11,9 @@ import UIKit
 import Foundation
 
 
-class UGCVideoLayerBuilder: UGCLayerBuilder
+internal class UGCVideoLayerBuilder: UGCLayerBuilder
 {
-    public static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecneRenderer) throws
+    static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecneRenderer) throws
     {
         let durationLogger = DurationLogger.begin(prefix: "[UGCScene] withVideoLayer")
         

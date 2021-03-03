@@ -7,7 +7,8 @@
 
 import Foundation
 
-class UGCLayerConfiguration {
+internal class UGCLayerConfiguration
+{
     
     public func build(scene: UGCSecneRenderer) throws
     {
@@ -16,7 +17,8 @@ class UGCLayerConfiguration {
 }
 
 
-class UGCLayerBuilder {
+internal class UGCLayerBuilder
+{
 
     
 }

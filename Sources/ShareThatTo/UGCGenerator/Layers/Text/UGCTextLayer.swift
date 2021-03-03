@@ -7,7 +7,7 @@
 import UIKit
 import Foundation
 
-public class UGCTextLayer : CATextLayer, UGCLayer {
+internal class UGCTextLayer : CATextLayer, UGCLayer {
     
     var defaultPlacements: Bool = false
     

@@ -16,7 +16,7 @@ public class UGCConfiguration: UGCSceneDelegate
     private let sceneRenderingWaitGroup = DispatchGroup()
     private weak var delegate: UGCResultDelegate?
     
-    private var sceneConfigurations: [UCGSceneConfiguration] = []
+    private var sceneConfigurations: [UGCScene] = []
     private var sceneRenderingResults: [UGCResult?] = []
     
     //MARK: Public
@@ -28,9 +28,9 @@ public class UGCConfiguration: UGCSceneDelegate
         self.renderSettings = renderSettings
     }
     
-    public func createSceneConfiguration() -> UCGSceneConfiguration
+    public func createSceneConfiguration() -> UGCScene
     {
-        let sceneConfiguration = UCGSceneConfiguration(delegate: self, renderSettings: self.renderSettings)
+        let sceneConfiguration = UGCScene(delegate: self, renderSettings: self.renderSettings)
         sceneConfigurations.append(sceneConfiguration)
         sceneRenderingResults.append(nil)
         return sceneConfiguration
@@ -96,7 +96,7 @@ public class UGCConfiguration: UGCSceneDelegate
     
     //MARK: UGCSceneDelegate
     
-    internal func sceneDidRender(configuration: UCGSceneConfiguration, result: UGCResult)
+    internal func sceneDidRender(configuration: UGCScene, result: UGCResult)
     {
         let optionalIndex = sceneConfigurations.firstIndex(of: configuration)
         guard let index = optionalIndex else {
@@ -108,7 +108,7 @@ public class UGCConfiguration: UGCSceneDelegate
         sceneRenderingWaitGroup.leave()
     }
     
-    internal func sceneReady(configuration: UCGSceneConfiguration)
+    internal func sceneReady(configuration: UGCScene)
     {
         sceneRenderingWaitGroup.enter()
     }

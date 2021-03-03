@@ -8,7 +8,7 @@ import AVFoundation
 import UIKit
 import Foundation
 
-public class UGCImageLayer : CALayer, UGCLayer {
+internal class UGCImageLayer : CALayer, UGCLayer {
     
     var defaultPlacements: Bool = false
     

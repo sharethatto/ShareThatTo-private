@@ -6,11 +6,11 @@
 //
 
 import Foundation
-class UGCImageLayerConfiguration: UGCLayerConfiguration
+internal class UGCImageLayerConfiguration: UGCLayerConfiguration
 {
     
-    public let format: UGCImageFormat
-    public let url: URL
+    internal let format: UGCImageFormat
+    internal let url: URL
     
     public init(format: UGCImageFormat, url: URL)
     {

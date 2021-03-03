@@ -7,9 +7,9 @@
 import UIKit
 import Foundation
 
-class UGCImageLayerBuilder: UGCLayerBuilder
+internal class UGCImageLayerBuilder: UGCLayerBuilder
 {
-    public static func build(configuration: UGCImageLayerConfiguration, scene: UGCSecneRenderer) throws
+    internal static func build(configuration: UGCImageLayerConfiguration, scene: UGCSecneRenderer) throws
     {
         let imageLayer = UGCImageLayer()
         

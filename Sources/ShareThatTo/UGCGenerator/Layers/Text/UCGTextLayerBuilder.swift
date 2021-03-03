@@ -7,9 +7,9 @@
 import UIKit
 import Foundation
 
-class UGCTextLayerBuilder: UGCLayerBuilder
+internal class UGCTextLayerBuilder: UGCLayerBuilder
 {
-    public static func build(configuration: UGCTextLayerConfiguration, scene: UGCSecneRenderer)
+    static func build(configuration: UGCTextLayerConfiguration, scene: UGCSecneRenderer)
     {
         var outputText = configuration.format.textTemplate
         for (name, value) in configuration.parameters {

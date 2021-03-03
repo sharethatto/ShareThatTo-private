@@ -9,7 +9,7 @@ import Foundation
 import AVFoundation
 import UIKit
 
-public class UGCVideoLayer : CALayer, UGCLayer {
+internal class UGCVideoLayer : CALayer, UGCLayer {
     
     var defaultPlacements: Bool = false
     

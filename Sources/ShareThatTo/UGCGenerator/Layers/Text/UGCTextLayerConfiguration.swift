@@ -7,19 +7,19 @@
 
 import Foundation
 
-class UGCTextLayerConfiguration: UGCLayerConfiguration
+internal class UGCTextLayerConfiguration: UGCLayerConfiguration
 {
     
-    public let format: UGCTextFormat
-    public let parameters: [String:String]
+    internal let format: UGCTextFormat
+    internal let parameters: [String:String]
     
-    public init(format: UGCTextFormat, parameters: [String:String])
+    internal init(format: UGCTextFormat, parameters: [String:String])
     {
         self.format = format
         self.parameters = parameters
     }
     
-    override public func build(scene: UGCSecneRenderer)
+    override internal func build(scene: UGCSecneRenderer)
     {
         UGCTextLayerBuilder.build(configuration: self, scene: scene)
     }

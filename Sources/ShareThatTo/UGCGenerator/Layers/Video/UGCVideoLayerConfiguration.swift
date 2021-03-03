@@ -7,19 +7,19 @@
 
 
 import Foundation
-class UGCVideoLayerConfiguration: UGCLayerConfiguration
+internal class UGCVideoLayerConfiguration: UGCLayerConfiguration
 {
     
-    public let format: UGCVideoFormat
-    public let url: URL
+    let format: UGCVideoFormat
+    let url: URL
     
-    public init(format: UGCVideoFormat, url: URL)
+    init(format: UGCVideoFormat, url: URL)
     {
         self.format = format
         self.url = url
     }
     
-    override public func build(scene: UGCSecneRenderer) throws
+    override func build(scene: UGCSecneRenderer) throws
     {
         try UGCVideoLayerBuilder.build(configuration: self, scene: scene)
     }
