@@ -10,7 +10,7 @@ import Foundation
 
 class ThumbnailCreator
 {
-    internal static func thumbnail(videoURL: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void)
+    public static func thumbnail(videoURL: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void)
     {
         let avurl = AVURLAsset(url: videoURL)
         avurl.thumbnail { (image) in

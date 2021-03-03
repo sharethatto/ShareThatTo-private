@@ -20,6 +20,8 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     static let shareBackground = UIColor(rgb: 0xF4F2FF)
     static let contentBackground = UIColor(rgb: 0xF7F6FF)
     static let contentMargin: CGFloat = 20
+    static let shareoutViewDimension: CGFloat = 75
+    static let shareOutletItemSize: CGFloat = 75
     
     var content: Content
     var shareOutlets: [ShareOutletProtocol]
@@ -67,16 +69,17 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         let shareToLabel = UILabel.init(frame: defaultRect)
         shareToLabel.translatesAutoresizingMaskIntoConstraints = false
+        shareToLabel.textAlignment = .center
         
-        let labelText = NSAttributedString(string: "Share To", attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 18.0)])
-        
+        let labelText = NSAttributedString(string: "Share to", attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Black", size: 16.0)])
         shareToLabel.attributedText = labelText
         
         
         shareToLabelView.addSubview(shareToLabel)
         NSLayoutConstraint.activate([
-            shareToLabel.topAnchor.constraint(equalTo: shareToLabelView.topAnchor, constant: 0),
+//            shareToLabel.topAnchor.constraint(equalTo: shareToLabelView.topAnchor, constant: 0),
             shareToLabel.centerXAnchor.constraint(equalTo: shareToLabelView.centerXAnchor),
+            shareToLabel.centerYAnchor.constraint(equalTo: shareToLabelView.centerYAnchor),
         ])
         return shareToLabelView
     }()
@@ -85,9 +88,16 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         // Collection View
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        layout.itemSize = CGSize(width: 60, height: 60)
-        layout.minimumLineSpacing = 15
+//        layout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        layout.itemSize = CGSize(width: shareOutletItemSize, height: shareOutletItemSize)
+//        let paddingPercent =  0.05
+        let maxFullShareOutletsOnScreen = floor(UIScreen.main.bounds.width / shareOutletItemSize)
+        let fullShareOutletsOnScreen = maxFullShareOutletsOnScreen - 1
+        let percentLastShareOutletOnScreen  = CGFloat(0.5)
+        let spaceOccupiedByShareOutlets = (fullShareOutletsOnScreen + percentLastShareOutletOnScreen) * shareOutletItemSize
+        layout.minimumLineSpacing = (UIScreen.main.bounds.width - spaceOccupiedByShareOutlets) / fullShareOutletsOnScreen
+//        layout.minimumLineSpacing = (375-(4.5*68))/4
+//        layout.minimumLineSpacing = 50
 
         let shareOutletView = UICollectionView.init(frame: defaultRect, collectionViewLayout: layout)
         shareOutletView.backgroundColor = ShareSheetViewController.contentBackground
@@ -164,7 +174,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             player.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             player.view.widthAnchor.constraint(equalTo: player.view.heightAnchor, multiplier: 720.0/1280.0),
             player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+            player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
 
         // Setup player
@@ -190,7 +200,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let constraints = [
             shareToLabelView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareToLabelView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareToLabelView.heightAnchor.constraint(equalToConstant: 40),
+            shareToLabelView.heightAnchor.constraint(equalToConstant: 35),
             shareToLabelView.bottomAnchor.constraint(equalTo: shareOutletView.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
@@ -198,9 +208,10 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     
     func addShareOutletView() {
         let constraints = [
+//            shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareOutletView.heightAnchor.constraint(equalToConstant: 60),
+            shareOutletView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.shareoutViewDimension),
             shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingButton.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
@@ -240,7 +251,6 @@ extension ShareSheetViewController {
         
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.logo_tapped"), context: analtyicsContext)
         
-
     }
 
 
@@ -255,6 +265,8 @@ extension ShareSheetViewController: UICollectionViewDataSource {
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShareThatToOutletCell", for: indexPath)
+        myCell.backgroundColor = ShareSheetViewController.contentBackground
+//        myCell.backgroundColor = UIColor.red
 
         for view in myCell.contentView.subviews {
             view.removeFromSuperview()
@@ -264,16 +276,31 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         let shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
         let image = type(of: shareOutlet).buttonImage() //UIImage(named: shareOutlet.imageName)
 
+        let label = UILabel()
+        let labelText = NSAttributedString(string: type(of: shareOutlet).outletName,
+                                           attributes: [
+                                            NSAttributedString.Key.font: UIFont(name: "Avenir", size: 12.0)
+                                           ])
+        label.attributedText = labelText
+        label.textAlignment = .center
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isUserInteractionEnabled = true
+        
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
         myCell.contentView.addSubview(imageView)
-
+        myCell.contentView.addSubview(label)
 
         let constraints = [
             imageView.topAnchor.constraint(equalTo: myCell.contentView.topAnchor),
-            imageView.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor),
-            imageView.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor), // Make it a square
+            imageView.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.70),
+            imageView.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.70), // Make it a square
             imageView.centerXAnchor.constraint(equalTo: myCell.contentView.centerXAnchor),
+            label.bottomAnchor.constraint(equalTo: myCell.contentView.bottomAnchor),
+            label.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor),
+            label.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.2), // Make it a square
+            label.centerXAnchor.constraint(equalTo: myCell.contentView.centerXAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
         return myCell
@@ -284,6 +311,17 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         shareOutlet.delegate = self
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).started"))
         shareOutlet.share(with: self)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath){
+        Haptics.shared.play(.light)
+        guard let cell = shareOutletView.cellForItem(at: indexPath) else { return }
+        cell.subviews[0].subviews[0].transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath){
+        guard let cell = shareOutletView.cellForItem(at: indexPath) else { return }
+        cell.subviews[0].subviews[0].transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
     }
     
     
@@ -337,5 +375,3 @@ extension ShareSheetViewController: ShareOutletDelegate {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).cancelled"), context: analtyicsContext)
     }
 }
-
-
