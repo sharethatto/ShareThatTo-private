@@ -34,7 +34,7 @@ extension Network: NetworkApplicationProtocol
                switch result
                {
                case .failure(let error):
-                shareThatToDebug(string: "[network GET /application] - failure <doc-link> - ", error:error)
+                Logger.shareThatToDebug(string: "[network GET /application] - failure", error:error)
                 completion(.failure(error))
                case .success(let response):
                    completion(.success((response)))

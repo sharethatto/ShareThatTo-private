@@ -16,9 +16,7 @@ struct InstagramStories: ShareOutletProtocol
     static let imageName = "InstagramStories"
     static let outletName = "Stories"
     static let canonicalOutletName = "instagram-stories"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return InstgramStoriesRequirements()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = InstgramStoriesRequirements()
     
     var delegate: ShareOutletDelegate?
     var content: Content

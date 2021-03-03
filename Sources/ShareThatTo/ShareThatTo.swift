@@ -35,7 +35,7 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     {
         guard let _ = authenticationDatastore.apiKey else {
             let error = NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"])
-            shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist", error: error)
+            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist", error: error)
             completion?(error)
             return
         }
@@ -46,7 +46,7 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
                     completion?(nil)
                 }
             } catch let error {
-                shareThatToDebug(string: "Unable to present Share Sheet", error: error)
+                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
                 completion?(error)
             }
         }

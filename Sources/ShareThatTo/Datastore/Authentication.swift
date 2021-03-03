@@ -21,7 +21,7 @@ class AuthenticationDatastore: AuthenticationDatastoreProtocol
         apiKey = Bundle.main.shareThatToClientId
         if (apiKey == nil)
         {
-            shareThatToDebug(string: "[AuthenticationDatastore ShareThatToClientId] ShareThatToClientId is not set, please update your Info.plist")
+            Logger.shareThatToDebug(string: "[AuthenticationDatastore ShareThatToClientId] ShareThatToClientId is not set, please update your Info.plist", error: nil, documentation: .apiKeyNotSet)
         }
     }
 }

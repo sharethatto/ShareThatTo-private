@@ -15,9 +15,7 @@ struct InstagramFeed: ShareOutletProtocol
     static let imageName = "InstagramFeed"
     static let outletName = "Insta"
     static let canonicalOutletName = "instagram-feed"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return InstagramFeedRequirements()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = InstagramFeedRequirements()
     
     var delegate: ShareOutletDelegate?
     var content: Content

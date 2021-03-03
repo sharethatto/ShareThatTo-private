@@ -89,7 +89,7 @@ extension Network: NetworkShareProtocol
                switch result
                {
                case .failure(let error):
-                shareThatToDebug(string: "[network POST /share] - failure <doc-link> - ", error: error)
+                Logger.shareThatToDebug(string: "[network POST /share] - failure", error: error, documentation: .unexpecteError)
                 completion(.failure(error))
                case .success(let response):
                    completion(.success(response))
@@ -117,7 +117,7 @@ extension Network: NetworkShareProtocol
             switch result
             {
             case .failure(let error):
-                shareThatToDebug(string: "[network POST /share/activate] - failure <doc-link> - ",  error:error)
+                Logger.shareThatToDebug(string: "[network POST /share/activate] - failure",  error:error, documentation: .unexpecteError)
                 completion(.failure(error))
             case .success(let response):
                 completion(.success((response)))
@@ -144,7 +144,7 @@ extension Network: NetworkShareProtocol
             switch result
             {
             case .failure(let error):
-                shareThatToDebug(string: "[network DELETE /share/activate] - failure <doc-link> - ", error:error)
+                Logger.shareThatToDebug(string: "[network DELETE /share/activate] - failure", error:error, documentation: .unexpecteError)
                 completion(.failure(error))
             case .success(let response):
                 completion(.success((response)))

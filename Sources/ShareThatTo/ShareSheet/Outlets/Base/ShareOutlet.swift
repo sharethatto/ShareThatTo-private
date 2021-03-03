@@ -45,20 +45,12 @@ class ShareOutlets
 
 public protocol ShareOutletDelegate {
     func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType])
-//    func success(shareOutlet: ShareOutletProtocol)
     func failure(shareOutlet: ShareOutletProtocol, error: String)
     func cancelled(shareOutlet: ShareOutletProtocol)
 }
 
-//extension ShareOutletDelegate
-//{
-//    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType])
-//    {
-//        self.success(shareOutlet: shareOutlet)
-//    }
-//}
-
-public protocol ShareOutletProtocol {
+public protocol ShareOutletProtocol
+{
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate? { get }
     var delegate: ShareOutletDelegate? { get set }
     var content: Content { get set }
@@ -67,7 +59,9 @@ public protocol ShareOutletProtocol {
     static var imageName: String { get }
     static var outletName: String { get }
     static var canonicalOutletName: String { get }
-//    static var requirements: ShareOutletRequirementProtocol { get }
+    
+    static var requirements: ShareOutletRequirementProtocol? { get }
+    
     static func buttonImage() -> UIImage?
     static func canPerform(withContent content:Content) -> Bool;
     
@@ -80,9 +74,20 @@ public protocol ShareOutletProtocol {
 
 extension ShareOutletProtocol
 {
+    static var requirements: ShareOutletRequirementProtocol? {
+        get { nil }
+    }
+    
     // Right now we can only perform with video content
     static func canPerform(withContent content: Content) -> Bool
     {
+        if let reqs = requirements {
+            if (!reqs.met(plist: Bundle.main.infoDictionary ?? [:]))
+            {
+                Logger.shareThatToDebug(string: "Can't enable outlet \(type(of: self)) please check plist", error: nil, documentation: .plitRequirementsNotMet)
+                return false
+            }
+        }
         if (content.contentType == .video)
         {
             return true
@@ -97,7 +102,6 @@ extension ShareOutletProtocol
         }
         return UIImage(contentsOfFile: filepath)
     }
-    
 }
 
 

@@ -11,9 +11,7 @@ struct More: ShareOutletProtocol {
     static let imageName = "More"
     static let outletName = "More"
     static let canonicalOutletName = "more"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return NoRequirements()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = NoRequirements()
 
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?

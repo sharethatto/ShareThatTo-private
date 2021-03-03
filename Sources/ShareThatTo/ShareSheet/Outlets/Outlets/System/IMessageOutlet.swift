@@ -16,9 +16,7 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     static let imageName = "IMessage"
     static let outletName = "SMS"
     static let canonicalOutletName = "imessage"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return NoRequirements()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = NoRequirements()
     
     var delegate: ShareOutletDelegate?
     var content: Content

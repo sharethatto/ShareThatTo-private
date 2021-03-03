@@ -2,7 +2,7 @@
 //  File.swift
 //  
 //
-//  Created by Brian Anglin on 2/10/21.
+//  Created by Brian Anglin on 2/12/21.
 //
 
 import UIKit
@@ -10,41 +10,15 @@ import Foundation
 import FacebookCore
 import FacebookShare
 
-class FacebookOutletLifecycle: ShareThatToLifecycleDelegate
+// TODO: Refactor this and the facebook outlet into one class 
+class Messenger: NSObject, ShareOutletProtocol
 {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
-    {
-        ApplicationDelegate.shared.application(
-            application,
-            didFinishLaunchingWithOptions: launchOptions
-        )
-    }
+    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool
-    {
-        ApplicationDelegate.shared.application(
-                  app,
-                  open: url,
-                  sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
-                  annotation: options[UIApplication.OpenURLOptionsKey.annotation]
-              )
-    }
-}
-
-
-class Facebook: NSObject, ShareOutletProtocol
-{
-
-    static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?  = {
-        return FacebookOutletLifecycle()
-    }()
-    
-    static let imageName = "Facebook"
-    static let outletName = "Facebook"
-    static let canonicalOutletName = "facebook"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return FacebookRequirements()
-    }()
+    static let imageName = "Messenger"
+    static let outletName = "Messenger"
+    static let canonicalOutletName = "messenger"
+    static let requirements: ShareOutletRequirementProtocol = FacebookRequirements()
     
     var delegate: ShareOutletDelegate?
     var content: Content
@@ -60,12 +34,13 @@ class Facebook: NSObject, ShareOutletProtocol
 
         if (content.contentType == .video)
         {
-            if (!ShareOutletUtils.isFacebookAppInstalled) {
+            if (!ShareOutletUtils.isMessengerAppInstalled) {
                 // TODO: We can do this if we have the preview link.
                 // We can use the link share strategy as a fallback if we need to
                 // We can also use re-tar or even a native redirect preparation page before redirecting to fb
-                // let url = URL(string: "https://www.facebook.com/dialog/share?app_id=1926440290830565&href=https://sharethatto-sdk.herokuapp.com/s/4cff8157b895b53737de241c5d8ff13c&redirect_uri=https://example.com")!
+                // let url = URL(string: "https://www.Messenger.com/dialog/share?app_id=1926440290830565&href=https://sharethatto-sdk.herokuapp.com/s/4cff8157b895b53737de241c5d8ff13c&redirect_uri=https://example.com")!
                 // UIApplication.shared.openURL(url)
+                // If we do this, we MUST change the strategiesUsed: in the success delegate
                 return false
             }
             return true
@@ -88,12 +63,9 @@ class Facebook: NSObject, ShareOutletProtocol
     weak var viewController: UIViewController?
     private func shareVideo(content: VideoContent, viewController: UIViewController)
     {
-        // Prefer link strategy
         self.viewController = viewController
         let photoPermissionHelper = PhotoPermissionHelper.init(viewController: viewController, content: content, shareOutlet: self, delegate: self)
         photoPermissionHelper.requestPermission()
-        
-
     }
     
     func shareVideoAsset(asset: PHAsset)
@@ -102,19 +74,18 @@ class Facebook: NSObject, ShareOutletProtocol
         let shareVdieoContent = ShareVideoContent()
         shareVdieoContent.video = shareVideo
         
-        guard let viewController = self.viewController else {  delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
-        let shareDialog = ShareDialog.init(fromViewController: viewController, content: shareVdieoContent, delegate: self)
+        let shareDialog = MessageDialog.init(content: shareVdieoContent, delegate: self)
+
         
         // I think validate needs to be on the main thread--definitely one of the two does
         DispatchQueue.main.async {
             do {
                 try shareDialog.validate()
             } catch let error {
-                shareThatToDebug(string: "[FacebookOutlet] Unable to share to facebook", error: error)
-                
+                Logger.shareThatToDebug(string: "[MessengerOutlet] Unable to share to facebook", error: error)
                 // Ideally we should never trigger this, b/c we should have caught the error
                 // at the top where we decided if we could show the outlet or not.
-                self.delegate?.failure(shareOutlet: self, error: "Whoops! We can't share to Facebook right now.")
+                self.delegate?.failure(shareOutlet: self, error: "Whoops! We can't share to Messenger right now.")
                 // TODO: Capture the error here
                 return
             }
@@ -124,13 +95,13 @@ class Facebook: NSObject, ShareOutletProtocol
 }
 
 
-extension Facebook: PhotoPermissionHelperDelegate
+extension Messenger: PhotoPermissionHelperDelegate
 {
     func succeeded()
     {
         // video content
         guard let videoContent = content.videoContent() else {
-            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook.")
+            delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger.")
             return
         }
         
@@ -141,13 +112,13 @@ extension Facebook: PhotoPermissionHelperDelegate
             placeholder =  changeRequest?.placeholderForCreatedAsset
         } completionHandler: { (success, error) in
             if (success) {
-                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
+                guard let placeholder = placeholder else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger."); return }
                 
                 let result = PHAsset.fetchAssets(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
-                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook."); return }
+                guard let asset = result.firstObject else { self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger."); return }
                 self.shareVideoAsset(asset: asset)
             } else {
-                self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Facebook.")
+                self.delegate?.failure(shareOutlet: self, error: "Unable to save video to share to Messenger.")
             }
         }
     }
@@ -162,11 +133,9 @@ extension Facebook: PhotoPermissionHelperDelegate
         // We've already communicated with the user so this ins't really "failing" in the same way
         delegate?.cancelled(shareOutlet: self)
     }
-    
-    
 }
 
-extension Facebook: SharingDelegate
+extension Messenger: SharingDelegate
 {
     func sharer(_ sharer: Sharing, didCompleteWithResults results: [String : Any])
     {

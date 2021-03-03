@@ -12,7 +12,7 @@ import XCTest
 
 final class RequirementsTestsTests: XCTestCase {
     
-  
+
     func testRequiredApplicationQuerySchemes()
     {
         var plist = ["LSApplicationQueriesSchemes": ["snapchat"]] as [String: Any?]

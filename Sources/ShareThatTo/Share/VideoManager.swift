@@ -90,10 +90,10 @@ class ShareManagerVideo
         providers.shareNetwork.deleteShare(delete: DeleteShareRequest(shareable_access_token: shareable.shareable_access_token)) { (result) in
             switch(result) {
                 case .failure(let error):
-                    shareThatToDebug(string: "[VideoManager destroy] failure", error: error)
+                    Logger.shareThatToDebug(string: "[VideoManager destroy] failure", error: error)
                     self.delegate?.shareManagerDidComplete(error: error)
                 case .success:
-                    shareThatToDebug(string: "[VideoManager destroy] success")
+                    Logger.shareThatToDebug(string: "[VideoManager destroy] success")
                     self.delegate?.shareManagerDidComplete(error: Error.destoryed)
             }
         }
@@ -110,10 +110,10 @@ class ShareManagerVideo
         providers.render.renderThumbnailAndVideo(videoURL: videoContent.videoURL) { (result) in
             switch(result) {
             case .failure(let error):
-                shareThatToDebug(string: "[VideoManager render] failure", error: error)
+                Logger.shareThatToDebug(string: "[VideoManager render] failure", error: error)
                 self.delegate?.shareManagerDidComplete(error: error)
             case .success(let datas):
-                shareThatToDebug(string: "[VideoManager render] success")
+                Logger.shareThatToDebug(string: "[VideoManager render] success")
                 self.thumbnail = datas.0
                 self.renderedVideo = datas.1
                 self.delegate?.renderedStrategyDidUpdate(renderedStrategy: RenderedShareStrategy(data: datas.1))
@@ -144,7 +144,7 @@ class ShareManagerVideo
         providers.shareNetwork.shareRequest(share: shareRequest) { (result) in
             switch(result) {
             case .failure(let error):
-                shareThatToDebug(string: "[VideoManager uploadPlan] failure", error: error)
+                Logger.shareThatToDebug(string: "[VideoManager uploadPlan] failure", error: error)
                 self.delegate?.shareManagerDidComplete(error: error)
             case .success(let result):
                 self.shareable = result.shareable
@@ -159,7 +159,7 @@ class ShareManagerVideo
                 
                 self.delegate?.linkPreviewStrategyDidUpdate(linkPreviewStrategy: LinkPreviewShareStrategy(link: result.shareable.link))
                 self.delegate?.linkPreviewConfidenceDidUpdate(linkPreviewConfidence: .planReceived)
-                shareThatToDebug(string: "[VideoManager uploadPlan] success")
+                Logger.shareThatToDebug(string: "[VideoManager uploadPlan] success")
                 self.upload(with: result.preview_image, data: thumbnail, uploadKey: .previewImage)
                 self.upload(with: result.video_content, data: renderedVideo, uploadKey: .videoContent)
             }
@@ -175,10 +175,10 @@ class ShareManagerVideo
         providers.uploadNetwork.upload(plan: plan, data: data) { (result) in
             switch(result) {
             case .failure(let error):
-                shareThatToDebug(string: "[VideoManager upload] failure \(uploadKey)", error: error)
+                Logger.shareThatToDebug(string: "[VideoManager upload] failure \(uploadKey)", error: error)
                 self.delegate?.shareManagerDidComplete(error: error)
             case .success():
-                shareThatToDebug(string: "[VideoManager upload] success \(uploadKey)")
+                Logger.shareThatToDebug(string: "[VideoManager upload] success \(uploadKey)")
                 self.activate(uploadKey: uploadKey)
             }
         }
@@ -204,10 +204,10 @@ class ShareManagerVideo
             (result) in
             switch(result) {
             case .failure(let error):
-                shareThatToDebug(string: "[VideoManager activate] failure \(uploadKey)", error: error)
+                Logger.shareThatToDebug(string: "[VideoManager activate] failure \(uploadKey)", error: error)
                 self.delegate?.shareManagerDidComplete(error: error)
             case .success:
-                shareThatToDebug(string: "[VideoManager activate] success \(uploadKey)")
+                Logger.shareThatToDebug(string: "[VideoManager activate] success \(uploadKey)")
                 switch(uploadKey) {
                 case .previewImage: self.previewImageCompleted = true
                 case .videoContent: self.videoContentCompleted = true

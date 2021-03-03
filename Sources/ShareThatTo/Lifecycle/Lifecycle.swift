@@ -43,7 +43,7 @@ internal class Lifecycle: LifecycleProtocol
     {
         
         stop() // Ensure we don't do this twice
-        shareThatToDebug(string: "[Lifecycle start]")
+        Logger.shareThatToDebug(string: "[Lifecycle start]")
         notificationCenter.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         refreshSessionData()
@@ -52,7 +52,7 @@ internal class Lifecycle: LifecycleProtocol
     
     public func stop()
     {
-        shareThatToDebug(string: "[Lifecycle stop]")
+        Logger.shareThatToDebug(string: "[Lifecycle stop]")
         analytics.stop()
         notificationCenter.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
         notificationCenter.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -86,7 +86,7 @@ internal class Lifecycle: LifecycleProtocol
             }
         }
         lastUpdated = Date()
-        shareThatToDebug(string: "[Lifecycle refreshApplication]")
+        Logger.shareThatToDebug(string: "[Lifecycle refreshApplication]")
         network.application { [self] result in
             switch(result) {
             case .failure(_): break

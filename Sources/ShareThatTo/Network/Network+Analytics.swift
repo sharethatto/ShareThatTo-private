@@ -36,7 +36,7 @@ extension Network: NetworkAnalyticsProtocol
                switch result
                {
                case .failure(let error):
-                shareThatToDebug(string: "[network POST /events] - failure <doc-link>", error: error)
+                Logger.shareThatToDebug(string: "[network POST /events] - failure", error: error, documentation: .unexpecteError)
                 completion(.failure(error))
                case .success:
                    completion(.success(Void()))

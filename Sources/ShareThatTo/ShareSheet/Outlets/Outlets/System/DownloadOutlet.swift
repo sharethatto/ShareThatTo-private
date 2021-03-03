@@ -18,9 +18,7 @@ struct Download: ShareOutletProtocol
     static let canonicalOutletName = "download"
     var delegate: ShareOutletDelegate?
     var content: Content
-    static let requirements: ShareOutletRequirementProtocol = {
-        return PhotoRequirement()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = PhotoRequirement()
     
     init(content: Content)
     {

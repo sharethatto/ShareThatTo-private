@@ -15,9 +15,7 @@ struct Copy: ShareOutletProtocol
     static let imageName = "Copy"
     static let outletName = "Copy"
     static let canonicalOutletName = "copy"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return NoRequirements()
-    }()
+    static let requirements: ShareOutletRequirementProtocol = NoRequirements()
     
     var delegate: ShareOutletDelegate?
     var content: Content

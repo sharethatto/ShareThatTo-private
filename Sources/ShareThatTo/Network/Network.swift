@@ -95,7 +95,7 @@ extension Network
                 
                 if let response = response as? HTTPURLResponse, response.statusCode == 401
                 {
-                    shareThatToDebug(string: "Unable to authenticate, please make sure your ShareThatToClientId is correct. <doc-link>")
+                    Logger.shareThatToDebug(string: "Unable to authenticate, please make sure your ShareThatToClientId is correct.", error: nil, documentation: .apiKeyNotSet)
                     return completion(.failure(Error.notAuthenticated))
                 }
                 let response = try JSONDecoder().decode(ResponseType.self, from: unWrappedData)
@@ -103,7 +103,7 @@ extension Network
             }
             catch let error
             {
-                shareThatToDebug(string: "Unable to decode response to type \(ResponseType.self)", error: error)
+                Logger.shareThatToDebug(string: "Unable to decode response to type \(ResponseType.self)", error: error, documentation: .unexpecteError)
                 completion(.failure(Error.decoding))
             }
         }

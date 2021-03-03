@@ -160,7 +160,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             try ShareSheetViewController.session?.setCategory(.ambient, options: [])
             try ShareSheetViewController.session?.setActive(true) //Set to false to deactivate session
         } catch let error as NSError {
-            shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
+            Logger.shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
         }
 
         // Setup player
@@ -361,7 +361,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
             } catch let error as NSError {
-                shareThatToDebug(string: "Unable to activate audio session", error: error)
+                Logger.shareThatToDebug(string: "Unable to activate audio session", error: error)
             }
         }
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
@@ -388,7 +388,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
             } catch let error as NSError {
-                shareThatToDebug(string: "Unable to activate audio session", error: error)
+                Logger.shareThatToDebug(string: "Unable to activate audio session", error: error)
             }
         }
         DispatchQueue.main.async {

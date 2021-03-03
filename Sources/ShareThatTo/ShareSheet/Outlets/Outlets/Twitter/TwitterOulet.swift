@@ -11,10 +11,8 @@ struct Twitter: ShareOutletProtocol {
     static let imageName = "Twitter"
     static let outletName = "Twitter"
     static let canonicalOutletName = "twitter"
-    static let requirements: ShareOutletRequirementProtocol = {
-        return InstgramStoriesRequirements()
-    }()
-
+    static let requirements: ShareOutletRequirementProtocol = InstgramStoriesRequirements()
+    
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate?
     var delegate: ShareOutletDelegate?
     var content: Content
