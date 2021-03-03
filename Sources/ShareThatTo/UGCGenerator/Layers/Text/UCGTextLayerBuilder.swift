@@ -20,11 +20,6 @@ internal class UGCTextLayerBuilder: UGCLayerBuilder
         configuration.format.appendAttribute(.string(outputText))
         textLayer.applyAttributes(layerAttributes: configuration.format.attributes)
         
-        textLayer.borderWidth = 4
-        textLayer.borderColor = UIColor.red.cgColor
-        
-        textLayer.backgroundColor = UIColor.green.cgColor
-        
         if (textLayer.defaultPlacements == true){
             textLayer.transformToExpectedLayerPlacement(
                 outputLayerSize: scene.outputLayer.frame.size

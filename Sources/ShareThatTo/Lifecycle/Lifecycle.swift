@@ -64,12 +64,10 @@ internal class Lifecycle: LifecycleProtocol
     {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "lifecycle.app_opened", error_string: nil))
         refreshSessionData()
-        UGCLifecycleManager.appDidMoveToForeground()
     }
     
     @objc private func didEnterBackground()
     {
-        UGCLifecycleManager.appDidMoveToBackground()
     }
     
     

@@ -53,12 +53,13 @@ internal class UGCRenderer
         
     func startExport(completion: @escaping UGCResultCompletion)
     {
+        let durationLogger = UGCDurationLogger.begin(prefix: "[UGC] startExport")
         for scene in self.scenes {
             let sceneVideoAsset = AVAsset(url: scene.displayURL)
                     
             guard let sceneVideoTrack = sceneVideoAsset.tracks(withMediaType: .video).first
             else {
-                Logger.log(message: "Unable to add scene \(scene) to the UGC. Scene has no video Track.")
+                UGCLogger.log(message: "Unable to add scene \(scene) to the UGC. Scene has no video Track.")
                 continue
             }
 
@@ -70,7 +71,7 @@ internal class UGCRenderer
                     at: .zero)
             } catch {
                 // renders UGC without Scene
-                Logger.log(message: "Unable to add scene \(scene) to the UGC. Trouble insertTimeRange to mainTrack.")
+                UGCLogger.log(message: "Unable to add scene \(scene) to the UGC. Trouble insertTimeRange to mainTrack.")
                 continue
             }
                     
@@ -106,9 +107,9 @@ internal class UGCRenderer
         exporter.shouldOptimizeForNetworkUse = true
         exporter.videoComposition = self.outputComposition
         
-        Logger.log(message: "UGC Generated")
+        UGCLogger.log(message: "UGC Generated")
         exporter.exportAsynchronously {
-            Logger.log(message: "UGC Rendered ")
+            UGCLogger.log(message: "UGC Rendered ")
             switch exporter.status {
             
                 case .completed:
@@ -120,6 +121,7 @@ internal class UGCRenderer
                 case .cancelled, .failed: completion(.failure(.exportFailedOrCancelled))
                 default: completion(.failure(.unknown))
             }
+            durationLogger.finish()
         }
     }
 }

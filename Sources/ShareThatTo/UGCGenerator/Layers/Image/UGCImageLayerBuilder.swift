@@ -25,8 +25,7 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
                 outputLayerSize: scene.outputLayer.frame.size
             )
         }
-        imageLayer.borderWidth = 4
-        imageLayer.borderColor = UIColor.red.cgColor
+        
         scene.outputLayer.addSublayer(imageLayer)
     }
 }

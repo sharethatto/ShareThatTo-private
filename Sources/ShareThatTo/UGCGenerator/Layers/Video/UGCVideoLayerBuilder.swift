@@ -15,7 +15,7 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
 {
     static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecneRenderer) throws
     {
-        let durationLogger = DurationLogger.begin(prefix: "[UGCScene] withVideoLayer")
+        let durationLogger = UGCDurationLogger.begin(prefix: "[UGCScene] withVideoLayer")
         
         let videoLayer = UGCVideoLayer()
         let videoAsset = AVAsset(url: configuration.url)
@@ -42,7 +42,8 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
         )
         
         videoInstruction.setTransform(scaleFactor, at: .zero)
-
+        
+        // Reverse Order 
         do {
             try scene.sceneTrack.insertTimeRange(
                 CMTimeRangeMake(start: .zero, duration: videoAsset.duration),

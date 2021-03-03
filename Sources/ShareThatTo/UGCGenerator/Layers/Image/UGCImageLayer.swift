@@ -142,7 +142,7 @@ internal class UGCImageLayer : CALayer, UGCLayer {
             case .defaultPlacements(let value):
                 self.defaultPlacements = value
             default:
-                Logger.log(message: "This Layer attribute does not exist for this layer type.  Ignoring attribute, but preceding creating layer. layerAttribute \(layerAttribute)")
+                UGCLogger.log(message: "This Layer attribute does not exist for this layer type.  Ignoring attribute, but preceding creating layer. layerAttribute \(layerAttribute)")
             }
         }
     }

@@ -20,7 +20,7 @@ struct ContentHelper {
                     try fileManager.createDirectory(atPath: shareThatToDirectory.path, withIntermediateDirectories: true, attributes: nil)
                     return fileURLDirectory
                 } catch {
-                    Logger.log(message: "Cannot create Share That To Folder in caches directory. \(error.localizedDescription)")
+                    UGCLogger.log(message: "Cannot create Share That To Folder in caches directory. \(error.localizedDescription)")
                     return nil
                 }
             } else {
@@ -29,12 +29,12 @@ struct ContentHelper {
                     try fileManager.createDirectory(atPath: fileURLDirectory.path, withIntermediateDirectories: true, attributes: nil)
                     return fileURLDirectory
                 } catch {
-                    Logger.log(message: "Cannot create Share That To Folder in caches directory. \(error.localizedDescription)")
+                    UGCLogger.log(message: "Cannot create Share That To Folder in caches directory. \(error.localizedDescription)")
                     return nil
                 }
             }
         } else {
-            Logger.log(message: "Cannot get cachesDirectoryUrl")
+            UGCLogger.log(message: "Cannot get cachesDirectoryUrl")
             return nil
         }
     }

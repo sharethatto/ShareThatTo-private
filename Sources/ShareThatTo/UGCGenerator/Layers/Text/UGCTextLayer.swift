@@ -156,7 +156,7 @@ internal class UGCTextLayer : CATextLayer, UGCLayer {
             case .allowsFontSubpixelQuantization(let value):
                 self.allowsFontSubpixelQuantization = value
             default:
-                Logger.log(message: "This Layer attribute does not exist for this layer type.  Ignoring attribute, but preceding creating layer. layerAttribute \(layerAttribute)")
+                UGCLogger.log(message: "This Layer attribute does not exist for this layer type.  Ignoring attribute, but preceding creating layer. layerAttribute \(layerAttribute)")
             }
         }
     }

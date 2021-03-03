@@ -14,10 +14,6 @@ public protocol UGCLayer : CALayer {
     func applyAttribute(layerAttribute: CALayer.MutableLayerAttribute)
 }
 
-
-
-
-
 public extension CALayer {
     enum MutableLayerAttribute {
         // position (normally CGPoint) and frame (normally CGRect) can be of type any to allow for special setting

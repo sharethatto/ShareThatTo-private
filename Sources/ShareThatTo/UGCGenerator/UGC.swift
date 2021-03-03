@@ -9,17 +9,23 @@ import Foundation
 import AVFoundation
 import UIKit
 
-public class UGCConfiguration: UGCSceneDelegate
+public class UGC: UGCSceneDelegate
 {
     private let defaultVideoURL: URL
     private let renderSettings: UGCRenderSettings
     private let sceneRenderingWaitGroup = DispatchGroup()
-    private weak var delegate: UGCResultDelegate?
+    
+    public weak var delegate: UGCResultDelegate?
     
     private var sceneConfigurations: [UGCScene] = []
     private var sceneRenderingResults: [UGCResult?] = []
     
     //MARK: Public
+    public init(defaultVideoURL: URL, renderSettings: UGCRenderSettings)
+    {
+        self.defaultVideoURL = defaultVideoURL
+        self.renderSettings = renderSettings
+    }
     
     public init(delegate: UGCResultDelegate, defaultVideoURL: URL, renderSettings: UGCRenderSettings)
     {

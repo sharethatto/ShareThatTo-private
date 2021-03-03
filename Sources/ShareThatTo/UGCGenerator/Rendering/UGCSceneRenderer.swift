@@ -63,7 +63,7 @@ internal class UGCSecneRenderer
     
     public func sceneReady(completion: @escaping UGCResultCompletion)
     {
-        let durationLogger = DurationLogger.begin(prefix: "[UGCScene] sceneReady")
+        let durationLogger = UGCDurationLogger.begin(prefix: "[UGCScene] sceneReady")
         
         guard let sceneDuration = self.sceneDuration else {
             completion(.failure(.noDuration))
