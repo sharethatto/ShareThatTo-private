@@ -42,18 +42,18 @@ public class UGC: UGCSceneDelegate
         return sceneConfiguration
     }
     
-    public func ready()
+    public func ready(completion: UGCResultCompletion? = nil)
     {
         // Wait until all the scenes we've created are ready
         sceneRenderingWaitGroup.notify(queue: .main) {
             // Actually render the UGC
-            self.renderUGC()
+            self.renderUGC(retries: 3, completion: completion)
         }
     }
     
     //MARK: Private Rendering
     
-    private func renderUGC(retries: Int = 3)
+    private func renderUGC(retries: Int = 3, completion: UGCResultCompletion?)
     {
         let results = self.sceneRenderingResults.compactMap { (result) -> UGCSuccessResult? in
             switch(result) {
@@ -69,15 +69,17 @@ public class UGC: UGCSceneDelegate
             // Propogate configuration errors
             if(error.retryable && retries > 0)
             {
-                self.renderUGC(retries: retries - 1)
+                self.renderUGC(retries: retries - 1, completion: completion)
             }
             else
             {
                 delegate?.didFinish(result: .failure(error))
+                completion?(.failure(error))
             }
             return
         } catch {
             delegate?.didFinish(result: .failure(.unknown))
+            completion?(.failure(.unknown))
             return
         }
 
@@ -87,14 +89,16 @@ public class UGC: UGCSceneDelegate
             {
             case .success(let result):
                 self.delegate?.didFinish(result: .success(result))
+                completion?(.success(result))
             case .failure(let error):
                 if(error.retryable && retries > 0)
                 {
-                    self.renderUGC(retries: retries - 1)
+                    self.renderUGC(retries: retries - 1, completion: completion)
                 }
                 else
                 {
                     self.delegate?.didFinish(result: .failure(error))
+                    completion?(.failure(error))
                 }
             }
         }
