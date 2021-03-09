@@ -40,7 +40,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let avPlayer =  AVPlayer(url:  videoURL)
         let controller = AVPlayerViewController()
         controller.player = avPlayer
-        self.player = controller
+        self.playerController = controller
         super.init(nibName: nil, bundle: nil)
         self.presentationController?.delegate = self
     }
@@ -50,7 +50,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     }
 
     
-    let player: AVPlayerViewController
+    let playerController: AVPlayerViewController
 
     let analtyicsContext: Context = {
         return Context()
@@ -144,15 +144,15 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         self.view.addSubview(shareOutletView)
         self.view.addSubview(shareThatToBrandingView)
 
-        player.view.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(player.view)
-        player.showsPlaybackControls = false
+        playerController.view.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(playerController.view)
+        playerController.showsPlaybackControls = false
 
         NSLayoutConstraint.activate([
-            player.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            player.view.widthAnchor.constraint(equalTo: player.view.heightAnchor, multiplier: 720.0/1280.0),
-            player.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            player.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            playerController.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            playerController.view.widthAnchor.constraint(equalTo: playerController.view.heightAnchor, multiplier: 720.0/1280.0),
+            playerController.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            playerController.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
         
         ShareSheetViewController.session = AVAudioSession.sharedInstance()
@@ -164,14 +164,14 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         }
 
         // Setup player
-        self.addChild(player)
-        player.player?.isMuted = true
-        player.player?.play()
+        self.addChild(playerController)
+        playerController.player?.isMuted = true
+        playerController.player?.play()
 
         // Loop the video!
-        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: player.player?.currentItem, queue: .main) { [weak player] _ in
-            player?.player?.seek(to: CMTime.zero)
-            player?.player?.play()
+        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerController.player?.currentItem, queue: .main) { [weak playerController] _ in
+            playerController?.player?.seek(to: CMTime.zero)
+            playerController?.player?.play()
         }
 
         shareOutletView.dataSource = self
@@ -354,11 +354,11 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         cell.subviews[0].subviews[0].transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
     }
     
-    
     public func presentationControllerDidDismiss(
        _ presentationController: UIPresentationController)
      {
         // turn off audio session
+        playerController.player?.pause()
         if ShareSheetViewController.session != nil {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
@@ -384,6 +384,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
         // If we didn't use the link preview, I think we can delete it
         content.cleanupContent(with: strategiesUsed)
         // turn off audio session
+        playerController.player?.pause()
         if ShareSheetViewController.session != nil {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
