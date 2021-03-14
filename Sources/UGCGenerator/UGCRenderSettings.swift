@@ -11,19 +11,27 @@ import AVFoundation
 
 public struct UGCRenderSettings {
     
-    internal var size: CGSize
-    internal var fps: Int32
-    internal var avCodecKey: AVVideoCodecType
-    internal var filenameExt: String
-    internal var assetHeight: Double
-    internal var assetWidth: Double
-    internal var outputFileType: AVFileType
+    public static var defaultVideoAsset: UGCRenderSettings {
+        get {  UGCRenderSettings(renderPreset: .defaultVideoAsset) }
+    }
     
-    public init(renderPreset: UGCRenderPreset){
+    // Video Render Settings
+    public let size: CGSize
+    internal let fps: Int32
+    internal let avCodecKey: AVVideoCodecType
+    internal let filenameExt: String
+    internal let assetHeight: Double
+    internal let assetWidth: Double
+    internal let outputFileType: AVFileType
+    
+    // Composition options
+    internal var backgroundColor: CGColor = UIColor.white.cgColor
+    
+    public init(renderPreset: UGCRenderPreset, renderOptions: [UGCRenderOptions] = []){
         switch renderPreset {
             case .defaultVideoAsset:
-                assetHeight = 920
-                assetWidth = 517.5
+                assetHeight = 960
+                assetWidth = 540
                 size = CGSize(width: assetWidth, height: assetHeight)
                 fps = 30
                 if #available(iOS 11.0, *) {
@@ -34,10 +42,20 @@ public struct UGCRenderSettings {
                 filenameExt = "mp4"
                 outputFileType = AVFileType.mp4
         }
+        for option in renderOptions {
+            switch option {
+            case .backgroundColor(let color):
+                backgroundColor = color
+            }
+        }
     }
     
     public enum UGCRenderPreset {
         case defaultVideoAsset
+    }
+    
+    public enum UGCRenderOptions {
+        case backgroundColor(CGColor)
     }
 }
 

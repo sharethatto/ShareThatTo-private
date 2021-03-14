@@ -20,10 +20,8 @@ internal class UGCRenderer
     
     var ugcExporter : AVAssetExportSession?
     
-    
     internal var displayURL: URL
 
-    
     let renderSettings : UGCRenderSettings
     let scenes: [UGCSuccessResult]
     public init(scenes: [UGCSuccessResult],  renderSettings: UGCRenderSettings)  throws

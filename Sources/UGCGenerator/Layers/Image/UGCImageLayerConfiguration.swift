@@ -22,5 +22,10 @@ internal class UGCImageLayerConfiguration: UGCLayerConfiguration
     {
         try UGCImageLayerBuilder.build(configuration: self, scene: scene)
     }
+    
+    override public func buildPresentation(presentation: UGCScenePresentation) throws
+    {
+        try UGCImageLayerBuilder.buildPresentation(configuration: self, presentation: presentation)
+    }
 }
 

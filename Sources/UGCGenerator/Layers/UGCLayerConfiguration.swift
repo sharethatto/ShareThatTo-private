@@ -14,6 +14,11 @@ internal class UGCLayerConfiguration
     {
         //
     }
+    
+    public func buildPresentation(presentation: UGCScenePresentation) throws
+    {
+        //
+    }
 }
 
 

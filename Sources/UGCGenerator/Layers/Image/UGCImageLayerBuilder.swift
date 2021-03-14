@@ -11,7 +11,7 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
 {
     internal static func build(configuration: UGCImageLayerConfiguration, scene: UGCSecneRenderer) throws
     {
-        let imageLayer = UGCImageLayer()
+        let imageLayer = CALayer()
         
         guard let bgImage = UIImage(contentsOfFile: configuration.url.path) else {
             throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
@@ -20,12 +20,22 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
         var attributes = configuration.format.attributes
         attributes.append(.contents( bgImage.cgImage as Any ))
         imageLayer.applyAttributes(layerAttributes: attributes)
-        if (imageLayer.defaultPlacements == true){
-            imageLayer.transformToExpectedLayerPlacement(
-                outputLayerSize: scene.outputLayer.frame.size
-            )
-        }
         
         scene.outputLayer.addSublayer(imageLayer)
+    }
+        
+    static func buildPresentation(configuration: UGCImageLayerConfiguration, presentation: UGCScenePresentation) throws
+    {
+        let imageLayer = CALayer()
+        
+        guard let bgImage = UIImage(contentsOfFile: configuration.url.path) else {
+            throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+        }
+        
+        var attributes = configuration.format.attributes
+        attributes.append(.contents( bgImage.cgImage as Any ))
+        imageLayer.applyAttributes(layerAttributes: attributes)
+        
+        presentation.view.layer.addSublayer(imageLayer)
     }
 }

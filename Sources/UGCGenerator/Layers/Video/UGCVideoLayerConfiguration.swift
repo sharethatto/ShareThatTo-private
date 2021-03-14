@@ -23,5 +23,10 @@ internal class UGCVideoLayerConfiguration: UGCLayerConfiguration
     {
         try UGCVideoLayerBuilder.build(configuration: self, scene: scene)
     }
+    
+    override func buildPresentation(presentation: UGCScenePresentation) throws
+    {
+        try UGCVideoLayerBuilder.buildPresentation(configuration: self, presentation: presentation)
+    }
 }
 

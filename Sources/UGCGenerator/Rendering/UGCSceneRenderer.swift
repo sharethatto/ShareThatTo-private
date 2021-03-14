@@ -27,9 +27,12 @@ internal class UGCSecneRenderer
     internal let displayURL: URL
     internal let renderSettings: UGCRenderSettings
     private let configurations: [UGCLayerConfiguration]
-    internal init(configurations: [UGCLayerConfiguration], renderSettings: UGCRenderSettings) throws {
-        self.configurations = configurations
-        self.renderSettings = renderSettings
+    internal let sceneOptions: UGCSceneOptions
+    internal init(scene: UGCScene) throws
+    {
+        self.configurations = scene.configurations
+        self.renderSettings = scene.renderSettings
+        self.sceneOptions = scene.sceneOptions
 
         
         guard let outputURL = ContentHelper.createFileURL(filename: UUID().uuidString,
@@ -46,6 +49,11 @@ internal class UGCSecneRenderer
         self.outputLayer = CALayer()
         
         outputLayer.frame = CGRect(x: 0, y: 0, width: renderSettings.assetWidth, height: renderSettings.assetHeight)
+        outputLayer.backgroundColor = renderSettings.backgroundColor
+        
+        // HACK: https://stackoverflow.com/questions/6749216/how-to-properly-export-calayer-on-top-of-avmutablecomposition-with-avassetexport
+        // The Y-Axis gets flipped during the export for some strange, strange and very bad reason
+        outputLayer.isGeometryFlipped = true
         
         let optionalSceneTrack = sceneComposition.addMutableTrack(
             withMediaType: .video,

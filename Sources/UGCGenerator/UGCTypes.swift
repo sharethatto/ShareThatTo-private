@@ -52,3 +52,5 @@ public protocol UGCResultDelegate: class
 {
     func didFinish(result: UGCResult)
 }
+
+public typealias UGCPresentationCompletion = () -> Void

@@ -11,26 +11,23 @@ import UIKit
 
 public class UGC: UGCSceneDelegate
 {
-    private let defaultVideoURL: URL
     private let renderSettings: UGCRenderSettings
     private let sceneRenderingWaitGroup = DispatchGroup()
     
     public weak var delegate: UGCResultDelegate?
     
-    private var sceneConfigurations: [UGCScene] = []
-    private var sceneRenderingResults: [UGCResult?] = []
+    internal var sceneConfigurations: [UGCScene] = []
+    internal var sceneRenderingResults: [UGCResult?] = []
     
     //MARK: Public
-    public init(defaultVideoURL: URL, renderSettings: UGCRenderSettings)
+    public init(renderSettings: UGCRenderSettings)
     {
-        self.defaultVideoURL = defaultVideoURL
         self.renderSettings = renderSettings
     }
     
-    public init(delegate: UGCResultDelegate, defaultVideoURL: URL, renderSettings: UGCRenderSettings)
+    public init(delegate: UGCResultDelegate, renderSettings: UGCRenderSettings)
     {
         self.delegate = delegate
-        self.defaultVideoURL = defaultVideoURL
         self.renderSettings = renderSettings
     }
     
@@ -49,6 +46,20 @@ public class UGC: UGCSceneDelegate
             // Actually render the UGC
             self.renderUGC(retries: 3, completion: completion)
         }
+    }
+
+    @discardableResult
+    public func presentUGC(on viewController: UIViewController, view: UIView) -> Swift.Error?
+    {
+        do {
+            let presentation = UGCPresentation(ugc: self)
+            try  presentation.present(on: viewController, view: view)
+        } catch let error as UGCError {
+            return error
+        } catch let error {
+            return error
+        }
+        return nil
     }
     
     //MARK: Private Rendering

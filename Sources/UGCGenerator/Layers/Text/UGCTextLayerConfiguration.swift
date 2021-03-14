@@ -23,4 +23,9 @@ internal class UGCTextLayerConfiguration: UGCLayerConfiguration
     {
         UGCTextLayerBuilder.build(configuration: self, scene: scene)
     }
+    
+    override func buildPresentation(presentation: UGCScenePresentation) throws
+    {
+        try UGCTextLayerBuilder.buildPresentation(configuration: self, presentation: presentation)
+    }
 }
