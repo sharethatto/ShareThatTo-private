@@ -7,7 +7,7 @@
 
 import AVKit
 import Foundation
-import ShareThatToCore
+
 
 class VideoContentProviders
 {

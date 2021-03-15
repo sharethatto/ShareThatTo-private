@@ -6,7 +6,7 @@
 //
 import Foundation
 import AVFoundation
-import ShareThatToCore
+
 import UIKit
 
 internal class UGCRenderer

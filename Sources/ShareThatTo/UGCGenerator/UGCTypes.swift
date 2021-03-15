@@ -7,7 +7,7 @@
 
 
 import Foundation
-import ShareThatToCore
+
 
 public enum UGCError: Error
 {

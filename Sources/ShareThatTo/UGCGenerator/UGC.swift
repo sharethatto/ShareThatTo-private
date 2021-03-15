@@ -8,7 +8,7 @@
 import Foundation
 import AVFoundation
 import UIKit
-import ShareThatToCore
+
 
 public class UGC: UGCSceneDelegate, Presentable
 {
