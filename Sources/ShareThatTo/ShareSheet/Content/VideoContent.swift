@@ -7,6 +7,7 @@
 
 import AVKit
 import Foundation
+import ShareThatToCore
 
 class VideoContentProviders
 {
@@ -21,6 +22,62 @@ class VideoContentProviders
     }
 }
 
+// Content Future?
+
+
+internal typealias VideoContentResult = Result<VideoContent, Swift.Error>
+internal typealias VideoContentCompletion = (VideoContentResult) -> Void
+
+
+
+internal class VideoContentFuture
+{
+    private var completions: [VideoContentCompletion] = []
+    private var videoContentResult: VideoContentResult? = nil
+    
+    
+    internal init(futureProvider: VideoContentFutureProvider, title: String, providers: VideoContentProviders = VideoContentProviders(), completion:  VideoContentCompletion?)
+    {
+        // Add to the completions
+        if let completion = completion {
+            completions.append(completion)
+        }
+        
+        futureProvider.renderingComplete() { (result) in
+            switch(result) {
+            case .success(let success):
+                do {
+                    let videoContent = try VideoContent(videoURL: success.displayURL, title: title, providers: providers)
+                    self.videoContentComplete(result: .success(videoContent))
+                } catch let error {
+                    self.videoContentComplete(result: .failure(error))
+                }
+            case .failure(let error):
+                self.videoContentComplete(result: .failure(error))
+            }
+        }
+    }
+    
+    
+    internal func addCompletion(completion: @escaping VideoContentCompletion)
+    {
+        if let result = videoContentResult {
+            completion(result)
+            return
+        }
+        
+        completions.append(completion)
+    }
+    
+    
+    private func videoContentComplete(result: VideoContentResult)
+    {
+        for completion in completions
+        {
+            completion(result)
+        }
+    }
+}
 
 public class VideoContent: Content
 {

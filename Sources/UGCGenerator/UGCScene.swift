@@ -42,7 +42,7 @@ public class UGCScene
     internal let renderSettings: UGCRenderSettings
     internal let sceneOptions: UGCSceneOptions
     private weak var delegate: UGCSceneDelegate?
-    internal init(delegate: UGCSceneDelegate, renderSettings: UGCRenderSettings, _ sceneOptions: UGCSceneOption...) //ugc: UGC, orderInUgc: Int)
+    internal init(delegate: UGCSceneDelegate, renderSettings: UGCRenderSettings, sceneOptions: [UGCSceneOption] = []) //ugc: UGC, orderInUgc: Int)
     {
         self.delegate = delegate
         self.renderSettings = renderSettings

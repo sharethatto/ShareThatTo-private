@@ -26,11 +26,12 @@ struct InstagramStories: ShareOutletProtocol
         self.content = content
     }
     
-    static func canPerform(withContent content: Content) -> Bool
+    
+    static func canPerform(withContentType contentType:ContentType) -> Bool
     {
         // TODO: Refactor this to not need ios 10
         if #available(iOS 10.0, *) {
-            return content.contentType == .video
+            return contentType == .video
         }
         return false
     }

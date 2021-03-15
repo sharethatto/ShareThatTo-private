@@ -1,5 +1,5 @@
 import UIKit
-
+import ShareThatToCore
 //public protocol ShareThatToApplicationLifecycleProtocol
 //{
 //   
@@ -31,23 +31,32 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         self.lifecycle.start()
     }
     
-    public func presentShareSheet(on viewController: UIViewController, videoURL: URL, title: String, completion: ((Swift.Error?) -> Void)?)
+    public func presentShareSheet(on viewController: UIViewController, presentable: Presentable,  videoProvider: VideoContentFutureProvider, title: String, completion: ((Swift.Error?) -> Void)? = nil)
     {
-        guard let _ = authenticationDatastore.apiKey else {
-            let error = NSError(domain: "ShareThatTo", code: 1, userInfo: ["reason": "API key must be set"])
-            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist", error: error)
-            completion?(error)
-            return
+        if authenticationDatastore.apiKey == nil  {
+            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist")
         }
         DispatchQueue.main.async {
             do {
-                let vc = try ShareSheetViewController.init(videoURL: videoURL, title: title)
+                let vc = try ShareSheetViewController.init(presentable: presentable, videoProvider: videoProvider, title: title)
                 viewController.present(vc, animated: true) {
                     completion?(nil)
                 }
             } catch let error {
                 Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
                 completion?(error)
+            }
+        }
+    }
+    
+    public func share(ugc: ContentProvider, title: String, on: UIViewController)
+    {
+        DispatchQueue.main.async {
+            do {
+                let vc = try ShareSheetViewController.init(provider: ugc, title: title)
+                on.present(vc, animated: true)
+            } catch let error {
+                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
             }
         }
     }

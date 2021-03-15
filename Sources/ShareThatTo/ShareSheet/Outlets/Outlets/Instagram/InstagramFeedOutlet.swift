@@ -25,13 +25,13 @@ struct InstagramFeed: ShareOutletProtocol
         self.content = content
     }
     
-    static func canPerform(withContent content: Content) -> Bool
+    static func canPerform(withContentType contentType:ContentType) -> Bool
     {
         if (!ShareOutletUtils.isInstagramAppInstalled) {
             return false
         }
         // TODO: Refactor this to not need ios 10
-        return content.contentType == .video
+        return contentType == .video
     }
 
     func share(with viewController: UIViewController)

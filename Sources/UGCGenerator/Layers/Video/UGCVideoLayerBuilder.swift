@@ -29,13 +29,32 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
         let playerItem = AVPlayerItem(asset: videoAsset)
         
         
-        let observer = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerItem, queue: .main) { _ in
-            presentation.presentationViewController.videoDidFinish()
+        let duration = UGCVideoLayerBuilder.duration(maxDuration: presentation.scene?.sceneOptions.maxDuration, videoAsset: videoAsset)
+        
+        if (duration < videoAsset.duration)
+        {
+            DispatchQueue.main.asyncAfter(deadline: .now() + CMTimeGetSeconds(duration))
+            {
+                presentation.presentationViewController.videoDidFinish()
+            }
+        }
+        else
+        {
+            let observer = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerItem, queue: .main)
+            { _ in
+                presentation.presentationViewController.videoDidFinish()
+            }
+            
+            presentation.presentationViewController.registerDeinit
+            {
+                NotificationCenter.default.removeObserver(observer)
+            }
         }
         
-        presentation.presentationViewController.registerDeinit {
-            NotificationCenter.default.removeObserver(observer)
-        }
+
+        
+        
+
 
         avPlayer.player = AVPlayer(playerItem: playerItem)
         presentation.view.addSubview(avPlayer.view)
@@ -72,15 +91,7 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
         
         // Grab the duration
         
-        let duration: CMTime
-        if let maxDuration = scene.sceneOptions.maxDuration
-        {
-            duration = CMTime(value: CMTimeValue(maxDuration), timescale: 30)
-        }
-        else
-        {
-            duration = videoAsset.duration
-        }
+        let duration = UGCVideoLayerBuilder.duration(maxDuration: scene.sceneOptions.maxDuration, videoAsset: videoAsset)
             
         do {
             try scene.sceneTrack.insertTimeRange(
@@ -91,7 +102,7 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
             throw UGCError.videoError(message: "Unable to insert video track")
         }
 
-        scene.sceneDuration = videoAsset.duration
+        scene.sceneDuration = duration
         scene.sceneOutputComposition.animationTool = AVVideoCompositionCoreAnimationTool(
             postProcessingAsVideoLayer: videoLayer,
             in: scene.outputLayer)
@@ -99,5 +110,27 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
         scene.outputLayer.addSublayer(videoLayer)
         
         durationLogger.finish()
+    }
+    
+    static func duration(maxDuration: Double?, videoAsset: AVAsset) -> CMTime
+    {
+        let duration: CMTime
+        if let maxDuration = maxDuration
+        {
+            let maxDurationTime = CMTime(seconds: maxDuration, preferredTimescale: videoAsset.duration.timescale)
+            if (maxDurationTime > videoAsset.duration)
+            {
+                duration =  videoAsset.duration
+            }
+            else
+            {
+                duration = maxDurationTime
+            }
+        }
+        else
+        {
+            duration = videoAsset.duration
+        }
+        return duration
     }
 }

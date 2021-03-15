@@ -10,8 +10,11 @@ import AVKit
 import UIKit
 import Photos
 import Foundation
+import ShareThatToCore
 
 let defaultRect =  CGRect(x: 0, y: 0, width: 100, height: 100)
+
+let shareOutletItemSize: CGFloat = 75
 
 internal class ShareSheetViewController: UIViewController, UICollectionViewDelegate, UIAdaptivePresentationControllerDelegate {
 
@@ -22,35 +25,61 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     static let darkModeBackground : UIColor = UIColor(rgb: 0x0F0F0F)
     static let contentMargin: CGFloat = 20
     static let shareoutViewDimension: CGFloat = 80
-    static let shareOutletItemSize: CGFloat = 75
     
     static var session : AVAudioSession?
-    
-    var content: Content
-    var shareOutlets: [ShareOutletProtocol]
 
+    var shareOutlets: [ShareOutletProtocol.Type]
     
-    internal init(videoURL: URL, title: String) throws {
-        // TODO: Fix this with a delegate proxy so we don't break other callers
-        // https://stackoverflow.com/questions/26953559/in-swift-how-do-i-have-a-uiscrollview-subclass-that-has-an-internal-and-externa
-        
-        self.content = try VideoContent(videoURL: videoURL, title: title)
-        self.shareOutlets = ShareOutlets.outlets(forPeformable: self.content)
-        
-        let avPlayer =  AVPlayer(url:  videoURL)
-        let controller = AVPlayerViewController()
-        controller.player = avPlayer
-        self.playerController = controller
+    private var content: Content?
+    private let presentable: Presentable
+
+    private var vidoeContentFuture: VideoContentFuture?
+    
+    internal init(presentable: Presentable, videoProvider: VideoContentFutureProvider, title: String) throws
+    {
+        self.presentable = presentable
+        self.shareOutlets = ShareOutlets.outlets(forPeformableType: .video)
         super.init(nibName: nil, bundle: nil)
+        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: videoProvider, title: title)
+        {
+            (result) in
+            var analyticsEvent = AnalyticsEvent(event_name: "share_sheet.rendering_completed")
+            switch(result)
+            {
+            case .success(let videoContent):
+                self.content = videoContent
+            case .failure(let error):
+                analyticsEvent.error_string = error.localizedDescription
+            }
+            Analytics.shared.addEvent(event: analyticsEvent, context: self.analtyicsContext)
+        }
+        self.presentationController?.delegate = self
+    }
+    
+    internal init(provider: ContentProvider, title: String) throws
+    {
+        self.presentable = provider
+        self.shareOutlets = ShareOutlets.outlets(forPeformableType: .video)
+        super.init(nibName: nil, bundle: nil)
+        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: provider, title: title)
+        {
+            (result) in
+            var analyticsEvent = AnalyticsEvent(event_name: "share_sheet.rendering_completed")
+            switch(result)
+            {
+            case .success(let videoContent):
+                self.content = videoContent
+            case .failure(let error):
+                analyticsEvent.error_string = error.localizedDescription
+            }
+            Analytics.shared.addEvent(event: analyticsEvent, context: self.analtyicsContext)
+        }
         self.presentationController?.delegate = self
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    
-    let playerController: AVPlayerViewController
 
     let analtyicsContext: Context = {
         return Context()
@@ -81,7 +110,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         shareToLabelView.addSubview(shareToLabel)
         NSLayoutConstraint.activate([
-//            shareToLabel.topAnchor.constraint(equalTo: shareToLabelView.topAnchor, constant: 0),
             shareToLabel.centerXAnchor.constraint(equalTo: shareToLabelView.centerXAnchor),
             shareToLabel.centerYAnchor.constraint(equalTo: shareToLabelView.centerYAnchor),
         ])
@@ -103,7 +131,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         shareOutletView.backgroundColor = lightModeBackground
         shareOutletView.translatesAutoresizingMaskIntoConstraints = false
         shareOutletView.collectionViewLayout = layout
-        shareOutletView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ShareThatToOutletCell")
+        shareOutletView.register(ShareOutletCellView.self, forCellWithReuseIdentifier: "ShareThatToOutletCell")
         shareOutletView.showsHorizontalScrollIndicator = false
             
         return shareOutletView
@@ -124,6 +152,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         
         var userInterfaceModeString = "lightMode"
         if #available(iOS 12.0, *) {
+            self.view.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
             contentView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
             shareToLabelView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
             shareOutletView.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
@@ -144,34 +173,12 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         self.view.addSubview(shareOutletView)
         self.view.addSubview(shareThatToBrandingView)
 
-        playerController.view.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(playerController.view)
-        playerController.showsPlaybackControls = false
-
-        NSLayoutConstraint.activate([
-            playerController.view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            playerController.view.widthAnchor.constraint(equalTo: playerController.view.heightAnchor, multiplier: 720.0/1280.0),
-            playerController.view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            playerController.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-        ])
-        
         ShareSheetViewController.session = AVAudioSession.sharedInstance()
         do {
             try ShareSheetViewController.session?.setCategory(.ambient, options: [])
             try ShareSheetViewController.session?.setActive(true) //Set to false to deactivate session
         } catch let error as NSError {
             Logger.shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
-        }
-
-        // Setup player
-        self.addChild(playerController)
-        playerController.player?.isMuted = true
-        playerController.player?.play()
-
-        // Loop the video!
-        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerController.player?.currentItem, queue: .main) { [weak playerController] _ in
-            playerController?.player?.seek(to: CMTime.zero)
-            playerController?.player?.play()
         }
 
         shareOutletView.dataSource = self
@@ -183,6 +190,16 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         addShareThatToLogoButtonView()
     }
     
+    private var presentedPresntable: Bool = false
+    override func viewDidLayoutSubviews()
+    {
+        super.viewDidLayoutSubviews()
+        print("DID LAYOUT SUBVIEWS")
+        if (presentedPresntable) { return }
+        presentedPresntable = true
+        self.presentable.present(on: self, view: contentView)
+    }
+
     func makeShareThatToLogoLabel(_ userInterfaceModeString: String) -> UILabel {
         let shareThatToBrandingLabel = UILabel(frame: defaultRect)
         
@@ -235,7 +252,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     
     func addShareOutletView() {
         let constraints = [
-//            shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             shareOutletView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.shareoutViewDimension),
@@ -260,90 +276,88 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     func addContentView() {
         let constraints = [
-            contentView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 25),
             contentView.bottomAnchor.constraint(equalTo: shareToLabelView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
         ]
         NSLayoutConstraint.activate(constraints)
     }
-
+    
+    // UICollectionView - state
+    internal var spinningCellIndex: IndexPath? = nil
+    internal var currentlySharingOulet: ShareOutletProtocol? = nil
 }
 
 // MARK: Button Responders
 
 extension ShareSheetViewController {
 
-    @objc func didTapShareThatToLogo() {
-        
+    @objc func didTapShareThatToLogo()
+    {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.logo_tapped"), context: analtyicsContext)
-        
     }
-
-
 }
+
 // MARK: UICollectionView
 
 extension ShareSheetViewController: UICollectionViewDataSource {
 
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
+    {
         return shareOutlets.count
     }
 
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShareThatToOutletCell", for: indexPath)
-        if #available(iOS 12.0, *) {
-            myCell.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+    {
+        let shareOutletCell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShareThatToOutletCell", for: indexPath) as! ShareOutletCellView
+        if #available(iOS 12.0, *)
+        {
+            shareOutletCell.backgroundColor = self.traitCollection.userInterfaceStyle == .dark ? ShareSheetViewController.darkModeBackground : ShareSheetViewController.lightModeBackground
         }
-
-        for view in myCell.contentView.subviews {
-            view.removeFromSuperview()
+        shareOutletCell.setupOutlet(shareOutlets[indexPath.row])
+        
+        var shouldSpin = false
+        if let spinningIndex = spinningCellIndex
+        {
+            if (spinningIndex == indexPath)
+            {
+                shouldSpin = true
+            }
         }
-
-        // Find the right share outletn & load the image
-        let shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
-        let image = type(of: shareOutlet).buttonImage() //UIImage(named: shareOutlet.imageName)
-
-        let label = UILabel()
-        let labelText = NSAttributedString(string: type(of: shareOutlet).outletName,
-                                           attributes: [
-                                            NSAttributedString.Key.font: UIFont(name: "Avenir", size: 12.0) as Any
-                                           ])
-        label.attributedText = labelText
-        label.textAlignment = .center
-        let imageView = UIImageView(image: image)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.isUserInteractionEnabled = true
-        
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        myCell.contentView.addSubview(imageView)
-        myCell.contentView.addSubview(label)
-
-        let constraints = [
-            imageView.topAnchor.constraint(equalTo: myCell.contentView.topAnchor),
-            imageView.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.70),
-            imageView.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.70), // Make it a square
-            imageView.centerXAnchor.constraint(equalTo: myCell.contentView.centerXAnchor),
-            label.bottomAnchor.constraint(equalTo: myCell.contentView.bottomAnchor),
-            label.widthAnchor.constraint(equalTo: myCell.contentView.widthAnchor),
-            label.heightAnchor.constraint(equalTo: myCell.contentView.widthAnchor, multiplier: 0.2), // Make it a square
-            label.centerXAnchor.constraint(equalTo: myCell.contentView.centerXAnchor)
-        ]
-        NSLayoutConstraint.activate(constraints)
-        return myCell
+        shareOutletCell.spin(shouldSpin)
+        return shareOutletCell
     }
 
-    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let dl = DurationLogger.begin(prefix: "Cell tapped")
-        var shareOutlet: ShareOutletProtocol = shareOutlets[indexPath.row]
-        shareOutlet.delegate = self
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).started"))
-        shareOutlet.share(with: self)
-        dl.finish()
+    // State to ensure we can only tap one cell while the rendering is happening
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
+    {
+        if (spinningCellIndex != nil) { return }
+        let shareOutletClass: ShareOutletProtocol.Type = shareOutlets[indexPath.row]
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(shareOutletClass.canonicalOutletName).started"))
+        
+        guard let unwrappedContent = self.content else
+        {
+            // We don't have the content yet, we're going to add a spinner
+            spin(indexPath, true)
+            Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.rendering_incomplete_on_tap"), context: analtyicsContext)
+            self.vidoeContentFuture?.addCompletion { (result) in
+                self.spin(indexPath, false)
+                switch(result)
+                {
+                case .success(let content):
+                    self.share(content: content, to: shareOutletClass)
+                case .failure(let error):
+                    self.presentError(error: "Unable share right now: \(error.localizedDescription)")
+                }
+            }
+            return
+        }
+        share(content: unwrappedContent, to: shareOutletClass)
     }
-    
-    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath){
+
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath)
+    {
         Haptics.shared.play(.light)
         guard let cell = shareOutletView.cellForItem(at: indexPath) else { return }
         cell.subviews[0].subviews[0].transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
@@ -358,7 +372,6 @@ extension ShareSheetViewController: UICollectionViewDataSource {
        _ presentationController: UIPresentationController)
      {
         // turn off audio session
-        playerController.player?.pause()
         if ShareSheetViewController.session != nil {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
@@ -368,23 +381,82 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         }
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
         // We didn't use any strategies
-        content.cleanupContent(with: [])
+        content?.cleanupContent(with: [])
      }
+    
+    
+    //MARK: - ShareOutletButtons
+
+    private func share(content: Content, to: ShareOutletProtocol.Type)
+    {
+        
+        DispatchQueue.main.async
+        {
+            // Safeguard to prevent popping two outlets at once
+            if (self.currentlySharingOulet != nil) { return }
+            
+            var shareOutlet = to.init(content: content)
+            self.currentlySharingOulet = shareOutlet
+            shareOutlet.delegate = self
+            shareOutlet.share(with: self)
+        }
+    }
+    
+    internal func shareComplete()
+    {
+        currentlySharingOulet = nil
+    }
+    
+    private func spin(_ indexPath: IndexPath, _ enabled: Bool)
+    {
+        var reloadPaths = [indexPath]
+        
+        if let originalIndexPath: IndexPath = spinningCellIndex
+        {
+            reloadPaths.append(originalIndexPath)
+        }
+        
+        if (enabled)
+        {
+            spinningCellIndex = indexPath
+        }
+        
+        else
+        {
+            spinningCellIndex = nil
+        }
+        
+        DispatchQueue.main.async
+        {
+            self.shareOutletView.reloadItems(at: reloadPaths)
+        }
+    }
+    
+    internal func presentError(error: String, completion: (() -> Void)? = nil)
+    {
+        let alert = UIAlertController(title: "Error", message: error, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+            completion?()
+        }))
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
 }
-
-
 
 // MARK: ShareOutletDelegate
 
 extension ShareSheetViewController: ShareOutletDelegate {
 
-    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType]) {
+    func success(shareOutlet: ShareOutletProtocol, strategiesUsed: [ShareStretegyType])
+    {
+        shareComplete()
+        
         // TODO: Add strategy type to event
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).succeeded"), context: analtyicsContext)
         // If we didn't use the link preview, I think we can delete it
-        content.cleanupContent(with: strategiesUsed)
+        content?.cleanupContent(with: strategiesUsed)
         // turn off audio session
-        playerController.player?.pause()
         if ShareSheetViewController.session != nil {
             do {
                 try ShareSheetViewController.session?.setActive(false) //Set to false to deactivate session
@@ -399,17 +471,14 @@ extension ShareSheetViewController: ShareOutletDelegate {
 
     func failure(shareOutlet: ShareOutletProtocol, error: String)
     {
+        shareComplete()
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).failed", error_string: error), context: analtyicsContext)
-        let alert = UIAlertController(title: "Error", message: error, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-            NSLog("The \"OK\" alert occured.")        
-        }))
-        DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
-        }
+        presentError(error: error)
     }
 
-    func cancelled(shareOutlet: ShareOutletProtocol){
+    func cancelled(shareOutlet: ShareOutletProtocol)
+    {
+        shareComplete()
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(type(of: shareOutlet).canonicalOutletName).cancelled"), context: analtyicsContext)
     }
 }

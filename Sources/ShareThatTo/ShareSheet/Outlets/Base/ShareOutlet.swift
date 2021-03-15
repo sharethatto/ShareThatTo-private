@@ -28,13 +28,13 @@ class ShareOutlets
         }
     }
     
-    internal static func outlets(forPeformable content:Content) -> [ShareOutletProtocol]
+    internal static func outlets(forPeformableType contentType:ContentType) -> [ShareOutletProtocol.Type]
     {
-        var outlets: [ShareOutletProtocol] = []
+        var outlets: [ShareOutletProtocol.Type] = []
         for outletClass in availableOutlets {
-            if (outletClass.canPerform(withContent: content)){
-                let outlet = outletClass.init(content: content)
-                outlets.append(outlet)
+            if (outletClass.canPerform(withContentType: contentType))
+            {
+                outlets.append(outletClass)
             }
         }
         return outlets
@@ -47,6 +47,8 @@ public protocol ShareOutletDelegate {
     func cancelled(shareOutlet: ShareOutletProtocol)
 }
 
+
+// TODO: Refactor so the outlet logic is disconnected from the actual view logic
 public protocol ShareOutletProtocol
 {
     static var outletLifecycleDelegate: ShareThatToLifecycleDelegate? { get }
@@ -61,9 +63,11 @@ public protocol ShareOutletProtocol
     static var requirements: ShareOutletRequirementProtocol? { get }
     
     static func buttonImage() -> UIImage?
-    static func canPerform(withContent content:Content) -> Bool;
+//    static func canPerform(withContent content:Content) -> Bool;
+    static func canPerform(withContentType contentType:ContentType) -> Bool;
     
     // Initialize with the content
+    // TODO: Ensure there is some content available to share before allowing init
     init(content: Content)
     
     // Actually present the view controller and try and share the content
@@ -77,7 +81,7 @@ extension ShareOutletProtocol
     }
     
     // Right now we can only perform with video content
-    static func canPerform(withContent content: Content) -> Bool
+    static func canPerform(withContentType contentType:ContentType) -> Bool
     {
         if let reqs = requirements {
             if (!reqs.met(plist: Bundle.main.infoDictionary ?? [:]))
@@ -86,7 +90,7 @@ extension ShareOutletProtocol
                 return false
             }
         }
-        if (content.contentType == .video)
+        if (contentType == .video)
         {
             return true
         }

@@ -17,7 +17,6 @@ internal class UGCScenePresentationViewController: UIViewController
     private weak var presentation: UGCScenePresentation?
     init(presentation: UGCScenePresentation)
     {
-        print("[ShareThatTo] UGCScenePresentionView init")
         self.presentation = presentation
         super.init(nibName: nil, bundle: nil)
     }
@@ -56,9 +55,7 @@ internal class UGCScenePresentationViewController: UIViewController
         {
             deinitBlock()
         }
-        print("[ShareThatTo] UGCScenePresentionView deinit")
     }
-    
     
     public func registerDeinit(completion: @escaping () -> Void)
     {
@@ -73,7 +70,6 @@ internal protocol UGCScenePresentationDelegate: class {
 
 internal class UGCScenePresentation
 {
-//    let view: UIView
     weak var view: UIView!
     weak var viewController: UIViewController!
     weak var scene: UGCScene?
@@ -113,12 +109,16 @@ internal class UGCScenePresentation
         // TODO: Support UIViewContentModeScaleAspectFit, UIViewContentModeScaleAspectFill
         // TODO: Support AVLayerVideoGravity 
 
+        
+        // Handle narrower content view
         let scale = view.frame.height / CGFloat(renderSettings.assetHeight)
         
         var transform = CGAffineTransform.identity
+        let centeringXAdjustment = CGFloat(renderSettings.assetWidth) * scale / 2.0  - view.frame.width / 2.0
+        let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * (CGFloat(renderSettings.assetWidth)) - centeringXAdjustment
         
-        let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.assetWidth)
-        let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.assetHeight)
+        let centeringYAdjustment = CGFloat(renderSettings.assetHeight) * scale / 2.0  - view.frame.height / 2.0
+        let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.assetHeight) - centeringYAdjustment
         
         transform = transform.translatedBy(x: translateX, y: translateY)
         transform = transform.scaledBy(x: scale, y: scale)

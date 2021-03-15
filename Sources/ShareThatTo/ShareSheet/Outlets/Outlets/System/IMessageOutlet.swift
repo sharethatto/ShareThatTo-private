@@ -31,9 +31,9 @@ class IMessage: NSObject, ShareOutletProtocol, MFMessageComposeViewControllerDel
     }
 
     // Make sure we have the ability to send messages before we show this option
-    static func canPerform(withContent content: Content) -> Bool
+    static func canPerform(withContentType contentType:ContentType) -> Bool
     {
-        if (content.contentType == .video)
+        if (contentType == .video)
         {
             return MFMessageComposeViewController.canSendText() && MFMessageComposeViewController.canSendAttachments()
         }

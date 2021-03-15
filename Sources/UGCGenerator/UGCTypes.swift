@@ -5,7 +5,9 @@
 //  Created by Brian Anglin on 3/2/21.
 //
 
+
 import Foundation
+import ShareThatToCore
 
 public enum UGCError: Error
 {
@@ -39,12 +41,9 @@ public enum UGCError: Error
 }
 
 
-public typealias UGCResult = Result<UGCSuccessResult, UGCError>
+public typealias UGCResult = Result<SuccessfulRenderingResult, UGCError>
 
-public struct UGCSuccessResult: Equatable
-{
-    public let displayURL: URL
-}
+public typealias UGCSuccessResult = SuccessfulRenderingResult
 
 public typealias UGCResultCompletion = (UGCResult) -> Void
 

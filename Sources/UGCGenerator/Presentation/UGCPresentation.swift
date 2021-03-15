@@ -8,6 +8,17 @@
 import UIKit
 import Foundation
 
+//internal class UGCPresentationViewController: UIViewController
+//{
+//    
+//    
+//    
+//    deinit {
+//        print("[UGCPresentationViewController] deinit")
+//    }
+//    
+//}
+
 internal class UGCPresentation
 {
     weak var view: UIView!

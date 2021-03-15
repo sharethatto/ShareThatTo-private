@@ -8,8 +8,9 @@
 import Foundation
 import AVFoundation
 import UIKit
+import ShareThatToCore
 
-public class UGC: UGCSceneDelegate
+public class UGC: UGCSceneDelegate, Presentable
 {
     private let renderSettings: UGCRenderSettings
     private let sceneRenderingWaitGroup = DispatchGroup()
@@ -31,25 +32,17 @@ public class UGC: UGCSceneDelegate
         self.renderSettings = renderSettings
     }
     
-    public func createSceneConfiguration() -> UGCScene
+    public func createSceneConfiguration(_ sceneOptions: UGCSceneOption...) -> UGCScene
     {
-        let sceneConfiguration = UGCScene(delegate: self, renderSettings: self.renderSettings)
+        let sceneConfiguration = UGCScene(delegate: self, renderSettings: self.renderSettings, sceneOptions: sceneOptions)
         sceneConfigurations.append(sceneConfiguration)
         sceneRenderingResults.append(nil)
         return sceneConfiguration
     }
     
-    public func ready(completion: UGCResultCompletion? = nil)
-    {
-        // Wait until all the scenes we've created are ready
-        sceneRenderingWaitGroup.notify(queue: .main) {
-            // Actually render the UGC
-            self.renderUGC(retries: 3, completion: completion)
-        }
-    }
-
+    
     @discardableResult
-    public func presentUGC(on viewController: UIViewController, view: UIView) -> Swift.Error?
+    public func present(on viewController: UIViewController, view: UIView) -> Swift.Error?
     {
         do {
             let presentation = UGCPresentation(ugc: self)
@@ -62,9 +55,51 @@ public class UGC: UGCSceneDelegate
         return nil
     }
     
+    private var renderingResult: UGCResult? = nil
+    private var renderingStarted: Bool = false
+    private var completionConsumers: [UGCResultCompletion] = []
+    
+    
+    public func ready(completion: UGCResultCompletion? = nil)
+    {
+        // Circuit break here if we've already finished rendering
+        // This result will always be nil until we've finished rendering
+        if let result = renderingResult {
+            completion?(result)
+            return
+        }
+        
+        // TODO: Possible race here:
+        // (A) The rendering was not done when we checked
+        // (B) Finishes and the completions are called
+        // (A) We now add the new completion to the list
+        
+        // Add a new watcher
+        if let unwrappedCompletion = completion
+        {
+            completionConsumers.append(unwrappedCompletion)
+        }
+        
+        // Only start this process once
+        if (renderingStarted)
+        {
+            return
+        }
+        renderingStarted = true
+        
+        
+        // Wait until all the scenes we've created are ready
+        sceneRenderingWaitGroup.notify(queue: .main) {
+            // Actually render the UGC
+            self.renderUGC(retries: 3)
+        }
+    }
+
+    
     //MARK: Private Rendering
     
-    private func renderUGC(retries: Int = 3, completion: UGCResultCompletion?)
+    
+    private func renderUGC(retries: Int = 3)
     {
         let results = self.sceneRenderingResults.compactMap { (result) -> UGCSuccessResult? in
             switch(result) {
@@ -80,17 +115,15 @@ public class UGC: UGCSceneDelegate
             // Propogate configuration errors
             if(error.retryable && retries > 0)
             {
-                self.renderUGC(retries: retries - 1, completion: completion)
+                self.renderUGC(retries: retries - 1)
             }
             else
             {
-                delegate?.didFinish(result: .failure(error))
-                completion?(.failure(error))
+                self.renderingDidComplete(result: .failure(error))
             }
             return
         } catch {
-            delegate?.didFinish(result: .failure(.unknown))
-            completion?(.failure(.unknown))
+            self.renderingDidComplete(result: .failure(.unknown))
             return
         }
 
@@ -99,20 +132,29 @@ public class UGC: UGCSceneDelegate
             switch(result)
             {
             case .success(let result):
-                self.delegate?.didFinish(result: .success(result))
-                completion?(.success(result))
+                self.renderingDidComplete(result: .success(result))
             case .failure(let error):
                 if(error.retryable && retries > 0)
                 {
-                    self.renderUGC(retries: retries - 1, completion: completion)
+                    self.renderUGC(retries: retries - 1)
                 }
                 else
                 {
-                    self.delegate?.didFinish(result: .failure(error))
-                    completion?(.failure(error))
+                    self.renderingDidComplete(result: .failure(error))
                 }
             }
         }
+    }
+    
+    // Notify all the watchers
+    private func renderingDidComplete(result: UGCResult)
+    {
+        self.renderingResult = result
+        for completion in completionConsumers
+        {
+            completion(result)
+        }
+        delegate?.didFinish(result: result)
     }
     
     //MARK: UGCSceneDelegate
@@ -132,5 +174,29 @@ public class UGC: UGCSceneDelegate
     internal func sceneReady(configuration: UGCScene)
     {
         sceneRenderingWaitGroup.enter()
+    }
+}
+
+extension UGC: VideoContentFutureProvider
+{
+    public func startRendering()
+    {
+        ready()
+    }
+    
+    public func renderingComplete(completion: @escaping (RenderingResult) -> Void)
+    {
+        // TODO: Since the completion signature is basically the same except
+        // the UGC uses `UGCError` (which is as subclass of `Swift.Error`) we have to do this
+        // grossness 
+        ready() {
+            (result) in
+            switch(result) {
+            case .success(let result):
+                completion(.success(result))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
 }

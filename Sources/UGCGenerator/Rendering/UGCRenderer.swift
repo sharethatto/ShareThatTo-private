@@ -6,6 +6,7 @@
 //
 import Foundation
 import AVFoundation
+import ShareThatToCore
 import UIKit
 
 internal class UGCRenderer
@@ -79,7 +80,6 @@ internal class UGCRenderer
                 sceneInstruction.setOpacity(0.0, at: self.durationTillNow)
             }
             self.instruction.layerInstructions.append(sceneInstruction)
-  
         }
             
         self.instruction.timeRange = CMTimeRangeMake(

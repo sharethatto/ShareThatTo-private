@@ -26,13 +26,21 @@ let package = Package(
         .target(
             name: "ShareThatTo",
             dependencies: [
+                "ShareThatToCore",
             ],
             path: "Sources/ShareThatTo", resources: [
                 .copy("Assets")
             ]),
         .target(
             name: "UGCGenerator",
+            dependencies: [
+                "ShareThatToCore"
+            ],
             path: "Sources/UGCGenerator"
+        ),
+        .target(
+            name: "ShareThatToCore",
+            path: "Sources/Core"
         ),
         .testTarget(
             name: "ShareThatToTests",
