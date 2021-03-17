@@ -13,7 +13,7 @@ private class BundleFinder {}
 extension Foundation.Bundle {
     /// Returns the resource bundle associated with the current Swift module.
     static var module: Bundle = {
-        let bundleName = "ShareThatTo_ShareThatTo"
+        let bundleName = "ShareThatTo_ShareThatToAssets"
 
         let candidates = [
             // Bundle should be present here when the package is linked into an App.

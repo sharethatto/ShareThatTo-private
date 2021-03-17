@@ -1,0 +1,60 @@
+#!/bin/bash
+
+set -ex
+
+cd "$(dirname "$0")/../.."
+
+
+# Setup a clean output directory
+rm -rf out/
+mkdir -p out/
+
+# Copy BundleModule.swift to provide a `Bundle.module` function
+# This is complicated by SPM won't provide a way to bundle resources w/ a
+# binary package. So instead we're going to handle it in our public Swift
+# package repo.
+cp support/BundleModule.swift Sources/ShareThatTo/BundleModule.swift
+
+# Actually build & create the xcframework
+swift create-xcframework --platform ios --output out
+
+# Cleanup the bundle hack
+rm Sources/ShareThatTo/BundleModule.swift
+
+cd out/ShareThatTo.xcframework
+
+# Hack to deal with module prefixing
+# https://developer.apple.com/forums/thread/123253
+find . -name "*.swiftinterface" -exec sed -i -e 's/ShareThatTo\.//g' {} \;
+
+cd ..
+
+zip -r -X ShareThatTo.zip ShareThatTo.xcframework
+
+FRAMEWORK_SHA="$(shasum -a 256 ShareThatTo.zip | awk '{print $1}')"
+
+echo "$FRAMEWORK_SHA" > "ShareThatTo.sha256"
+
+exit 1
+
+# Get the public repository
+if [ ! -d "public" ]
+then
+  git clone https://github.com/sharethatto/ShareThatTo.git public
+fi
+
+cd ../public
+
+git add . && git stash
+git reset --hard HEAD
+
+git checkout release-trunk
+
+cp ../out/ShareThatTo.zip Frameworks/
+
+git commit -m "Checking in new release"
+
+GIT_SHA="$(git rev-parse HEAD)"
+
+
+

@@ -4,14 +4,4 @@ set -ex
 
 cd "$(dirname "$0")/.."
 
-cp script/BundleModule.swift Sources/BundleModule.swift
-
-swift create-xcframework --platform ios
-
-rm Sources/BundleModule.swift
-
-cd ShareThatTo.xcframework
-
-# Hack to deal with module prefixing
-# https://developer.apple.com/forums/thread/123253
-find . -name "*.swiftinterface" -exec sed -i -e 's/ShareThatTo\.//g' {} \;
+script/_build/build

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -ex
+
+cd "$(dirname "$0")/../.."
+
+# Get the public repository
+if [ ! -d "public" ]
+then
+  git clone https://github.com/sharethatto/ShareThatTo.git public
+fi
+
+cd ./public
+
+# Clean up current working copy
+git add . && git stash
+git reset --hard HEAD
+
+# Checkout the relase truck for SwiftPM
+git checkout release-trunk
+
+cp ../out/ShareThatTo.zip Frameworks/
+
+git add Frameworks/ShareThatTo.zip
+git commit -m "Checking in new release"
+
+# We need to commit the framework so we can get the sha for the raw GitHub url 
+# later.
+
+# Replacing the link the package & sha256 of the new package
+GIT_SHA="$(git rev-parse HEAD)"
+sed -i '' "s/\/[^\/]*\/Frameworks/\/$GIT_SHA\/Frameworks/" Package.swift
+
+FRAMEWORK_SHA=$(cat ../out/ShareThatTo.sha256)
+sed -i '' "s/checksum: \".*\"/checksum: \"$FRAMEWORK_SHA\"/" Package.swift
+
+# Copy the assets
+rm -rf Sources/ShareThatToAssets/Assets
+cp -r ../Sources/ShareThatTo/Assets Sources/ShareThatToAssets/
+
+
+echo "A new commit was created on release-truck, if you're ready to release"
+echo "1) Push the release-trunk branch"
+echo "2) Check out the desired branch & commit the changes to Package.swift and Sources"
