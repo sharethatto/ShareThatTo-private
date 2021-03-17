@@ -8,54 +8,71 @@ import UIKit
 import Foundation
 import AVFoundation
 
+public enum UGCRenderPreset
+{
+    case verticalVideoPreset
+}
 
-public struct UGCRenderSettings {
-    
-    public static var defaultVideoAsset: UGCRenderSettings {
-        get {  UGCRenderSettings(renderPreset: .defaultVideoAsset) }
-    }
+public enum UGCRenderOptions
+{
+    case backgroundColor(CGColor)
+    case preset(UGCRenderPreset)
+    case width(CGFloat)
+    case height(CGFloat)
+}
+
+public struct UGCRenderSettings
+{
     
     // Video Render Settings
-    public let size: CGSize
+    public var size: CGSize
     internal let fps: Int32
     internal let avCodecKey: AVVideoCodecType
     internal let filenameExt: String
-    internal let assetHeight: Double
-    internal let assetWidth: Double
+
     internal let outputFileType: AVFileType
     
     // Composition options
     internal var backgroundColor: CGColor = UIColor.white.cgColor
     
-    public init(renderPreset: UGCRenderPreset, renderOptions: [UGCRenderOptions] = []){
-        switch renderPreset {
-            case .defaultVideoAsset:
-                assetHeight = 960
-                assetWidth = 540
-                size = CGSize(width: assetWidth, height: assetHeight)
-                fps = 30
-                if #available(iOS 11.0, *) {
-                    avCodecKey = AVVideoCodecType.h264
-                } else {
-                    avCodecKey = AVVideoCodecType(rawValue: AVVideoCodecH264)
-                }
-                filenameExt = "mp4"
-                outputFileType = AVFileType.mp4
+    public init(_ options: [UGCRenderOptions] = []){
+        let presets = options.compactMap { (option) -> UGCRenderPreset? in
+            switch option {
+            case .preset(let preset):
+                return preset
+            default: break
+            }
+            return nil
         }
-        for option in renderOptions {
+        
+        let preset: UGCRenderPreset = presets[safe: 0] ?? .verticalVideoPreset
+        
+        switch preset {
+        case .verticalVideoPreset:
+            size = CGSize(width: 540, height: 960)
+            fps = 30
+            if #available(iOS 11.0, *) {
+                avCodecKey = AVVideoCodecType.h264
+            } else {
+                avCodecKey = AVVideoCodecType(rawValue: AVVideoCodecH264)
+            }
+            filenameExt = "mp4"
+            outputFileType = AVFileType.mp4
+        }
+        
+        
+        for option in options
+        {
             switch option {
             case .backgroundColor(let color):
                 backgroundColor = color
+            case .height(let height):
+                size = CGSize(width: size.width, height: height)
+            case .width(let width):
+                size = CGSize(width: width, height: size.height)
+            case .preset(_): break
             }
         }
-    }
-    
-    public enum UGCRenderPreset {
-        case defaultVideoAsset
-    }
-    
-    public enum UGCRenderOptions {
-        case backgroundColor(CGColor)
     }
 }
 

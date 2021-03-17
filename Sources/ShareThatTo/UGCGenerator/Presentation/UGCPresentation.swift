@@ -36,7 +36,7 @@ internal class UGCPresentation
         
     }
     
-    public func present(on viewController: UIViewController, view: UIView) throws
+    public func presentOn(viewController: UIViewController, view: UIView) throws
     {
         try present(index: sceneIndex, viewController: viewController, view: view)
     }
@@ -57,7 +57,7 @@ internal class UGCPresentation
                 self.sceneIndex = 0
             }
             do {
-                try self.present(on: viewController, view: view)
+                try self.presentOn(viewController: viewController, view: view)
             } catch {
                 UGCLogger.log(message: "Got error presting")
             }

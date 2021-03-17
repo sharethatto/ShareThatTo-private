@@ -10,5 +10,5 @@ import Foundation
 
 public protocol Presentable
 {
-    func present(on viewController: UIViewController, view: UIView) -> Swift.Error?
+    func presentOn(viewController: UIViewController, view: UIView) -> Swift.Error?
 }

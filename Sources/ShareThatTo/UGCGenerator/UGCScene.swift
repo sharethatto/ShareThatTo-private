@@ -69,8 +69,8 @@ public class UGCScene
     }
     
     @discardableResult
-    public func withTextLayer(format: UGCTextFormat, parameters: [String:String]) -> UGCScene {
-        configurations.append(UGCTextLayerConfiguration(format: format, parameters: parameters))
+    public func withTextLayer(format: UGCTextFormat, text: String) -> UGCScene {
+        configurations.append(UGCTextLayerConfiguration(format: format, text: text))
         return self
     }
     

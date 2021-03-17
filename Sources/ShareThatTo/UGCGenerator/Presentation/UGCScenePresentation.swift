@@ -97,7 +97,7 @@ internal class UGCScenePresentation
         let configurations = scene.configurations
         
         // We have a view we're going to put our view into
-        let containerView = UIView(frame: CGRect(x: 0, y: 0, width: renderSettings.assetWidth, height: renderSettings.assetHeight))
+        let containerView = UIView(frame: CGRect(x: 0, y: 0, width: renderSettings.size.width, height: renderSettings.size.height))
         self.view = containerView
         
         for configuration in configurations
@@ -111,14 +111,14 @@ internal class UGCScenePresentation
 
         
         // Handle narrower content view
-        let scale = view.frame.height / CGFloat(renderSettings.assetHeight)
+        let scale = view.frame.height / CGFloat(renderSettings.size.height)
         
         var transform = CGAffineTransform.identity
-        let centeringXAdjustment = CGFloat(renderSettings.assetWidth) * scale / 2.0  - view.frame.width / 2.0
-        let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * (CGFloat(renderSettings.assetWidth)) - centeringXAdjustment
+        let centeringXAdjustment =  CGFloat(renderSettings.size.width) * scale / 2.0  - view.frame.width / 2.0
+        let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * (CGFloat(renderSettings.size.width)) - centeringXAdjustment
         
-        let centeringYAdjustment = CGFloat(renderSettings.assetHeight) * scale / 2.0  - view.frame.height / 2.0
-        let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.assetHeight) - centeringYAdjustment
+        let centeringYAdjustment = CGFloat(renderSettings.size.height) * scale / 2.0  - view.frame.height / 2.0
+        let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.size.height) - centeringYAdjustment
         
         transform = transform.translatedBy(x: translateX, y: translateY)
         transform = transform.scaledBy(x: scale, y: scale)

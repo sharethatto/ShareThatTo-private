@@ -28,4 +28,10 @@ public protocol VideoContentFutureProvider
     func startRendering()
 }
 
-public typealias ContentProvider = (Presentable & VideoContentFutureProvider)
+public protocol TitleProvider {
+    var title: String? { get }
+}
+
+public typealias ContentProvider = (Presentable & VideoContentFutureProvider & TitleProvider)
+
+public typealias NilSuccessCompletion = (Swift.Error?) -> Void

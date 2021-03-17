@@ -10,26 +10,34 @@ import AVFoundation
 import UIKit
 
 
-public class UGC: UGCSceneDelegate, Presentable
+public class UGC: UGCSceneDelegate, Presentable, TitleProvider
 {
-    private let renderSettings: UGCRenderSettings
+    public let renderSettings: UGCRenderSettings
+    public var title: String?
     private let sceneRenderingWaitGroup = DispatchGroup()
     
     public weak var delegate: UGCResultDelegate?
+    
     
     internal var sceneConfigurations: [UGCScene] = []
     internal var sceneRenderingResults: [UGCResult?] = []
     
     //MARK: Public
-    public init(renderSettings: UGCRenderSettings)
+    
+    convenience public init(title: String, _ options: UGCRenderOptions...)
     {
-        self.renderSettings = renderSettings
+        self.init(title:title, options: options)
     }
     
-    public init(delegate: UGCResultDelegate, renderSettings: UGCRenderSettings)
+    convenience public init(_ options: UGCRenderOptions...)
     {
-        self.delegate = delegate
-        self.renderSettings = renderSettings
+        self.init(title:nil, options: options)
+    }
+    
+    private init(title: String?, options: [UGCRenderOptions] = [])
+    {
+        self.title = title
+        self.renderSettings = UGCRenderSettings(options)
     }
     
     public func createSceneConfiguration(_ sceneOptions: UGCSceneOption...) -> UGCScene
@@ -41,12 +49,24 @@ public class UGC: UGCSceneDelegate, Presentable
     }
     
     
+    public func present(on viewController:UIViewController, completion: NilSuccessCompletion? = nil)
+    {
+        DispatchQueue.main.async {
+//            do {
+                let vc = ShareSheetViewController.init(provider: self, completion: completion)
+                viewController.present(vc, animated: true)
+//            } catch let error {
+//                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
+//            }
+        }
+    }
+    
     @discardableResult
-    public func present(on viewController: UIViewController, view: UIView) -> Swift.Error?
+    public func presentOn(viewController: UIViewController, view: UIView) -> Swift.Error?
     {
         do {
             let presentation = UGCPresentation(ugc: self)
-            try  presentation.present(on: viewController, view: view)
+            try  presentation.presentOn(viewController: viewController, view: view)
         } catch let error as UGCError {
             return error
         } catch let error {

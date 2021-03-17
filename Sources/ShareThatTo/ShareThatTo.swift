@@ -31,35 +31,38 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         self.lifecycle.start()
     }
     
-    public func presentShareSheet(on viewController: UIViewController, presentable: Presentable,  videoProvider: VideoContentFutureProvider, title: String, completion: ((Swift.Error?) -> Void)? = nil)
-    {
-        if authenticationDatastore.apiKey == nil  {
-            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist")
-        }
-        DispatchQueue.main.async {
-            do {
-                let vc = try ShareSheetViewController.init(presentable: presentable, videoProvider: videoProvider, title: title)
-                viewController.present(vc, animated: true) {
-                    completion?(nil)
-                }
-            } catch let error {
-                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
-                completion?(error)
-            }
-        }
-    }
+//    public func presentShareSheet(on viewController: UIViewController, presentable: Presentable,  videoProvider: VideoContentFutureProvider, title: String, completion: ((Swift.Error?) -> Void)? = nil)
+//    {
+//        if authenticationDatastore.apiKey == nil  {
+//            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist")
+//        }
+//        DispatchQueue.main.async {
+//            do {
+//                let vc = try ShareSheetViewController.init(presentable: presentable, videoProvider: videoProvider, title: title)
+//                viewController.present(vc, animated: true) {
+//                    completion?(nil)
+//                }
+//            } catch let error {
+//                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
+//                completion?(error)
+//            }
+//        }
+//    }
     
-    public func share(ugc: ContentProvider, title: String, on: UIViewController)
-    {
-        DispatchQueue.main.async {
-            do {
-                let vc = try ShareSheetViewController.init(provider: ugc, title: title)
-                on.present(vc, animated: true)
-            } catch let error {
-                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
-            }
-        }
-    }
+//    public func present(ugc: ContentProvider, title: String, on: UIViewController)
+//    {
+//        if authenticationDatastore.apiKey == nil  {
+//            Logger.shareThatToDebug(string: "Please set ShareThatToClientId in your Info.plist")
+//        }
+//        DispatchQueue.main.async {
+//            do {
+//                let vc = try ShareSheetViewController.init(provider: ugc, title: title)
+//                on.present(vc, animated: true)
+//            } catch let error {
+//                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
+//            }
+//        }
+//    }
 
     
     @discardableResult
@@ -85,6 +88,11 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
     public func configure(userId: String?)
     {
         self.contribDatastore.userId = userId
+    }
+    
+    public func configure(apiKey: String)
+    {
+        self.authenticationDatastore.apiKey = apiKey
     }
     
     // TODO: Maybe automatically go find all the available share outlets?

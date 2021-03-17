@@ -11,12 +11,12 @@ internal class UGCTextLayerConfiguration: UGCLayerConfiguration
 {
     
     internal let format: UGCTextFormat
-    internal let parameters: [String:String]
+    internal let text: String
     
-    internal init(format: UGCTextFormat, parameters: [String:String])
+    internal init(format: UGCTextFormat, text: String)
     {
         self.format = format
-        self.parameters = parameters
+        self.text = text
     }
     
     override internal func build(scene: UGCSecneRenderer)

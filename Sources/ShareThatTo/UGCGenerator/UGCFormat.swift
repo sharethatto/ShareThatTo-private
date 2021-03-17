@@ -14,14 +14,12 @@ protocol UGCFormat {
 }
 
 // TODO: Make smart assumptions about anchors in UGC
-public class UGCTextFormat : UGCFormat {
-    let textTemplate: String
+public class UGCTextFormat : UGCFormat
+{
     var attributes: [CALayer.MutableLayerAttribute]
     
-    public init(
-        textTemplate: String,
-        attributes: [CALayer.MutableLayerAttribute] ) {
-        self.textTemplate = textTemplate
+    public init(_
+                    attributes: CALayer.MutableLayerAttribute... ) {
         self.attributes = attributes
     }
     
@@ -34,8 +32,8 @@ public class UGCTextFormat : UGCFormat {
 public class UGCVideoFormat : UGCFormat {
     public var attributes: [CALayer.MutableLayerAttribute]
     
-    public init(
-        attributes: [CALayer.MutableLayerAttribute] ) {
+    public init(_
+                    attributes: CALayer.MutableLayerAttribute... ) {
         self.attributes = attributes
     }
     
@@ -49,8 +47,8 @@ public class UGCVideoFormat : UGCFormat {
 public class UGCImageFormat : UGCFormat {
     public var attributes: [CALayer.MutableLayerAttribute]
     
-    public init(
-        attributes: [CALayer.MutableLayerAttribute] ) {
+    public init(_
+                    attributes: CALayer.MutableLayerAttribute... ) {
         self.attributes = attributes
     }
     

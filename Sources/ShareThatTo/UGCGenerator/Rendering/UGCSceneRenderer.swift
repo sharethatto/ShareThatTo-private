@@ -48,7 +48,7 @@ internal class UGCSecneRenderer
         self.layerInstruction = AVVideoCompositionLayerInstruction()
         self.outputLayer = CALayer()
         
-        outputLayer.frame = CGRect(x: 0, y: 0, width: renderSettings.assetWidth, height: renderSettings.assetHeight)
+        outputLayer.frame = CGRect(x: 0, y: 0, width: renderSettings.size.width, height: renderSettings.size.height)
         outputLayer.backgroundColor = renderSettings.backgroundColor
         
         // HACK: https://stackoverflow.com/questions/6749216/how-to-properly-export-calayer-on-top-of-avmutablecomposition-with-avassetexport

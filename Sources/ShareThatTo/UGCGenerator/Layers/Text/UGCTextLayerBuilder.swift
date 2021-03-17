@@ -11,11 +11,12 @@ internal class UGCTextLayerBuilder: UGCLayerBuilder
 {
     private static func renderText(configuration: UGCTextLayerConfiguration) -> String
     {
-        var outputText = configuration.format.textTemplate
-        for (name, value) in configuration.parameters {
-            outputText = outputText.replacingOccurrences(of: "{{\(name)}}", with: value)
-        }
-        return outputText
+        return configuration.text
+//        var outputText = configuration.format.textTemplate
+//        for (name, value) in configuration.parameters {
+//            outputText = outputText.replacingOccurrences(of: "{{\(name)}}", with: value)
+//        }
+//        return outputText
     }
     
     static func build(configuration: UGCTextLayerConfiguration, scene: UGCSecneRenderer)

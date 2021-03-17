@@ -35,33 +35,35 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     private var vidoeContentFuture: VideoContentFuture?
     
-    internal init(presentable: Presentable, videoProvider: VideoContentFutureProvider, title: String) throws
-    {
-        self.presentable = presentable
-        self.shareOutlets = ShareOutlets.outlets(forPeformableType: .video)
-        super.init(nibName: nil, bundle: nil)
-        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: videoProvider, title: title)
-        {
-            (result) in
-            var analyticsEvent = AnalyticsEvent(event_name: "share_sheet.rendering_completed")
-            switch(result)
-            {
-            case .success(let videoContent):
-                self.content = videoContent
-            case .failure(let error):
-                analyticsEvent.error_string = error.localizedDescription
-            }
-            Analytics.shared.addEvent(event: analyticsEvent, context: self.analtyicsContext)
-        }
-        self.presentationController?.delegate = self
-    }
+//    internal init(presentable: Presentable, videoProvider: VideoContentFutureProvider, title: String) throws
+//    {
+//        self.presentable = presentable
+//        self.shareOutlets = ShareOutlets.outlets(forPeformableType: .video)
+//        super.init(nibName: nil, bundle: nil)
+//        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: videoProvider, title: title)
+//        {
+//            (result) in
+//            var analyticsEvent = AnalyticsEvent(event_name: "share_sheet.rendering_completed")
+//            switch(result)
+//            {
+//            case .success(let videoContent):
+//                self.content = videoContent
+//            case .failure(let error):
+//                analyticsEvent.error_string = error.localizedDescription
+//            }
+//            Analytics.shared.addEvent(event: analyticsEvent, context: self.analtyicsContext)
+//        }
+//        self.presentationController?.delegate = self
+//    }
+    private var completion: NilSuccessCompletion?
     
-    internal init(provider: ContentProvider, title: String) throws
+    internal init(provider: ContentProvider, completion: NilSuccessCompletion? = nil)
     {
+        self.completion = completion
         self.presentable = provider
         self.shareOutlets = ShareOutlets.outlets(forPeformableType: .video)
         super.init(nibName: nil, bundle: nil)
-        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: provider, title: title)
+        self.vidoeContentFuture = VideoContentFuture.init(futureProvider: provider, title: provider.title ?? "")
         {
             (result) in
             var analyticsEvent = AnalyticsEvent(event_name: "share_sheet.rendering_completed")
@@ -197,7 +199,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         print("DID LAYOUT SUBVIEWS")
         if (presentedPresntable) { return }
         presentedPresntable = true
-        self.presentable.present(on: self, view: contentView)
+        self.presentable.presentOn(viewController: self, view: contentView)
     }
 
     func makeShareThatToLogoLabel(_ userInterfaceModeString: String) -> UILabel {
@@ -466,6 +468,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
         }
         DispatchQueue.main.async {
             self.presentingViewController?.dismiss(animated: true)
+            self.completion?(nil)
         }
     }
 
