@@ -246,7 +246,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let constraints = [
             shareToLabelView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareToLabelView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareToLabelView.heightAnchor.constraint(equalToConstant: 35),
+            shareToLabelView.heightAnchor.constraint(equalToConstant: 45),
             shareToLabelView.bottomAnchor.constraint(equalTo: shareOutletView.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)

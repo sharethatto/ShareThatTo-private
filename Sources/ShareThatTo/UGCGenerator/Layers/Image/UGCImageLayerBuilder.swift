@@ -13,12 +13,25 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
     {
         let imageLayer = CALayer()
         
-        guard let bgImage = UIImage(contentsOfFile: configuration.url.path) else {
-            throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+        let image: UIImage
+        if let unwrappedImage: UIImage = configuration.image {
+            image = unwrappedImage
+        }
+        else
+        {
+            guard let unwrappedURL: URL = configuration.url else {
+                throw UGCError.imageError(message: "No url set for image")
+            }
+            guard let unwrappedImage = UIImage(contentsOfFile: unwrappedURL.path) else {
+                throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+            }
+            image = unwrappedImage
         }
         
+
+        
         var attributes = configuration.format.attributes
-        attributes.append(.contents( bgImage.cgImage as Any ))
+        attributes.append(.contents( image.cgImage as Any ))
         imageLayer.applyAttributes(layerAttributes: attributes)
         
         scene.outputLayer.addSublayer(imageLayer)
@@ -28,12 +41,23 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
     {
         let imageLayer = CALayer()
         
-        guard let bgImage = UIImage(contentsOfFile: configuration.url.path) else {
-            throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+        let image: UIImage
+        if let unwrappedImage: UIImage = configuration.image {
+            image = unwrappedImage
+        }
+        else
+        {
+            guard let unwrappedURL: URL = configuration.url else {
+                throw UGCError.imageError(message: "No url set for image")
+            }
+            guard let unwrappedImage = UIImage(contentsOfFile: unwrappedURL.path) else {
+                throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+            }
+            image = unwrappedImage
         }
         
         var attributes = configuration.format.attributes
-        attributes.append(.contents( bgImage.cgImage as Any ))
+        attributes.append(.contents( image.cgImage as Any ))
         imageLayer.applyAttributes(layerAttributes: attributes)
         
         presentation.view.layer.addSublayer(imageLayer)

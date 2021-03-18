@@ -61,6 +61,12 @@ public class UGCScene
         configurations.append(UGCImageLayerConfiguration(format: format, url: url))
         return self
     }
+    
+    @discardableResult
+    public func withImageLayer(format: UGCImageFormat, image: UIImage) -> UGCScene {
+        configurations.append(UGCImageLayerConfiguration(format: format, image: image))
+        return self
+    }
 
     @discardableResult
     public func withVideoLayer(format: UGCVideoFormat, url: URL) -> UGCScene {
