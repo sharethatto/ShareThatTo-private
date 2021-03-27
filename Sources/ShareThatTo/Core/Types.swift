@@ -41,6 +41,13 @@ public typealias NilSuccessCompletion = (Swift.Error?) -> Void
 public enum PresentationResult {
     case cancelled
     case shared(destination: String)
+    case ignored
 }
 
 public typealias SharePresentationCompletion = (PresentationResult) -> Void
+
+public enum PresentationStyle {
+    case shareSheet
+    case toast
+}
+

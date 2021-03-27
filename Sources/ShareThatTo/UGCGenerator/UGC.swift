@@ -49,7 +49,31 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     }
     
     
-    public func present(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
+    public func present(on viewController:UIViewController, presentationStyle: PresentationStyle = .shareSheet, completion: SharePresentationCompletion? = nil)
+    {
+        switch presentationStyle
+        {
+            case .shareSheet: presentShareSheet(on: viewController, completion:  completion)
+            case .toast: presentToast(on: viewController, completion: completion)
+        }
+    }
+    
+    private func presentToast(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
+    {
+        // TODO: Add toast here
+        DispatchQueue.main.async {
+            let alert = UIAlertController.init(title: "TOAST", message: "Would you like to see your workout recaps?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Yes", comment: "Default action"), style: .default, handler: { _ in
+                self.presentShareSheet(on: viewController, completion: completion)
+            }))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("No", comment: "Default action"), style: .default, handler: { _ in
+                completion?(.ignored)
+            }))
+            viewController.present(alert, animated: true)
+        }
+    }
+    
+    private func presentShareSheet(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
     {
         DispatchQueue.main.async {
             let vc = ShareSheetViewController.init(provider: self, completion: completion)
