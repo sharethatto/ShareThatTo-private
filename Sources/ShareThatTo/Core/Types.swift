@@ -35,3 +35,12 @@ public protocol TitleProvider {
 public typealias ContentProvider = (Presentable & VideoContentFutureProvider & TitleProvider)
 
 public typealias NilSuccessCompletion = (Swift.Error?) -> Void
+
+
+
+public enum PresentationResult {
+    case cancelled
+    case shared(destination: String)
+}
+
+public typealias SharePresentationCompletion = (PresentationResult) -> Void

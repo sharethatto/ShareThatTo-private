@@ -49,15 +49,11 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     }
     
     
-    public func present(on viewController:UIViewController, completion: NilSuccessCompletion? = nil)
+    public func present(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
     {
         DispatchQueue.main.async {
-//            do {
-                let vc = ShareSheetViewController.init(provider: self, completion: completion)
-                viewController.present(vc, animated: true)
-//            } catch let error {
-//                Logger.shareThatToDebug(string: "Unable to present Share Sheet", error: error)
-//            }
+            let vc = ShareSheetViewController.init(provider: self, completion: completion)
+            viewController.present(vc, animated: true)
         }
     }
     

@@ -55,9 +55,9 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 //        }
 //        self.presentationController?.delegate = self
 //    }
-    private var completion: NilSuccessCompletion?
+    private var completion: SharePresentationCompletion?
     
-    internal init(provider: ContentProvider, completion: NilSuccessCompletion? = nil)
+    internal init(provider: ContentProvider, completion: SharePresentationCompletion? = nil)
     {
         self.completion = completion
         self.presentable = provider
@@ -384,6 +384,8 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.cancelled"), context: analtyicsContext)
         // We didn't use any strategies
         content?.cleanupContent(with: [])
+        
+        self.completion?(.cancelled)
      }
     
     
@@ -468,7 +470,7 @@ extension ShareSheetViewController: ShareOutletDelegate {
         }
         DispatchQueue.main.async {
             self.presentingViewController?.dismiss(animated: true)
-            self.completion?(nil)
+            self.completion?(.shared(destination: "\(type(of: shareOutlet).canonicalOutletName)"))
         }
     }
 
