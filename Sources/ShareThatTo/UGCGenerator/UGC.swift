@@ -62,8 +62,9 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
         // TODO: Handle completion passing for Action
         DispatchQueue.main.async {
             let toastSize = CGFloat(0.8)
+            let toastXOffset = CGFloat((1-toastSize)/2)
             let toast = UIButton()
-            toast.frame = CGRect(x: viewController.view.bounds.width * 0.1 , y: -60, width: viewController.view.bounds.width * toastSize , height: 60)
+            toast.frame = CGRect(x: viewController.view.bounds.width * toastXOffset , y: -60, width: viewController.view.bounds.width * toastSize , height: 60)
             toast.backgroundColor = .white
             toast.setTitle("Click to view workout recap", for: .normal)
             toast.setTitleColor(.black, for: .normal)
