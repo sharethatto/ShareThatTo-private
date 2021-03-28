@@ -28,7 +28,6 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
         let avPlayer = AVPlayerViewController()
         let playerItem = AVPlayerItem(asset: videoAsset)
         
-        
         let duration = UGCVideoLayerBuilder.duration(maxDuration: presentation.scene?.sceneOptions.maxDuration, videoAsset: videoAsset)
         
         if (duration < videoAsset.duration)

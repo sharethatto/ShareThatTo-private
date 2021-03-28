@@ -18,7 +18,6 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     
     public weak var delegate: UGCResultDelegate?
     
-    
     internal var sceneConfigurations: [UGCScene] = []
     internal var sceneRenderingResults: [UGCResult?] = []
     
@@ -60,16 +59,31 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     
     private func presentToast(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
     {
-        // TODO: Add toast here
+        // TODO: Handle completion passing for Action
         DispatchQueue.main.async {
-            let alert = UIAlertController.init(title: "TOAST", message: "Would you like to see your workout recaps?", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: NSLocalizedString("Yes", comment: "Default action"), style: .default, handler: { _ in
-                self.presentShareSheet(on: viewController, completion: completion)
-            }))
-            alert.addAction(UIAlertAction(title: NSLocalizedString("No", comment: "Default action"), style: .default, handler: { _ in
-                completion?(.ignored)
-            }))
-            viewController.present(alert, animated: true)
+            let toastSize = CGFloat(0.8)
+            let toast = UIButton()
+            toast.frame = CGRect(x: viewController.view.bounds.width * 0.1 , y: -60, width: viewController.view.bounds.width * toastSize , height: 60)
+            toast.backgroundColor = .white
+            toast.setTitle("Click to view workout recap", for: .normal)
+            toast.setTitleColor(.black, for: .normal)
+            toast.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+            toast.layer.cornerRadius = 30
+//            toast.addTarget(self, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
+            viewController.view.addSubview(toast)
+            toast.transform = .identity
+            UIView.animate(withDuration: 0.15, delay: 0.0, options: [.curveLinear],
+                           animations: { () -> Void in
+                                toast.transform = CGAffineTransform(translationX: 0, y: 120)
+                           }
+            )
+            UIView.animate(withDuration: 0.15, delay: 5.0, options: [.curveLinear],
+                           animations: { () -> Void in
+                                toast.transform = CGAffineTransform(translationX: 0, y: -120)
+                           }
+            ) { (animationCompleted: Bool) -> Void in
+                toast.removeFromSuperview()
+            }
         }
     }
     
@@ -240,3 +254,4 @@ extension UGC: VideoContentFutureProvider
         }
     }
 }
+
