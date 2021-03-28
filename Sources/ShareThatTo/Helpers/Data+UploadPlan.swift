@@ -8,7 +8,7 @@
 import CommonCrypto
 import Foundation
 
-extension Data
+internal extension Data
 {
     func uploadPlan(contentType: String) -> UploadPlanRequest
     {
@@ -36,7 +36,7 @@ extension Data {
     ///   - type: The type of hash algorithm to use for the hashing operation.
     ///   - output: The type of output string desired.
     /// - Returns: A hash string using the specified hashing algorithm, or nil.
-    public func hashWithRSA2048Asn1Header(_ type: HashType, output: HashOutputType = .hex) -> String? {
+    internal func hashWithRSA2048Asn1Header(_ type: HashType, output: HashOutputType = .hex) -> String? {
 
         let rsa2048Asn1Header:[UInt8] = [
             0x30, 0x82, 0x01, 0x22, 0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
@@ -55,7 +55,7 @@ extension Data {
     ///   - type: The type of hash to use.
     ///   - output: The type of hash output desired, defaults to .hex.
     ///   - Returns: The requested hash output or nil if failure.
-    public func hashed(_ type: HashType, output: HashOutputType = .hex) -> String? {
+    internal func hashed(_ type: HashType, output: HashOutputType = .hex) -> String? {
 
         // setup data variable to hold hashed value
         var digest = Data(count: Int(type.length))

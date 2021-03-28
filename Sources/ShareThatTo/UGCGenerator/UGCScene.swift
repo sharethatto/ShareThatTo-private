@@ -70,25 +70,25 @@ public class UGCScene:  UGCSceneContext
     
     //MARK: Public Interface
     @discardableResult
-    public func withImageLayer(format: UGCImageFormat, url: URL) -> UGCScene {
+    public func imageLayer(format: UGCImageFormat, url: URL) -> UGCScene {
         configurations.append(UGCURLImageLayerConfiguration(format: format, url: url))
         return self
     }
     
     @discardableResult
-    public func withImageLayer(format: UGCImageFormat, image: UIImage) -> UGCScene {
+    public func imageLayer(format: UGCImageFormat, image: UIImage) -> UGCScene {
         configurations.append(UGCUIImageLayerConfiguration(format: format, image: image))
         return self
     }
 
     @discardableResult
-    public func withVideoLayer(format: UGCVideoFormat, url: URL) -> UGCScene {
+    public func videoLayer(format: UGCVideoFormat, url: URL) -> UGCScene {
         configurations.append(UGCVideoLayerConfiguration(format: format, url: url))
         return self
     }
     
     @discardableResult
-    public func withTextLayer(format: UGCTextFormat, text: String) -> UGCScene {
+    public func textLayer(format: UGCTextFormat, text: String) -> UGCScene {
         configurations.append(UGCTextLayerConfiguration(format: format, text: text))
         return self
     }

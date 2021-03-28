@@ -4,7 +4,7 @@ import Foundation
 import CommonCrypto
 
 // Defines types of hash string outputs available
-public enum HashOutputType {
+internal enum HashOutputType {
     // standard hex string output
     case hex
     // base 64 encoded string output
@@ -12,7 +12,7 @@ public enum HashOutputType {
 }
 
 // Defines types of hash algorithms available
-public enum HashType {
+internal enum HashType {
     case md5
     case sha1
     case sha224
@@ -32,7 +32,7 @@ public enum HashType {
     }
 }
 
-public extension String {
+internal extension String {
 
     /// Hashing algorithm for hashing a string instance.
     ///
@@ -40,7 +40,7 @@ public extension String {
     ///   - type: The type of hash to use.
     ///   - output: The type of output desired, defaults to .hex.
     /// - Returns: The requested hash output or nil if failure.
-    public func hashed(_ type: HashType, output: HashOutputType = .hex) -> String? {
+    internal func hashed(_ type: HashType, output: HashOutputType = .hex) -> String? {
 
         // convert string to utf8 encoded data
         guard let message = data(using: .utf8) else { return nil }

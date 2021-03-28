@@ -23,23 +23,23 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     
     //MARK: Public
     
-    convenience public init(title: String, _ options: UGCRenderOptions...)
+    convenience public init(tag: String, title: String, _ options: UGCRenderOptions...)
     {
-        self.init(title:title, options: options)
+        self.init(tag: tag, title:title, options: options)
     }
     
-    convenience public init(_ options: UGCRenderOptions...)
+    convenience public init(tag: String, _ options: UGCRenderOptions...)
     {
-        self.init(title: nil, options: options)
+        self.init(tag: tag, title: nil, options: options)
     }
     
-    private init(title: String?, options: [UGCRenderOptions] = [])
+    private init(tag: String, title: String?, options: [UGCRenderOptions] = [])
     {
         self.title = title
         self.renderSettings = UGCRenderSettings(options)
     }
     
-    public func createSceneConfiguration(_ sceneOptions: UGCSceneOption...) -> UGCScene
+    public func addScene(tag: String, _ sceneOptions: UGCSceneOption...) -> UGCScene
     {
         let sceneConfiguration = UGCScene(delegate: self, renderSettings: self.renderSettings, sceneOptions: sceneOptions)
         sceneConfigurations.append(sceneConfiguration)

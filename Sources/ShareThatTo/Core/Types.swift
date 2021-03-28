@@ -22,7 +22,7 @@ public typealias RenderingResultCompletion = (RenderingResult) -> Void
 
 
 
-public protocol VideoContentFutureProvider
+internal protocol VideoContentFutureProvider
 {
     func renderingComplete(completion: @escaping RenderingResultCompletion)
     func startRendering()
@@ -32,11 +32,7 @@ public protocol TitleProvider {
     var title: String? { get }
 }
 
-public typealias ContentProvider = (Presentable & VideoContentFutureProvider & TitleProvider)
-
-public typealias NilSuccessCompletion = (Swift.Error?) -> Void
-
-
+internal typealias ContentProvider = (Presentable & VideoContentFutureProvider & TitleProvider)
 
 public enum PresentationResult {
     case cancelled

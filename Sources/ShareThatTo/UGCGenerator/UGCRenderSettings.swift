@@ -17,8 +17,7 @@ public enum UGCRenderOptions
 {
     case backgroundColor(CGColor)
     case preset(UGCRenderPreset)
-    case width(CGFloat)
-    case height(CGFloat)
+    case size(CGSize)
 }
 
 public struct UGCRenderSettings
@@ -66,10 +65,8 @@ public struct UGCRenderSettings
             switch option {
             case .backgroundColor(let color):
                 backgroundColor = color
-            case .height(let height):
-                size = CGSize(width: size.width, height: height)
-            case .width(let width):
-                size = CGSize(width: width, height: size.height)
+            case .size(let size):
+                self.size = size
             case .preset(_): break
             }
         }
