@@ -30,7 +30,7 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     
     convenience public init(_ options: UGCRenderOptions...)
     {
-        self.init(title:nil, options: options)
+        self.init(title: nil, options: options)
     }
     
     private init(title: String?, options: [UGCRenderOptions] = [])
@@ -53,37 +53,46 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
         switch presentationStyle
         {
             case .shareSheet: presentShareSheet(on: viewController, completion:  completion)
-            case .toast: presentToast(on: viewController, completion: completion)
+            case .toast(let message): presentToast(message: message, on: viewController, completion: completion)
         }
     }
-    
-    private func presentToast(on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
+
+    private func presentToast(message: String, on viewController:UIViewController, completion: SharePresentationCompletion? = nil)
     {
-        // TODO: Handle completion passing for Action
         DispatchQueue.main.async {
+            
             let toastSize = CGFloat(0.8)
             let toastXOffset = CGFloat((1-toastSize)/2)
+            let originalFrame = CGRect(x: viewController.view.bounds.width * toastXOffset , y: -60, width: viewController.view.bounds.width * toastSize , height: 60)
+        
             let toast = UIButton()
-            toast.frame = CGRect(x: viewController.view.bounds.width * toastXOffset , y: -60, width: viewController.view.bounds.width * toastSize , height: 60)
+            toast.frame = originalFrame
             toast.backgroundColor = .white
-            toast.setTitle("Click to view workout recap", for: .normal)
+            toast.setTitle(message, for: .normal)
             toast.setTitleColor(.black, for: .normal)
             toast.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
             toast.layer.cornerRadius = 30
-//            toast.addTarget(self, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
+            toast.addAction(for: .touchUpInside)
+            {
+                self.presentShareSheet(on: viewController, completion: completion)
+            }
+            
             viewController.view.addSubview(toast)
-            toast.transform = .identity
-            UIView.animate(withDuration: 0.15, delay: 0.0, options: [.curveLinear],
+            UIView.animate(withDuration: 0.15, delay: 0.0, options: [.curveLinear, .allowUserInteraction],
                            animations: { () -> Void in
-                                toast.transform = CGAffineTransform(translationX: 0, y: 120)
+                            toast.frame = CGRect(x: toast.frame.minX, y: 60, width: toast.frame.width, height: toast.frame.height)
                            }
             )
-            UIView.animate(withDuration: 0.15, delay: 5.0, options: [.curveLinear],
-                           animations: { () -> Void in
-                                toast.transform = CGAffineTransform(translationX: 0, y: -120)
-                           }
-            ) { (animationCompleted: Bool) -> Void in
-                toast.removeFromSuperview()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0)
+            {
+                UIView.animate(withDuration: 0.15, delay: 0.0, options: [.curveLinear, .allowUserInteraction],
+                               animations: { () -> Void in
+
+                                    toast.frame = originalFrame
+                               }
+                ) { (animationCompleted: Bool) -> Void in
+                    toast.removeFromSuperview()
+                }
             }
         }
     }

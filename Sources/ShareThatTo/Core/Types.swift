@@ -48,6 +48,6 @@ public typealias SharePresentationCompletion = (PresentationResult) -> Void
 
 public enum PresentationStyle {
     case shareSheet
-    case toast
+    case toast(message: String)
 }
 
