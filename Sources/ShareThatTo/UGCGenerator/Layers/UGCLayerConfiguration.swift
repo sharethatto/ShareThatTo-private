@@ -7,6 +7,8 @@
 
 import Foundation
 
+typealias UGCConfigurationReadyCompletion =  (Swift.Error? ) -> ()
+
 internal class UGCLayerConfiguration
 {
     
@@ -18,6 +20,11 @@ internal class UGCLayerConfiguration
     public func buildPresentation(presentation: UGCScenePresentation) throws
     {
         //
+    }
+    
+    public func ready(completion: @escaping UGCConfigurationReadyCompletion)
+    {
+        completion(nil)
     }
 }
 

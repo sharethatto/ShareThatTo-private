@@ -16,10 +16,15 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
 {
     static func buildPresentation(configuration: UGCVideoLayerConfiguration, presentation: UGCScenePresentation) throws
     {
+        
+        guard let videoURL = configuration.url else {
+            throw UGCError.videoError(message: "Unable to load video")
+        }
+        
         let videoLayer = CALayer()
         videoLayer.applyAttributes(layerAttributes: configuration.format.attributes)
         
-        let videoAsset = AVAsset(url: configuration.url)
+        let videoAsset = AVAsset(url: videoURL)
         
         guard let videoTrack = videoAsset.tracks(withMediaType: .video).first else {
             throw UGCError.videoError(message: "Unable to load video asset")
@@ -50,11 +55,6 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
             }
         }
         
-
-        
-        
-
-
         avPlayer.player = AVPlayer(playerItem: playerItem)
         presentation.view.addSubview(avPlayer.view)
         avPlayer.view.translatesAutoresizingMaskIntoConstraints = false
@@ -69,10 +69,14 @@ internal class UGCVideoLayerBuilder: UGCLayerBuilder
     
     static func build(configuration: UGCVideoLayerConfiguration, scene: UGCSecneRenderer) throws
     {
+        guard let videoURL = configuration.url else {
+            throw UGCError.videoError(message: "Unable to load video")
+        }
+        
         let durationLogger = UGCDurationLogger.begin(prefix: "[UGCScene] withVideoLayer")
         
         let videoLayer = CALayer()
-        let videoAsset = AVAsset(url: configuration.url)
+        let videoAsset = AVAsset(url: videoURL)
 
         guard let videoTrack = videoAsset.tracks(withMediaType: .video).first else {
             throw UGCError.videoError(message: "Unable to load video asset")

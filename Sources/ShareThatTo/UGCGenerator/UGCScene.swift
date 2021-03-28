@@ -36,35 +36,48 @@ public struct UGCSceneOptions
     }
 }
 
-public class UGCScene
+internal protocol UGCSceneContext
+{
+    var sceneIdentifier: String { get }
+    var sceneDispatchQueue: DispatchQueue { get }
+}
+
+public class UGCScene:  UGCSceneContext
 {
     internal var configurations: [UGCLayerConfiguration] = []
     internal let renderSettings: UGCRenderSettings
     internal let sceneOptions: UGCSceneOptions
     private weak var delegate: UGCSceneDelegate?
-    internal init(delegate: UGCSceneDelegate, renderSettings: UGCRenderSettings, sceneOptions: [UGCSceneOption] = []) //ugc: UGC, orderInUgc: Int)
+    
+    internal var sceneIdentifier: String = UUID().uuidString
+    internal var sceneDispatchQueue: DispatchQueue
+    
+    private let configurationReadyDispatchGroup = DispatchGroup()
+    internal init(delegate: UGCSceneDelegate, renderSettings: UGCRenderSettings, sceneOptions: [UGCSceneOption] = [])
     {
         self.delegate = delegate
         self.renderSettings = renderSettings
         self.sceneOptions =  UGCSceneOptions(options: sceneOptions)
+        self.sceneDispatchQueue = .init(label: "UGCScene-\(sceneIdentifier)")
     }
     
     public init(renderSettings: UGCRenderSettings, _ sceneOptions: UGCSceneOption...)
     {
         self.renderSettings = renderSettings
         self.sceneOptions = UGCSceneOptions(options: sceneOptions)
+        self.sceneDispatchQueue = .init(label: "UGCScene-\(sceneIdentifier)")
     }
     
     //MARK: Public Interface
     @discardableResult
     public func withImageLayer(format: UGCImageFormat, url: URL) -> UGCScene {
-        configurations.append(UGCImageLayerConfiguration(format: format, url: url))
+        configurations.append(UGCURLImageLayerConfiguration(format: format, url: url))
         return self
     }
     
     @discardableResult
     public func withImageLayer(format: UGCImageFormat, image: UIImage) -> UGCScene {
-        configurations.append(UGCImageLayerConfiguration(format: format, image: image))
+        configurations.append(UGCUIImageLayerConfiguration(format: format, image: image))
         return self
     }
 
@@ -80,10 +93,38 @@ public class UGCScene
         return self
     }
     
+    private var configurationsFailed: Bool = false
+    
     public func ready(completion: UGCResultCompletion? = nil)
     {
+        sceneDispatchQueue.async { if (self.configurationsFailed) { return } }
+        
         delegate?.sceneReady(configuration: self)
-        renderScene(retries: 3, completion: completion)
+        
+        // Make sure all completions are ready to go!
+        for configuration in configurations {
+            configurationReadyDispatchGroup.enter()
+                configuration.ready {
+                    (error) in
+                    if let _ = error {
+                        self.sceneDispatchQueue.async {
+                            self.configurationsFailed = true
+                        }
+                        // TODO: Have a way to break out of this operation here
+                    }
+                    self.configurationReadyDispatchGroup.leave()
+                }
+        }
+        
+
+        configurationReadyDispatchGroup.notify(queue: sceneDispatchQueue) {
+            // Stop us from continuing to render
+            if (self.configurationsFailed)
+            {
+                 return
+            }
+            self.renderScene(retries: 3, completion: completion)
+        }
     }
     
     //MARK: Private Rendering

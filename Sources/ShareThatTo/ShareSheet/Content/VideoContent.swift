@@ -28,8 +28,6 @@ class VideoContentProviders
 internal typealias VideoContentResult = Result<VideoContent, Swift.Error>
 internal typealias VideoContentCompletion = (VideoContentResult) -> Void
 
-
-
 internal class VideoContentFuture
 {
     private var completions: [VideoContentCompletion] = []
