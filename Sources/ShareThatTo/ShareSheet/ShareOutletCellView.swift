@@ -15,6 +15,7 @@ class ShareOutletCellView: UICollectionViewCell
         let label = UILabel()
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
+        
         return label
     }()
     
@@ -75,7 +76,9 @@ class ShareOutletCellView: UICollectionViewCell
     {
         let labelText = NSAttributedString(
             string: outlet.outletName,
-            attributes: [ NSAttributedString.Key.font: UIFont(name: "Avenir", size: 12.0) as Any ]
+            attributes: [
+                NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 12.0) as Any,
+            ]
         )
         labelView.attributedText = labelText
         
