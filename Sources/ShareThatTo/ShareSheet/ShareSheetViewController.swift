@@ -109,12 +109,16 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
                                            ])
         shareToLabel.attributedText = labelText
         
+        shareToLabel.attributedText = NSAttributedString(string: "")
         
         shareToLabelView.addSubview(shareToLabel)
         NSLayoutConstraint.activate([
             shareToLabel.centerXAnchor.constraint(equalTo: shareToLabelView.centerXAnchor),
             shareToLabel.centerYAnchor.constraint(equalTo: shareToLabelView.centerYAnchor),
         ])
+        
+        
+        
         return shareToLabelView
     }()
 
@@ -123,8 +127,8 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: shareOutletItemSize, height: shareOutletItemSize)
-        let maxFullShareOutletsOnScreen = floor(UIScreen.main.bounds.width / shareOutletItemSize)
-        let fullShareOutletsOnScreen = maxFullShareOutletsOnScreen - 1
+        let maxFullShareOutletsOnScreen = floor((UIScreen.main.bounds.width - 6.0) / shareOutletItemSize)
+        let fullShareOutletsOnScreen = maxFullShareOutletsOnScreen
         let percentLastShareOutletOnScreen  = CGFloat(0.5)
         let spaceOccupiedByShareOutlets = (fullShareOutletsOnScreen + percentLastShareOutletOnScreen) * shareOutletItemSize
         layout.minimumLineSpacing = (UIScreen.main.bounds.width - spaceOccupiedByShareOutlets) / fullShareOutletsOnScreen
@@ -135,8 +139,11 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         shareOutletView.collectionViewLayout = layout
         shareOutletView.register(ShareOutletCellView.self, forCellWithReuseIdentifier: "ShareThatToOutletCell")
         shareOutletView.showsHorizontalScrollIndicator = false
-            
+        
+        shareOutletView.contentInset = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 6)
+        
         return shareOutletView
+        
     }()
 
     let shareThatToBrandingView: UIView = {
@@ -211,7 +218,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             stringAttributes[NSAttributedString.Key.font] = unwrappedFont
         }
 
-        let shareThatToBrandingString = NSMutableAttributedString(string: "Powered by ", attributes:stringAttributes)
+        let shareThatToBrandingString = NSMutableAttributedString(string: "", attributes:stringAttributes)
         
         
         // create our NSTextAttachment
@@ -230,13 +237,19 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         shareThatToBrandingString.append(shareThatToLogoString)
         
         
-        shareThatToBrandingString.append(NSAttributedString(string: " Share That To", attributes: stringAttributes ))
+        shareThatToBrandingString.append(NSAttributedString(string: "  Share That", attributes: stringAttributes ))
 
         // draw the result in a label
         shareThatToBrandingLabel.attributedText = shareThatToBrandingString
 
 
         shareThatToBrandingLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        shareThatToBrandingLabel.alpha = 0.618
+        
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(self.didTapShareThatToLogo))
+        shareThatToBrandingLabel.addGestureRecognizer(recognizer)
+        shareThatToBrandingLabel.isUserInteractionEnabled = true
         
         return shareThatToBrandingLabel
     }
@@ -245,7 +258,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let constraints = [
             shareToLabelView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareToLabelView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareToLabelView.heightAnchor.constraint(equalToConstant: 45),
+            shareToLabelView.heightAnchor.constraint(equalToConstant: 40),
             shareToLabelView.bottomAnchor.constraint(equalTo: shareOutletView.topAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
@@ -256,7 +269,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             shareOutletView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareOutletView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             shareOutletView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.shareoutViewDimension),
-            shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingView.topAnchor)
+            shareOutletView.bottomAnchor.constraint(equalTo: shareThatToBrandingView.topAnchor, constant: -23)
         ]
         NSLayoutConstraint.activate(constraints)
 
@@ -266,7 +279,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
         let constraints = [
             shareThatToBrandingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             shareThatToBrandingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            shareThatToBrandingView.heightAnchor.constraint(equalToConstant: ShareSheetViewController.footerHeight * 0.6),
+            shareThatToBrandingView.heightAnchor.constraint(equalToConstant: 80),
             shareThatToBrandingView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
@@ -277,7 +290,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
 
     func addContentView() {
         let constraints = [
-            contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 25),
+            contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 48),
             contentView.bottomAnchor.constraint(equalTo: shareToLabelView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
@@ -297,6 +310,12 @@ extension ShareSheetViewController {
     @objc func didTapShareThatToLogo()
     {
         Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.logo_tapped"), context: analtyicsContext)
+        
+        
+        let slug = ApplicationDatastore.shared.application?.slug
+        if let url = URL(string: "https://sharethat.to/app-cta?ref=\(slug ?? "")") {
+            UIApplication.shared.open(url, options:[:], completionHandler: nil)
+        }
     }
 }
 

@@ -97,6 +97,10 @@ internal class UGCScenePresentation
         // We have a view we're going to put our view into
         let containerView = UIView(frame: CGRect(x: 0, y: 0, width: renderSettings.size.width, height: renderSettings.size.height))
         containerView.clipsToBounds = true
+        containerView.layer.cornerRadius = 32
+        if #available(iOS 13.0, *) {
+            containerView.layer.cornerCurve = .continuous
+        }
         self.view = containerView
         
         var configurationsFailed: Bool = false
