@@ -42,6 +42,14 @@ internal protocol UGCSceneContext
     var sceneDispatchQueue: DispatchQueue { get }
 }
 
+enum UGCLayerInstruction
+{
+    case imageLitearl(UGCImageFormat, UIImage)
+    case imageURL(UGCImageFormat, URL)
+    case videoURL(UGCVideoFormat, URL)
+    case text(UGCTextFormat, String)
+}
+
 public class UGCScene:  UGCSceneContext
 {
     internal var configurations: [UGCLayerConfiguration] = []

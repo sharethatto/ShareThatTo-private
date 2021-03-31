@@ -84,12 +84,10 @@ internal class UGCScenePresentation
 
     public func present(on viewController: UIViewController, view: UIView, completion: UGCPresentationCompletion? = nil) throws
     {
-        
         let presentationViewController = UGCScenePresentationViewController(presentation: self)
         self.presentationViewController = presentationViewController
         
         self.completion = completion
-        
         self.viewController = viewController
         
         guard let scene = self.scene else { throw UGCError.unknown }
@@ -101,34 +99,66 @@ internal class UGCScenePresentation
         containerView.clipsToBounds = true
         self.view = containerView
         
-        for configuration in configurations
-        {
-            try configuration.buildPresentation(presentation: self)
+        var configurationsFailed: Bool = false
+        let configurationReadyDispatchGroup = DispatchGroup()
+        for configuration in configurations {
+            configurationReadyDispatchGroup.enter()
+                configuration.ready {
+                    (error) in
+                    if let _ = error {
+                        configurationsFailed = true
+                        // TODO: Have a way to break out of this operation here
+                    }
+                    configurationReadyDispatchGroup.leave()
+                }
         }
+    
+        // Make sure all the configurations are ready to go
+        configurationReadyDispatchGroup.notify(queue: .main) {
         
-        // This code scales the content to fit in the containing view
-        // TODO: Support UIViewContentModeScaleAspectFit, UIViewContentModeScaleAspectFill
-        // TODO: Support AVLayerVideoGravity 
+            if (configurationsFailed)
+            {
+                self.delegate?.sceneDidFinsih(scene: self)
+                completion?()
+                return
+            }
+            
+            do {
+                for configuration in configurations
+                {
+                    try configuration.buildPresentation(presentation: self)
+                }
+                
+                // This code scales the content to fit in the containing view
+                // TODO: Support UIViewContentModeScaleAspectFit, UIViewContentModeScaleAspectFill
+                // TODO: Support AVLayerVideoGravity
 
-        
-        // Handle narrower content view
-        let scale = view.frame.height / CGFloat(renderSettings.size.height)
-        
-        var transform = CGAffineTransform.identity
-        let centeringXAdjustment =  CGFloat(renderSettings.size.width) * scale / 2.0  - view.frame.width / 2.0
-        let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * (CGFloat(renderSettings.size.width)) - centeringXAdjustment
-        
-        let centeringYAdjustment = CGFloat(renderSettings.size.height) * scale / 2.0  - view.frame.height / 2.0
-        let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.size.height) - centeringYAdjustment
-        
-        transform = transform.translatedBy(x: translateX, y: translateY)
-        transform = transform.scaledBy(x: scale, y: scale)
-        containerView.transform = transform
-        containerView.layer.borderWidth = CGFloat(2)
-        
-        containerView.backgroundColor = UIColor(cgColor: renderSettings.backgroundColor)
-        view.addSubview(containerView)
-        
-        viewController.addChild(presentationViewController)
+                
+                // Handle narrower content view
+                let scale = view.frame.height / CGFloat(renderSettings.size.height)
+                
+                var transform = CGAffineTransform.identity
+                let centeringXAdjustment =  CGFloat(renderSettings.size.width) * scale / 2.0  - view.frame.width / 2.0
+                let translateX = CGFloat(-0.5) * (CGFloat(1) - scale) * (CGFloat(renderSettings.size.width)) - centeringXAdjustment
+                
+                let centeringYAdjustment = CGFloat(renderSettings.size.height) * scale / 2.0  - view.frame.height / 2.0
+                let translateY = CGFloat(-0.5) * (CGFloat(1) - scale) * CGFloat(renderSettings.size.height) - centeringYAdjustment
+                
+                transform = transform.translatedBy(x: translateX, y: translateY)
+                transform = transform.scaledBy(x: scale, y: scale)
+                containerView.transform = transform
+                containerView.layer.borderWidth = CGFloat(2)
+                
+                containerView.backgroundColor = UIColor(cgColor: renderSettings.backgroundColor)
+                view.addSubview(containerView)
+                
+                viewController.addChild(presentationViewController)
+            } catch let error {
+                Logger.shareThatToDebug(string: "[UGCScenePresentation] unable present scene", error: error)
+                self.delegate?.sceneDidFinsih(scene: self)
+                completion?()
+                return
+            }
+        }
     }
 }
