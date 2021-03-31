@@ -196,7 +196,6 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
     override func viewDidLayoutSubviews()
     {
         super.viewDidLayoutSubviews()
-        print("DID LAYOUT SUBVIEWS")
         if (presentedPresntable) { return }
         presentedPresntable = true
         self.presentable.presentOn(viewController: self, view: contentView)
