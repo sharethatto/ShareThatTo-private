@@ -34,27 +34,3 @@ zip -r -X ShareThatTo.zip ShareThatTo.xcframework
 FRAMEWORK_SHA="$(shasum -a 256 ShareThatTo.zip | awk '{print $1}')"
 
 echo "$FRAMEWORK_SHA" > "ShareThatTo.sha256"
-
-exit 1
-
-# Get the public repository
-if [ ! -d "public" ]
-then
-  git clone https://github.com/sharethatto/ShareThatTo.git public
-fi
-
-cd ../public
-
-git add . && git stash
-git reset --hard HEAD
-
-git checkout release-trunk
-
-cp ../out/ShareThatTo.zip Frameworks/
-
-git commit -m "Checking in new release"
-
-GIT_SHA="$(git rev-parse HEAD)"
-
-
-

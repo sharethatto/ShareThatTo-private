@@ -187,7 +187,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             try ShareSheetViewController.session?.setCategory(.ambient, options: [])
             try ShareSheetViewController.session?.setActive(true) //Set to false to deactivate session
         } catch let error as NSError {
-            Logger.shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio sessio", error: error)
+            Logger.shareThatToDebug(string: "[ShareSheetViewController] Unable to activate audio session", error: error)
         }
 
         shareOutletView.dataSource = self

@@ -5,3 +5,5 @@ set -ex
 cd "$(dirname "$0")/.."
 
 script/_build/build
+
+script/_build/prepare-release
