@@ -7,6 +7,8 @@ Release Checklist
  - [ ] Ensure succes dismissed the view controller
  - [ ] Ensure cancel does not dismiss the view controller
  - [ ] (If possible) ensure it displays an error message
+ - [ ] Make sure the analytics events fire for tapped & succeeded
+ - [ ] Ensure outlet only shows up if available
 
 
  - Photo Prompt

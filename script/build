@@ -4,6 +4,31 @@ set -ex
 
 cd "$(dirname "$0")/.."
 
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -v|--version)
+    VERSION="$2"
+    shift # past argument
+    shift # past value
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+echo "$VERSION"
+
+if [ -z "$VERSION" ]
+then
+  echo "Please specify version with --version v0.0.1"
+fi
+
+VERSION="$VERSION" script/_build/lint
+
+
 script/_build/build
 
 script/_build/prepare-release

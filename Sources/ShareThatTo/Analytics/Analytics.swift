@@ -115,6 +115,7 @@ class Analytics
     
     internal func start()
     {
+        Logger.shareThatToDebug(string: "[Analytics] start")
         stop()
         self.timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
             self.upload()
@@ -123,6 +124,7 @@ class Analytics
     
     internal func stop()
     {
+        Logger.shareThatToDebug(string: "[Analytics] stop")
         guard let timer = timer else {
             return
         }
@@ -136,7 +138,9 @@ class Analytics
     
     private func upload()
     {
+        Logger.shareThatToDebug(string: "[Analytics] upload")
         let events = self.datastore.allEvents()
+        Logger.shareThatToDebug(string: "[Analytics] upload events (\(events.count))")
         self.datastore.destroyAll() // Remove everything and re-add it if we fail
         if (events.count == 0) {
             return

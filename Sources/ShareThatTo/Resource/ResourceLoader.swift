@@ -72,7 +72,7 @@ extension ResourceLoader
     {
         
         let durationLogger =  DurationLogger.begin(prefix: "[ResourceLoader] fetch")
-        Logger.shareThatToDebug(string: "Requesting url: \(request.url)")
+        Logger.shareThatToDebug(string: "Requesting url: \(request.url?.description ?? "")")
         var request = request
         let task = self.urlSession.downloadTask(with: request) { (url, response, error) in
             durationLogger.finish()

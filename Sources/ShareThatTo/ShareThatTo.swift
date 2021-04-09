@@ -5,6 +5,8 @@ import UIKit
 //   
 //}
 
+public let ShareThatToVersion = "v0.0.3"
+
 // This contains the lifecycle hooks that other intergations need
 public protocol ShareThatToLifecycleDelegate
 {
@@ -31,6 +33,12 @@ public class ShareThatTo: ShareThatToLifecycleDelegate
         self.lifecycle.start()
     }
     
+    
+    public var version: String {
+        get {
+            ShareThatToVersion
+        }
+    }
 //    public func presentShareSheet(on viewController: UIViewController, presentable: Presentable,  videoProvider: VideoContentFutureProvider, title: String, completion: ((Swift.Error?) -> Void)? = nil)
 //    {
 //        if authenticationDatastore.apiKey == nil  {

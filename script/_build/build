@@ -16,6 +16,7 @@ mkdir -p out/
 cp support/BundleModule.swift Sources/ShareThatTo/BundleModule.swift
 
 # Actually build & create the xcframework
+# TODO: Maybe pass the debug flag here? 
 swift create-xcframework --platform ios --output out
 
 # Cleanup the bundle hack

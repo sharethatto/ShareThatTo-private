@@ -68,6 +68,8 @@ internal class Lifecycle: LifecycleProtocol
     
     @objc private func didEnterBackground()
     {
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "lifecycle.app_backgrounded", error_string: nil))
+        Analytics.shared.stop()
     }
     
     

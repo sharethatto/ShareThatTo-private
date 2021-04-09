@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+
+
+
+# set -ex
+
+# cd "$(dirname "$0")/../.."
+
+# VERSION_IDENTIFER_STRING=$(cat Sources/ShareThatTo/ShareThatTo.swift | grep 'public let ShareThatToVersion')
+
+# echo $VERSION_IDENTIFER_STRING
+
+# if [$VERSION_IDENTIFER_STRING == "public let ShareThatToVersion = \"$VERSION\""]
+# then
+#   echo "Correct version string found"
+# else
+#   echo "Incorrect version string"
+# fi

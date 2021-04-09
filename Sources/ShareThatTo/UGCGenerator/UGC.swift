@@ -15,6 +15,7 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     public let renderSettings: UGCRenderSettings
     public var title: String?
     private let sceneRenderingWaitGroup = DispatchGroup()
+    private let renderingDispathQueue = DispatchQueue(label: "UGC Rendering")
     
     public weak var delegate: UGCResultDelegate?
     
@@ -126,22 +127,26 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     
     public func ready(completion: UGCResultCompletion? = nil)
     {
-        // Circuit break here if we've already finished rendering
-        // This result will always be nil until we've finished rendering
-        if let result = renderingResult {
-            completion?(result)
-            return
-        }
+        // We are avoiding the race by touching the callback on the same queue
+        renderingDispathQueue.async {
+            // Circuit break here if we've already finished rendering
+            // This result will always be nil until we've finished rendering
+            if let result = self.renderingResult {
+                completion?(result)
+                return
+            }
+            
+            // TODO: Possible race here:
+            // (A) The rendering was not done when we checked
+            // (B) Finishes and the completions are called
+            // (A) We now add the new completion to the list
         
-        // TODO: Possible race here:
-        // (A) The rendering was not done when we checked
-        // (B) Finishes and the completions are called
-        // (A) We now add the new completion to the list
         
-        // Add a new watcher
-        if let unwrappedCompletion = completion
-        {
-            completionConsumers.append(unwrappedCompletion)
+            // Add a new watcher
+            if let unwrappedCompletion = completion
+            {
+                self.completionConsumers.append(unwrappedCompletion)
+            }
         }
         
         // Only start this process once
@@ -213,12 +218,14 @@ public class UGC: UGCSceneDelegate, Presentable, TitleProvider
     // Notify all the watchers
     private func renderingDidComplete(result: UGCResult)
     {
-        self.renderingResult = result
-        for completion in completionConsumers
-        {
-            completion(result)
+        renderingDispathQueue.async {
+            self.renderingResult = result
+            for completion in self.completionConsumers
+            {
+                completion(result)
+            }
+            self.delegate?.didFinish(result: result)
         }
-        delegate?.didFinish(result: result)
     }
     
     //MARK: UGCSceneDelegate

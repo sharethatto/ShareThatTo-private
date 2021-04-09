@@ -51,7 +51,7 @@ internal class UGCImageLayerBuilder: UGCLayerBuilder
                 throw UGCError.imageError(message: "No url set for image")
             }
             guard let unwrappedImage = UIImage(contentsOfFile: unwrappedURL.path) else {
-                throw UGCError.imageError(message: "Unable to load image from: \(configuration.url)")
+                throw UGCError.imageError(message: "Unable to load image from: \(configuration.url?.description ?? "")")
             }
             image = unwrappedImage
         }

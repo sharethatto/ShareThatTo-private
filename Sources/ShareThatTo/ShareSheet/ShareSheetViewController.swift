@@ -423,11 +423,20 @@ extension ShareSheetViewController: UICollectionViewDataSource {
         DispatchQueue.main.async
         {
             // Safeguard to prevent popping two outlets at once
-            if (self.currentlySharingOulet != nil) { return }
-            
-            var shareOutlet = to.init(content: content)
-            self.currentlySharingOulet = shareOutlet
-            shareOutlet.delegate = self
+            if (self.currentlySharingOulet != nil)
+            {
+                Logger.shareThatToDebug(string: "[ShareSheetViewController] currently sharing")
+                return
+            }
+        }
+        
+        var shareOutlet = to.init(content: content)
+        self.currentlySharingOulet = shareOutlet
+        shareOutlet.delegate = self
+        Logger.shareThatToDebug(string: "Delegate: \(shareOutlet.delegate) Self: \(self)")
+    
+        DispatchQueue.main.async
+        {
             shareOutlet.share(with: self)
         }
     }

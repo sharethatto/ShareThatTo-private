@@ -61,12 +61,13 @@ struct InstagramFeed: ShareOutletProtocol
        DispatchQueue.main.async {
            if UIApplication.shared.canOpenURL(url) {
                if #available(iOS 10.0, *) {
-                   UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
                     self.delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
+                   UIApplication.shared.open(url, options: [:], completionHandler: { (success) in
+                    
                    })
                } else {
-                   UIApplication.shared.openURL(url)
                     self.delegate?.success(shareOutlet: self, strategiesUsed:[.raw])
+                    UIApplication.shared.openURL(url)
                }
            } else {
                 self.delegate?.failure(shareOutlet: self, error: "Unable to open instagram")

@@ -63,8 +63,10 @@ struct InstagramStories: ShareOutletProtocol
                 let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate : NSDate().addingTimeInterval(60 * 5)]
        
             UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
+            Logger.shareThatToDebug(string: "[InstagramStories] delegate: \(delegate)")
+            delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
             UIApplication.shared.open(URL(string: "instagram-stories://share")!, options: [:], completionHandler: { (success) in
-                delegate?.success(shareOutlet: self, strategiesUsed: [.raw])
+                
             })
             }
         } else {
