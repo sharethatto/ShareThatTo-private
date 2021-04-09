@@ -88,6 +88,7 @@ class Analytics
             application: Application(application_slug: applicationSlug)
         )
         self.datastore.addEvent(event: wrappedEvent)
+        Logger.shareThatToDebug(string: "[Analytics] logged observability event \(event.event_name): \(wrappedEvent)")
     }
     
     internal func addEvent(event: AnalyticsEvent)
@@ -109,6 +110,7 @@ class Analytics
             application: Application(application_slug: applicationSlug)
         )
         self.datastore.addEvent(event: wrappedEvent)
+        Logger.shareThatToDebug(string: "[Analytics] logged analytics event \(event.event_name): \(wrappedEvent)")
     }
     
     internal func start()
