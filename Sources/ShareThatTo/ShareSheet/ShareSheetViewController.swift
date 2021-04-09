@@ -76,6 +76,7 @@ internal class ShareSheetViewController: UIViewController, UICollectionViewDeleg
             }
             Analytics.shared.addEvent(event: analyticsEvent, context: self.analtyicsContext)
         }
+        
         self.presentationController?.delegate = self
     }
     
@@ -354,14 +355,20 @@ extension ShareSheetViewController: UICollectionViewDataSource {
     {
         if (spinningCellIndex != nil) { return }
         let shareOutletClass: ShareOutletProtocol.Type = shareOutlets[indexPath.row]
-        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(shareOutletClass.canonicalOutletName).started"))
+        Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_outlet.\(shareOutletClass.canonicalOutletName).started"), context: analtyicsContext)
         
         guard let unwrappedContent = self.content else
         {
             // We don't have the content yet, we're going to add a spinner
             spin(indexPath, true)
             Analytics.shared.addEvent(event: AnalyticsEvent(event_name: "share_sheet.rendering_incomplete_on_tap"), context: analtyicsContext)
-            self.vidoeContentFuture?.addCompletion { (result) in
+
+            guard  let videoContentFuture = self.vidoeContentFuture else {
+                Logger.shareThatToDebug(string: "[ShareSheetViewController] videoContentFuture not found")
+                self.presentError(error: "Unable to share right now, content not available")
+                return
+            }
+            videoContentFuture.addCompletion { (result) in
                 self.spin(indexPath, false)
                 switch(result)
                 {
@@ -373,6 +380,7 @@ extension ShareSheetViewController: UICollectionViewDataSource {
             }
             return
         }
+        Logger.shareThatToDebug(string: "[ShareSheetViewController] content found")
         share(content: unwrappedContent, to: shareOutletClass)
     }
 
